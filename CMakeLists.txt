@@ -8,5 +8,6 @@ set(LIBRARY_NAME_GAME "lib_game")
 set(LIBRARY_NAME_PLAYER "lib_player")
 set(EXECUTABLE_NAME "main")
 
+add_subdirectory(external)
 add_subdirectory(app)
 add_subdirectory(src)
