@@ -1,51 +1,29 @@
-#include <GLFW/glfw3.h>
-
-#include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
-
-void error_callback(int error, const char *description)
-{
-    fprintf(stderr, "Error: %s\n", description);
-}
-
-static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
-{
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, GLFW_TRUE);
-}
+#include <SFML/Graphics.hpp>
 
 int main()
 {
-    GLFWwindow *window;
-    glfwSetErrorCallback(error_callback);
+    // GAME WINDOW
+    const std::uint16_t gameWidth = 1280U;
+    const std::uint16_t gameHeight = 720U;
+    auto window = sf::RenderWindow{{gameWidth, gameHeight}, "GoodGame", sf::Style::Close};
 
-    if (!glfwInit())
-        exit(EXIT_FAILURE);
+    window.setFramerateLimit(60U);
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-
-    window = glfwCreateWindow(640, 480, "Simple example", NULL, NULL);
-    if (!window)
+    while (window.isOpen())
     {
-        glfwTerminate();
-        exit(EXIT_FAILURE);
+        for (auto event = sf::Event{}; window.pollEvent(event);)
+        {
+            if (event.type == sf::Event::Closed)
+            {
+                window.close();
+                break;
+            }
+        }
+
+        window.clear(sf::Color(50U, 50U, 50U));
+
+
+        window.display();
     }
-
-    glfwSetKeyCallback(window, key_callback);
-    glfwMakeContextCurrent(window);
-    glfwSwapInterval(1);
-
-    while (!glfwWindowShouldClose(window))
-    {
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-    }
-
-    glfwDestroyWindow(window);
-
-    glfwTerminate();
-    exit(EXIT_SUCCESS);
     return 0;
 }
