@@ -4,4 +4,6 @@ set_target_properties(${EXECUTABLE_NAME} PROPERTIES OUTPUT_NAME "GoodGame") #LIN
 
 target_link_libraries(
     ${EXECUTABLE_NAME}
-    PUBLIC sfml-graphics)
+    PUBLIC sfml-graphics
+    ${LIBRARY_NAME_PLAYER}
+    ${LIBRARY_NAME_GAME})
