@@ -186,6 +186,18 @@ int main()
                     playerSprite.setTextureRect(sf::IntRect(8U, 8U, 16U, 16U));
                 }
 
+                if (event.type == sf::Event::MouseWheelScrolled)
+                {
+                    if (event.mouseWheelScroll.delta > 0)
+                    {
+                        std::cout << "Zoom in: " << event.mouseWheelScroll.delta << std::endl;
+                    }
+                    else
+                    {
+                        std::cout << "Zoom out:" << event.mouseWheelScroll.delta << std::endl;
+                    }
+                }
+
                 if (event.type == sf::Event::MouseButtonPressed)
                 {
                     // get the current mouse position in the window
