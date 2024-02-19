@@ -21,6 +21,7 @@ int main()
                             sf::Style::Close); // Create window
     window.setVerticalSyncEnabled(true);
     window.setFramerateLimit(60U);
+    window.setKeyRepeatEnabled(false);
 
     auto view =
         std::make_unique<sf::View>(sf::Vector2f(gameWidth / 2, gameHeight / 2), sf::Vector2f(gameWidth, gameHeight));
@@ -51,19 +52,21 @@ int main()
     sf::Texture buttonTexture01;
     buttonTexture01.loadFromFile("ressources/textures/Buttons_all_01.png");
 
+    sf::Text mainTitleText;
+    mainTitleText.setFont(font);
+    mainTitleText.setCharacterSize(40U);
+
     //button01
     sf::Sprite button01;
 
     button01.setTexture(buttonTexture01);
     button01.setTextureRect(sf::IntRect(191U, 146U, 34U, 15U));
     button01.setScale(sf::Vector2f(5.0F, 5.0F));
-    button01.setPosition(
-        sf::Vector2f((gameWidth / 2) - ((button01.getLocalBounds().getSize().x * button01.getScale().x) / 2), 0.0F));
+
 
     sf::Text buttonText01;
     buttonText01.setFont(font);
     buttonText01.setCharacterSize(20U);
-
 
     //Button02
     sf::Sprite button02;
@@ -71,18 +74,14 @@ int main()
     button02.setTexture(buttonTexture01);
     button02.setTextureRect(sf::IntRect(191U, 146U, 34U, 15U));
     button02.setScale(sf::Vector2f(5.0F, 5.0F));
-    button02.setPosition(
-        sf::Vector2f((gameWidth / 2) - ((button02.getLocalBounds().getSize().x * button02.getScale().x) / 2),
-                     button01.getGlobalBounds().getSize().y));
+
 
     buttonText02.setFont(font);
     buttonText02.setCharacterSize(20U);
 
 
-    // Tile Texture and Sprite
-    sf::Sprite tileSprite;
-    sf::Texture grassTexture01;
-    grassTexture01.loadFromFile("ressources/textures/TileSet_V2.png");
+    sf::Texture surfaceTexture01;
+    surfaceTexture01.loadFromFile("ressources/textures/TileSet_V2.png");
 
     // Player Texture and Sprite
     sf::Sprite playerSprite;
@@ -95,34 +94,63 @@ int main()
 
     for (size_t i = 0; i < gameAreaMaxTiles; ++i)
     {
+        auto tileSprite = std::make_unique<sf::Sprite>();
         if (j * gameAreaTileSize >= gameAreaWidth)
         {
             j = 0;
             ++k;
         }
 
-        tileSprite.setTexture(grassTexture01);
+        tileSprite->setTexture(surfaceTexture01);
 
-        if (k == 0 || j == 0 || j * gameAreaTileSize == (gameAreaWidth - gameAreaTileSize) ||
-            k * gameAreaTileSize == (gameAreaHeight - gameAreaTileSize))
+        if (j == 0 && k == 0 || (j * gameAreaTileSize == (gameAreaWidth - gameAreaTileSize) && k == 0) ||
+            (k * gameAreaTileSize == (gameAreaHeight - gameAreaTileSize) && j == 0) ||
+            (j * gameAreaTileSize == (gameAreaWidth - gameAreaTileSize) &&
+             k * gameAreaTileSize == (gameAreaHeight - gameAreaTileSize)))
         {
-            tileSprite.setTextureRect(sf::IntRect(0U, 416U, gameAreaTileSize, gameAreaTileSize));
+            // FULL WATER
+            tileSprite->setTextureRect(sf::IntRect(0U, 416U, gameAreaTileSize, gameAreaTileSize));
         }
+        else if (j == 0)
+        {
+            // LEFT WATER
+            tileSprite->setTextureRect(sf::IntRect(0U, 320U, gameAreaTileSize, gameAreaTileSize));
+        }
+        else if (j * gameAreaTileSize == (gameAreaWidth - gameAreaTileSize))
+        {
+            // RIGHT WATER
+            tileSprite->setTextureRect(sf::IntRect(0U, 288U, gameAreaTileSize, gameAreaTileSize));
+        }
+        else if (k == 0)
+        {
+            // TOP WATER
+            tileSprite->setTextureRect(sf::IntRect(183U, 320U, gameAreaTileSize, gameAreaTileSize));
+        }
+        else if (k * gameAreaTileSize == (gameAreaHeight - gameAreaTileSize))
+        {
+            // BOT WATER
+            tileSprite->setTextureRect(sf::IntRect(128U, 288U, gameAreaTileSize, gameAreaTileSize));
+        }
+        // else if (k == 0 || j == 0 || k * gameAreaTileSize == (gameAreaHeight - gameAreaTileSize))
+        // {
+        //     // FULL WATER
+        //     tileSprite.setTextureRect(sf::IntRect(0U, 416U, gameAreaTileSize, gameAreaTileSize));
+        // }
         else
         {
             switch (distGrassTexture(gen))
             {
             case 0:
-                tileSprite.setTextureRect(sf::IntRect(0U, 192U, gameAreaTileSize, gameAreaTileSize));
+                tileSprite->setTextureRect(sf::IntRect(0U, 192U, gameAreaTileSize, gameAreaTileSize));
                 break;
             case 1:
-                tileSprite.setTextureRect(sf::IntRect(30U, 192U, gameAreaTileSize, gameAreaTileSize));
+                tileSprite->setTextureRect(sf::IntRect(30U, 192U, gameAreaTileSize, gameAreaTileSize));
                 break;
             case 2:
-                tileSprite.setTextureRect(sf::IntRect(63U, 192U, gameAreaTileSize, gameAreaTileSize));
+                tileSprite->setTextureRect(sf::IntRect(63U, 192U, gameAreaTileSize, gameAreaTileSize));
                 break;
             case 3:
-                tileSprite.setTextureRect(sf::IntRect(96U, 192U, gameAreaTileSize, gameAreaTileSize));
+                tileSprite->setTextureRect(sf::IntRect(96U, 192U, gameAreaTileSize, gameAreaTileSize));
                 break;
 
             default:
@@ -130,9 +158,9 @@ int main()
             }
         }
 
-        tileSprite.setPosition(j * gameAreaTileSize, k * gameAreaTileSize);
+        tileSprite->setPosition(j * gameAreaTileSize, k * gameAreaTileSize);
 
-        tileSprites.push_back(tileSprite);
+        tileSprites.push_back(*tileSprite);
         ++j;
     }
 
@@ -147,54 +175,101 @@ int main()
                 break;
             }
 
-            // TODO ADD MAIN MENU WITH START BUTTON AND REMOVE || game.GetGameState() == GameState::MainMenu
-
             if (game.GetGameState() == GameState::Paused || game.GetGameState() == GameState::MainMenu)
             {
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Key::Escape)
+                if (event.type == sf::Event::MouseButtonPressed)
                 {
-                    game.SetGameState(GameState::Running);
-                    break;
+                    // get the current mouse position in the window
+                    sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+                    // convert it to world coordinates
+                    sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+
+                    if (worldPos.x > button01.getPosition().x &&
+                        worldPos.x < button01.getPosition().x +
+                                         (button01.getLocalBounds().getSize().x * button01.getScale().x) &&
+                        worldPos.y > button01.getPosition().y &&
+                        worldPos.y <
+                            button01.getPosition().y + (button01.getLocalBounds().getSize().y * button01.getScale().y))
+                    {
+                        game.SetGameState(GameState::Running);
+                    }
                 }
             }
 
             if (game.GetGameState() == GameState::Running)
             {
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Key::Escape)
+                if (event.type == sf::Event::KeyPressed)
                 {
-                    game.SetGameState(GameState::Paused);
-                    break;
+                    if (event.key.code == sf::Keyboard::Key::Escape)
+                    {
+                        game.SetGameState(GameState::Paused);
+                        break;
+                    }
+
+                    switch (event.key.code)
+                    {
+                    case sf::Keyboard::Key::A:
+                        playerSprite.setTextureRect(sf::IntRect(8U, 200U, 16U, 16U));
+                        player.SetMovement(PlayerMovement::Left);
+                        break;
+                    case sf::Keyboard::Key::D:
+                        playerSprite.setTextureRect(sf::IntRect(8U, 72U, 16U, 16U));
+                        player.SetMovement(PlayerMovement::Right);
+                        break;
+                    case sf::Keyboard::Key::W:
+                        playerSprite.setTextureRect(sf::IntRect(8U, 136U, 16U, 16U));
+                        player.SetMovement(PlayerMovement::Up);
+                        break;
+                    case sf::Keyboard::Key::S:
+                        playerSprite.setTextureRect(sf::IntRect(8U, 8U, 16U, 16U));
+                        player.SetMovement(PlayerMovement::Down);
+                        break;
+
+                    default:
+                        break;
+                    }
                 }
 
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Key::A)
+                if (event.type == sf::Event::KeyReleased)
                 {
-                    playerSprite.setTextureRect(sf::IntRect(8U, 200U, 16U, 16U));
-                }
-
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Key::D)
-                {
-                    playerSprite.setTextureRect(sf::IntRect(8U, 72U, 16U, 16U));
-                }
-
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Key::W)
-                {
-                    playerSprite.setTextureRect(sf::IntRect(8U, 136U, 16U, 16U));
-                }
-
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Key::S)
-                {
-                    playerSprite.setTextureRect(sf::IntRect(8U, 8U, 16U, 16U));
+                    player.SetMovement(PlayerMovement::NotMoving);
                 }
 
                 if (event.type == sf::Event::MouseWheelScrolled)
                 {
-                    if (event.mouseWheelScroll.delta > 0)
+                    if (event.mouseWheelScroll.delta > 0U)
                     {
-                        std::cout << "Zoom in: " << event.mouseWheelScroll.delta << std::endl;
+                        if (game.GetZoom() <= game.GetMaxZoom())
+                        {
+                            view->zoom(0.5F);
+                            game.SetZoom(game.GetZoom() + 1U);
+                        }
                     }
                     else
                     {
-                        std::cout << "Zoom out:" << event.mouseWheelScroll.delta << std::endl;
+                        if (game.GetZoom() > 1U)
+                        {
+                            view->zoom(2.0F);
+                            game.SetZoom(game.GetZoom() - 1U);
+                        }
+                    }
+
+                    if (view->getCenter().x >= gameAreaWidth - (view->getSize().x / 2U))
+                    {
+                        view->setCenter({gameAreaWidth - (view->getSize().x / 2U), view->getCenter().y});
+                    }
+
+                    if (view->getCenter().x <= 0U + (view->getSize().x / 2U))
+                    {
+                        view->setCenter({view->getSize().x / 2U, view->getCenter().y});
+                    }
+                    if (view->getCenter().y <= 0U + (view->getSize().y / 2U))
+                    {
+                        view->setCenter({view->getCenter().x, view->getSize().y / 2U});
+                    }
+                    if (view->getCenter().y >= gameAreaHeight - (view->getSize().y / 2U))
+                    {
+                        view->setCenter({view->getCenter().x, gameAreaHeight - (view->getSize().y / 2U)});
                     }
                 }
 
@@ -211,9 +286,9 @@ int main()
                     // RIGHT
                     if (moveX > 0U)
                     {
-                        if (moveX + view->getCenter().x >= gameAreaWidth - (gameWidth / 2U))
+                        if (moveX + view->getCenter().x >= gameAreaWidth - (view->getSize().x / 2U))
                         {
-                            view->setCenter({gameAreaWidth - (gameWidth / 2U), view->getCenter().y});
+                            view->setCenter({gameAreaWidth - (view->getSize().x / 2U), view->getCenter().y});
                         }
                         else
                         {
@@ -222,9 +297,9 @@ int main()
                     }
                     else // LEFT
                     {
-                        if (view->getCenter().x + (moveX) <= 0U + (gameWidth / 2U))
+                        if (view->getCenter().x + (moveX) <= 0U + (view->getSize().x / 2U))
                         {
-                            view->setCenter({gameWidth / 2U, view->getCenter().y});
+                            view->setCenter({view->getSize().x / 2U, view->getCenter().y});
                         }
                         else
                         {
@@ -235,9 +310,9 @@ int main()
                     // UP
                     if (moveY < 0U)
                     {
-                        if (moveY + view->getCenter().y <= 0U + (gameHeight / 2U))
+                        if (moveY + view->getCenter().y <= 0U + (view->getSize().y / 2U))
                         {
-                            view->setCenter({view->getCenter().x, gameHeight / 2U});
+                            view->setCenter({view->getCenter().x, view->getSize().y / 2U});
                         }
                         else
                         {
@@ -246,9 +321,9 @@ int main()
                     }
                     else // DOWN
                     {
-                        if (moveY + view->getCenter().y >= gameAreaHeight - (gameHeight / 2U))
+                        if (moveY + view->getCenter().y >= gameAreaHeight - (view->getSize().y / 2U))
                         {
-                            view->setCenter({view->getCenter().x, gameAreaHeight - (gameHeight / 2U)});
+                            view->setCenter({view->getCenter().x, gameAreaHeight - (view->getSize().y / 2U)});
                         }
                         else
                         {
@@ -271,41 +346,87 @@ int main()
                 window.draw(data);
             }
 
+            auto playerPosX = playerSprite.getPosition().x;
+            auto playerPosY = playerSprite.getPosition().y;
+
+            switch (player.GetMovement())
+            {
+            case PlayerMovement::Left:
+                playerSprite.setPosition(playerPosX - 1.0F, playerPosY);
+                break;
+            case PlayerMovement::Right:
+                playerSprite.setPosition(playerPosX + 1.0F, playerPosY);
+                break;
+            case PlayerMovement::Down:
+                playerSprite.setPosition(playerPosX, playerPosY + 1.0F);
+                break;
+            case PlayerMovement::Up:
+                playerSprite.setPosition(playerPosX, playerPosY - 1.0F);
+                break;
+
+            default:
+                break;
+            }
+
+
             window.draw(playerSprite);
         }
 
         if (game.GetGameState() == GameState::Paused)
         {
-            buttonText01.setString("Paused");
+            mainTitleText.setString("Paused");
+            window.draw(mainTitleText);
 
-            window.draw(button01);
-            window.draw(buttonText01);
-        }
-
-        if (game.GetGameState() == GameState::MainMenu)
-        {
-            buttonText01.setString("Main Menu");
+            buttonText01.setString("Resume");
 
             window.draw(button01);
             window.draw(buttonText01);
 
-            buttonText02.setString("Play");
+            buttonText02.setString("Not Used");
 
             window.draw(button02);
             window.draw(buttonText02);
         }
 
+        if (game.GetGameState() == GameState::MainMenu)
+        {
+            mainTitleText.setString("Main Menu");
+            window.draw(mainTitleText);
+
+            buttonText01.setString("Play");
+
+            window.draw(button01);
+            window.draw(buttonText01);
+
+            buttonText02.setString("Not Used");
+
+            window.draw(button02);
+            window.draw(buttonText02);
+        }
+
+        mainTitleText.setPosition(
+            sf::Vector2f((gameWidth / 2U) - (mainTitleText.getLocalBounds().getSize().x / 2U), 0.0F));
+
+        button01.setPosition(sf::Vector2f(
+            (gameWidth / 2U) - ((button01.getLocalBounds().getSize().x * button01.getScale().x) / 2U),
+            (mainTitleText.getGlobalBounds().getPosition().y + mainTitleText.getLocalBounds().getSize().y) + 50.0F));
+
         buttonText01.setPosition(sf::Vector2f(
             button01.getGlobalBounds().getPosition().x +
-                ((button01.getGlobalBounds().getSize().x / 2) - (buttonText01.getLocalBounds().getSize().x / 2)),
+                ((button01.getGlobalBounds().getSize().x / 2U) - (buttonText01.getLocalBounds().getSize().x / 2U)),
             button01.getGlobalBounds().getPosition().y +
-                ((button01.getGlobalBounds().getSize().y / 2) - (buttonText01.getLocalBounds().getSize().y / 2))));
+                ((button01.getGlobalBounds().getSize().y / 2U) - (buttonText01.getLocalBounds().getSize().y / 2U))));
+
+        button02.setPosition(
+            sf::Vector2f((gameWidth / 2U) - ((button02.getLocalBounds().getSize().x * button02.getScale().x) / 2U),
+                         (button01.getGlobalBounds().getPosition().y +
+                          (button01.getLocalBounds().getSize().y * button01.getScale().y))));
 
         buttonText02.setPosition(sf::Vector2f(
             button02.getGlobalBounds().getPosition().x +
-                ((button02.getGlobalBounds().getSize().x / 2) - (buttonText02.getLocalBounds().getSize().x / 2)),
+                ((button02.getGlobalBounds().getSize().x / 2U) - (buttonText02.getLocalBounds().getSize().x / 2U)),
             button02.getGlobalBounds().getPosition().y +
-                ((button02.getGlobalBounds().getSize().y / 2) - (buttonText02.getLocalBounds().getSize().y / 2))));
+                ((button02.getGlobalBounds().getSize().y / 2U) - (buttonText02.getLocalBounds().getSize().y / 2U))));
 
         window.display();
     }

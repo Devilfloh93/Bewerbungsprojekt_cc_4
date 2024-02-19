@@ -24,3 +24,13 @@ float Player::GetFood() const
 {
     return this->m_food;
 }
+
+PlayerMovement Player::GetMovement() const
+{
+    return this->m_movement;
+}
+
+void Player::SetMovement(const PlayerMovement movement)
+{
+    this->m_movement = movement;
+}
