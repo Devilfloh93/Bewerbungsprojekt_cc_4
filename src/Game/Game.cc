@@ -1,6 +1,6 @@
 #include "Game.h"
 
-Game::Game()
+Game::Game(const PlayingView view) : m_view(view)
 {
 }
 
@@ -24,7 +24,27 @@ std::uint8_t Game::GetZoom() const
     return this->m_zoom;
 }
 
+bool Game::GetResize() const
+{
+    return this->m_resize;
+}
+
+PlayingView Game::GetView() const
+{
+    return this->m_view;
+}
+
 void Game::SetZoom(const std::uint8_t zoom)
 {
-    this->m_zoom = zoom;
+    this->m_zoom += zoom;
+}
+
+void Game::SetResize(const bool resize)
+{
+    this->m_resize = resize;
+}
+
+void Game::SetView(const PlayingView view)
+{
+    this->m_view = view;
 }
