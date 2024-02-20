@@ -1,30 +1,68 @@
 #include "Game.h"
 #include "Player.h"
+#include "Surface.h"
 #include <SFML/Graphics.hpp>
 #include <cstdint>
+#include <format>
 #include <iostream>
 #include <memory>
 #include <random>
 #include <vector>
+namespace
+{
+// GAME WINDOW
+const std::uint16_t gameWidth = 1280U;
+const std::uint16_t gameHeight = 720U;
+
+} // namespace
+
+void SetTitlePos(sf::Text &text)
+{
+    text.setPosition(sf::Vector2f((gameWidth / 2U) - (text.getLocalBounds().getSize().x / 2U), 0.0F));
+}
+
+void SetBtnAndTextPos(sf::Sprite &buttonObj, sf::Text &title, sf::Text &buttontext)
+{
+    buttonObj.setPosition(
+        sf::Vector2f((gameWidth / 2U) - ((buttonObj.getLocalBounds().getSize().x * buttonObj.getScale().x) / 2U),
+                     (title.getGlobalBounds().getPosition().y + title.getLocalBounds().getSize().y) + 50.0F));
+
+    buttontext.setPosition(sf::Vector2f(
+        buttonObj.getGlobalBounds().getPosition().x +
+            ((buttonObj.getGlobalBounds().getSize().x / 2U) - (buttontext.getLocalBounds().getSize().x / 2U)),
+        buttonObj.getGlobalBounds().getPosition().y +
+            ((buttonObj.getGlobalBounds().getSize().y / 2U) - (buttontext.getLocalBounds().getSize().y / 2U))));
+}
+
+void SetBtnAndTextPos(sf::Sprite &buttonObj, sf::Sprite &button, sf::Text &buttontext)
+{
+    buttonObj.setPosition(
+        sf::Vector2f((gameWidth / 2U) - ((buttonObj.getLocalBounds().getSize().x * buttonObj.getScale().x) / 2U),
+                     (button.getGlobalBounds().getPosition().y + button.getLocalBounds().getSize().y) + 50.0F));
+
+    buttontext.setPosition(sf::Vector2f(
+        buttonObj.getGlobalBounds().getPosition().x +
+            ((buttonObj.getGlobalBounds().getSize().x / 2U) - (buttontext.getLocalBounds().getSize().x / 2U)),
+        buttonObj.getGlobalBounds().getPosition().y +
+            ((buttonObj.getGlobalBounds().getSize().y / 2U) - (buttontext.getLocalBounds().getSize().y / 2U))));
+}
 
 int main()
 {
-    // GAME WINDOW
-    const std::uint16_t gameWidth = 1280U;
-    const std::uint16_t gameHeight = 720U;
     const std::uint32_t gameAreaWidth = 8800U;
     const std::uint32_t gameAreaHeight = 4800U;
-    const std::uint32_t gameAreaTileSize = 32U;
-    const std::uint32_t gameAreaMaxTiles = ((gameAreaWidth * gameAreaHeight) / gameAreaTileSize) / gameAreaTileSize;
+    const std::uint32_t surfaceTileSize = 32U;
+    const std::uint32_t gameAreaMaxTiles = ((gameAreaWidth * gameAreaHeight) / surfaceTileSize) / surfaceTileSize;
+    const auto defaultCenter = sf::Vector2f(gameWidth / 2, gameHeight / 2);
 
-    sf::RenderWindow window(sf::VideoMode(gameWidth, gameHeight), "GoodGame",
+    sf::RenderWindow window(sf::VideoMode(gameWidth, gameHeight), "Good Game",
                             sf::Style::Close); // Create window
     window.setVerticalSyncEnabled(true);
     window.setFramerateLimit(60U);
     window.setKeyRepeatEnabled(false);
+    auto view = std::make_unique<sf::View>(defaultCenter, sf::Vector2f(gameWidth, gameHeight));
 
-    auto view =
-        std::make_unique<sf::View>(sf::Vector2f(gameWidth / 2, gameHeight / 2), sf::Vector2f(gameWidth, gameHeight));
+    sf::Clock clock;
 
     std::random_device rd;  // a seed source for the random number engine
     std::mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
@@ -33,52 +71,51 @@ int main()
     std::uniform_int_distribution<> distGrassTexture(0, 2);
 
     // Init Game
-    auto game = Game();
+    auto game = Game(PlayingView(view->getCenter().x, view->getCenter().y, view->getSize().x, view->getSize().y));
 
     //Init Player
-    auto player = Player("Name", 100.0F, 100.0F, 100.0F);
+    auto player = Player("PlayerName", 100.0F, 100.0F, 100.0F, 1.0F);
 
     // vector with tilesprites
-    std::vector<sf::Sprite> tileSprites;
+    std::vector<std::unique_ptr<Surface>> surfaces;
 
     size_t j = 0;
     size_t k = 0;
+
+    sf::Sprite tileSprite;
 
     // Font
     sf::Font font;
     font.loadFromFile("ressources/font/Round9x13.ttf");
 
     //Button Texture
-    sf::Texture buttonTexture01;
-    buttonTexture01.loadFromFile("ressources/textures/Buttons_all_01.png");
+    sf::Texture btnTexture01;
+    btnTexture01.loadFromFile("ressources/textures/Buttons_all_01.png");
 
     sf::Text mainTitleText;
     mainTitleText.setFont(font);
     mainTitleText.setCharacterSize(40U);
 
-    //button01
-    sf::Sprite button01;
+    //btn01
+    sf::Sprite btn01;
 
-    button01.setTexture(buttonTexture01);
-    button01.setTextureRect(sf::IntRect(191U, 146U, 34U, 15U));
-    button01.setScale(sf::Vector2f(5.0F, 5.0F));
+    btn01.setTexture(btnTexture01);
+    btn01.setTextureRect(sf::IntRect(191U, 146U, 34U, 15U));
+    btn01.setScale(sf::Vector2f(5.0F, 5.0F));
 
+    sf::Text btnText01;
+    btnText01.setFont(font);
+    btnText01.setCharacterSize(20U);
 
-    sf::Text buttonText01;
-    buttonText01.setFont(font);
-    buttonText01.setCharacterSize(20U);
+    //btn02
+    sf::Sprite btn02;
+    sf::Text btnText02;
+    btn02.setTexture(btnTexture01);
+    btn02.setTextureRect(sf::IntRect(191U, 146U, 34U, 15U));
+    btn02.setScale(sf::Vector2f(5.0F, 5.0F));
 
-    //Button02
-    sf::Sprite button02;
-    sf::Text buttonText02;
-    button02.setTexture(buttonTexture01);
-    button02.setTextureRect(sf::IntRect(191U, 146U, 34U, 15U));
-    button02.setScale(sf::Vector2f(5.0F, 5.0F));
-
-
-    buttonText02.setFont(font);
-    buttonText02.setCharacterSize(20U);
-
+    btnText02.setFont(font);
+    btnText02.setCharacterSize(20U);
 
     sf::Texture surfaceTexture01;
     surfaceTexture01.loadFromFile("ressources/textures/TileSet_V2.png");
@@ -94,73 +131,91 @@ int main()
 
     for (size_t i = 0; i < gameAreaMaxTiles; ++i)
     {
-        auto tileSprite = std::make_unique<sf::Sprite>();
-        if (j * gameAreaTileSize >= gameAreaWidth)
+        auto surfaceType = SurfaceType::Grass;
+        if (j * surfaceTileSize >= gameAreaWidth)
         {
             j = 0;
             ++k;
         }
 
-        tileSprite->setTexture(surfaceTexture01);
+        tileSprite.setTexture(surfaceTexture01);
 
-        if (j == 0 && k == 0 || (j * gameAreaTileSize == (gameAreaWidth - gameAreaTileSize) && k == 0) ||
-            (k * gameAreaTileSize == (gameAreaHeight - gameAreaTileSize) && j == 0) ||
-            (j * gameAreaTileSize == (gameAreaWidth - gameAreaTileSize) &&
-             k * gameAreaTileSize == (gameAreaHeight - gameAreaTileSize)))
+        if (j == 0 && k == 0 || (j * surfaceTileSize == (gameAreaWidth - surfaceTileSize) && k == 0) ||
+            (k * surfaceTileSize == (gameAreaHeight - surfaceTileSize) && j == 0) ||
+            (j * surfaceTileSize == (gameAreaWidth - surfaceTileSize) &&
+             k * surfaceTileSize == (gameAreaHeight - surfaceTileSize)))
         {
             // FULL WATER
-            tileSprite->setTextureRect(sf::IntRect(0U, 416U, gameAreaTileSize, gameAreaTileSize));
+            tileSprite.setTextureRect(sf::IntRect(0U, 416U, surfaceTileSize, surfaceTileSize));
+            surfaceType = SurfaceType::Water;
         }
         else if (j == 0)
         {
             // LEFT WATER
-            tileSprite->setTextureRect(sf::IntRect(0U, 320U, gameAreaTileSize, gameAreaTileSize));
+            tileSprite.setTextureRect(sf::IntRect(0U, 320U, surfaceTileSize, surfaceTileSize));
+            surfaceType = SurfaceType::Water;
         }
-        else if (j * gameAreaTileSize == (gameAreaWidth - gameAreaTileSize))
+        else if (j * surfaceTileSize == (gameAreaWidth - surfaceTileSize))
         {
             // RIGHT WATER
-            tileSprite->setTextureRect(sf::IntRect(0U, 288U, gameAreaTileSize, gameAreaTileSize));
+            tileSprite.setTextureRect(sf::IntRect(0U, 288U, surfaceTileSize, surfaceTileSize));
+            surfaceType = SurfaceType::Water;
         }
         else if (k == 0)
         {
             // TOP WATER
-            tileSprite->setTextureRect(sf::IntRect(183U, 320U, gameAreaTileSize, gameAreaTileSize));
+            tileSprite.setTextureRect(sf::IntRect(183U, 320U, surfaceTileSize, surfaceTileSize));
+            surfaceType = SurfaceType::Water;
         }
-        else if (k * gameAreaTileSize == (gameAreaHeight - gameAreaTileSize))
+        else if (k * surfaceTileSize == (gameAreaHeight - surfaceTileSize))
         {
             // BOT WATER
-            tileSprite->setTextureRect(sf::IntRect(128U, 288U, gameAreaTileSize, gameAreaTileSize));
+            tileSprite.setTextureRect(sf::IntRect(128U, 288U, surfaceTileSize, surfaceTileSize));
+            surfaceType = SurfaceType::Water;
         }
-        // else if (k == 0 || j == 0 || k * gameAreaTileSize == (gameAreaHeight - gameAreaTileSize))
+        // else if (k == 0 || j == 0 || k * surfaceTileSize == (gameAreaHeight - surfaceTileSize))
         // {
         //     // FULL WATER
-        //     tileSprite.setTextureRect(sf::IntRect(0U, 416U, gameAreaTileSize, gameAreaTileSize));
+        //     tileSprite.setTextureRect(sf::IntRect(0U, 416U, surfaceTileSize, surfaceTileSize));
         // }
         else
         {
             switch (distGrassTexture(gen))
             {
             case 0:
-                tileSprite->setTextureRect(sf::IntRect(0U, 192U, gameAreaTileSize, gameAreaTileSize));
+                tileSprite.setTextureRect(sf::IntRect(0U, 192U, surfaceTileSize, surfaceTileSize));
                 break;
             case 1:
-                tileSprite->setTextureRect(sf::IntRect(30U, 192U, gameAreaTileSize, gameAreaTileSize));
+                tileSprite.setTextureRect(sf::IntRect(30U, 192U, surfaceTileSize, surfaceTileSize));
                 break;
             case 2:
-                tileSprite->setTextureRect(sf::IntRect(63U, 192U, gameAreaTileSize, gameAreaTileSize));
+                tileSprite.setTextureRect(sf::IntRect(63U, 192U, surfaceTileSize, surfaceTileSize));
                 break;
             case 3:
-                tileSprite->setTextureRect(sf::IntRect(96U, 192U, gameAreaTileSize, gameAreaTileSize));
+                tileSprite.setTextureRect(sf::IntRect(96U, 192U, surfaceTileSize, surfaceTileSize));
                 break;
 
             default:
                 break;
             }
+            surfaceType = SurfaceType::Grass;
         }
 
-        tileSprite->setPosition(j * gameAreaTileSize, k * gameAreaTileSize);
+        tileSprite.setPosition(j * surfaceTileSize, k * surfaceTileSize);
 
-        tileSprites.push_back(*tileSprite);
+        switch (surfaceType)
+        {
+        case SurfaceType::Grass:
+            surfaces.push_back(std::make_unique<Grass>(tileSprite, 1.5F));
+            break;
+        case SurfaceType::Water:
+            surfaces.push_back(std::make_unique<Water>(tileSprite, 0.8F));
+            break;
+
+        default:
+            break;
+        }
+
         ++j;
     }
 
@@ -180,18 +235,23 @@ int main()
                 if (event.type == sf::Event::MouseButtonPressed)
                 {
                     // get the current mouse position in the window
-                    sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+                    auto pixelPos = sf::Mouse::getPosition(window);
                     // convert it to world coordinates
-                    sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+                    auto worldPos = window.mapPixelToCoords(pixelPos);
 
-                    if (worldPos.x > button01.getPosition().x &&
-                        worldPos.x < button01.getPosition().x +
-                                         (button01.getLocalBounds().getSize().x * button01.getScale().x) &&
-                        worldPos.y > button01.getPosition().y &&
-                        worldPos.y <
-                            button01.getPosition().y + (button01.getLocalBounds().getSize().y * button01.getScale().y))
+                    auto btnPos = btn01.getPosition();
+                    auto btnLSize = btn01.getLocalBounds().getSize();
+                    auto btnScale = btn01.getScale();
+
+                    if (worldPos.x > btnPos.x && worldPos.x < btnPos.x + (btnLSize.x * btnScale.x) &&
+                        worldPos.y > btnPos.y && worldPos.y < btnPos.y + (btnLSize.y * btnScale.y))
                     {
+                        if (game.GetGameState() == GameState::Paused)
+                        {
+                            game.SetResize(true);
+                        }
                         game.SetGameState(GameState::Running);
+                        break;
                     }
                 }
             }
@@ -202,6 +262,7 @@ int main()
                 {
                     if (event.key.code == sf::Keyboard::Key::Escape)
                     {
+                        game.SetResize(true);
                         game.SetGameState(GameState::Paused);
                         break;
                     }
@@ -239,18 +300,18 @@ int main()
                 {
                     if (event.mouseWheelScroll.delta > 0U)
                     {
-                        if (game.GetZoom() <= game.GetMaxZoom())
+                        if (game.GetZoom() < game.GetMaxZoom())
                         {
                             view->zoom(0.5F);
-                            game.SetZoom(game.GetZoom() + 1U);
+                            game.SetZoom(1U);
                         }
                     }
                     else
                     {
-                        if (game.GetZoom() > 1U)
+                        if (game.GetZoom() > 0U)
                         {
                             view->zoom(2.0F);
-                            game.SetZoom(game.GetZoom() - 1U);
+                            game.SetZoom(-1U);
                         }
                     }
 
@@ -258,7 +319,6 @@ int main()
                     {
                         view->setCenter({gameAreaWidth - (view->getSize().x / 2U), view->getCenter().y});
                     }
-
                     if (view->getCenter().x <= 0U + (view->getSize().x / 2U))
                     {
                         view->setCenter({view->getSize().x / 2U, view->getCenter().y});
@@ -338,54 +398,149 @@ int main()
 
         if (game.GetGameState() == GameState::Running)
         {
+            auto playerPos = playerSprite.getPosition();
+            auto playerSpeed = player.GetSpeed();
+
+            if (game.GetResize())
+            {
+                view->setSize(sf::Vector2f(game.GetView().sizeX, game.GetView().sizeY));
+                view->setCenter(sf::Vector2f(game.GetView().centerX, game.GetView().centerY));
+                game.SetResize(false);
+            }
             window.setView(*view);
 
             // Draw it
-            for (auto &data : tileSprites)
+            for (auto &data : surfaces)
             {
-                window.draw(data);
+                auto sprite = data->GetSprite();
+                auto posX = sprite.getPosition().x;
+                auto posY = sprite.getPosition().y;
+                auto tileSize = surfaceTileSize / 2;
+
+                if (playerPos.x >= posX - tileSize && playerPos.x <= posX + tileSize &&
+                    playerPos.y >= posY - tileSize && playerPos.y <= posY + tileSize)
+                {
+                    auto speed = data->GetSpeed();
+                    player.SetSpeed(speed);
+                }
+
+                window.draw(sprite);
             }
 
-            auto playerPosX = playerSprite.getPosition().x;
-            auto playerPosY = playerSprite.getPosition().y;
+            sf::Time elapsed = clock.getElapsedTime();
+
 
             switch (player.GetMovement())
             {
             case PlayerMovement::Left:
-                playerSprite.setPosition(playerPosX - 1.0F, playerPosY);
+                if (elapsed.asMilliseconds() >= 0 && elapsed.asMilliseconds() < 200)
+                {
+                    // RIGHT FEET
+                    playerSprite.setTextureRect(sf::IntRect(72U, 200U, 16U, 16U));
+                }
+                else if (elapsed.asMilliseconds() >= 200 && elapsed.asMilliseconds() < 400)
+                {
+                    // LEFT FEET
+                    playerSprite.setTextureRect(sf::IntRect(8U, 200U, 16U, 16U));
+                }
+                else
+                {
+                    clock.restart();
+                }
+
+                playerSprite.setPosition(playerPos.x - playerSpeed, playerPos.y);
                 break;
             case PlayerMovement::Right:
-                playerSprite.setPosition(playerPosX + 1.0F, playerPosY);
+                if (elapsed.asMilliseconds() >= 0 && elapsed.asMilliseconds() < 200)
+                {
+                    // RIGHT FEET
+                    playerSprite.setTextureRect(sf::IntRect(72U, 72U, 16U, 16U));
+                }
+                else if (elapsed.asMilliseconds() >= 200 && elapsed.asMilliseconds() < 400)
+                {
+                    // LEFT FEET
+                    playerSprite.setTextureRect(sf::IntRect(8U, 72U, 16U, 16U));
+                }
+                else
+                {
+                    clock.restart();
+                }
+
+                playerSprite.setPosition(playerPos.x + playerSpeed, playerPos.y);
                 break;
             case PlayerMovement::Down:
-                playerSprite.setPosition(playerPosX, playerPosY + 1.0F);
+                if (elapsed.asMilliseconds() >= 0 && elapsed.asMilliseconds() < 200)
+                {
+                    // RIGHT FEET
+                    playerSprite.setTextureRect(sf::IntRect(72U, 8U, 16U, 16U));
+                }
+                else if (elapsed.asMilliseconds() >= 200 && elapsed.asMilliseconds() < 400)
+                {
+                    // LEFT FEET
+                    playerSprite.setTextureRect(sf::IntRect(136U, 8U, 16U, 16U));
+                }
+                else
+                {
+                    clock.restart();
+                }
+
+                playerSprite.setPosition(playerPos.x, playerPos.y + playerSpeed);
                 break;
             case PlayerMovement::Up:
-                playerSprite.setPosition(playerPosX, playerPosY - 1.0F);
+                if (elapsed.asMilliseconds() >= 0 && elapsed.asMilliseconds() < 200)
+                {
+                    // RIGHT FEET
+                    playerSprite.setTextureRect(sf::IntRect(72U, 136U, 16U, 16U));
+                }
+                else if (elapsed.asMilliseconds() >= 200 && elapsed.asMilliseconds() < 400)
+                {
+                    // LEFT FEET
+                    playerSprite.setTextureRect(sf::IntRect(136U, 136U, 16U, 16U));
+                }
+                else
+                {
+                    clock.restart();
+                }
+
+                playerSprite.setPosition(playerPos.x, playerPos.y - playerSpeed);
+                break;
+            case PlayerMovement::NotMoving:
+                playerSprite.setTextureRect(sf::IntRect(8U, 8U, 16U, 16U));
                 break;
 
             default:
                 break;
             }
 
-
             window.draw(playerSprite);
         }
 
         if (game.GetGameState() == GameState::Paused)
         {
+            if (game.GetResize())
+            {
+                game.SetView(
+                    PlayingView(view->getCenter().x, view->getCenter().y, view->getSize().x, view->getSize().y));
+
+                view->setSize(sf::Vector2f(gameWidth, gameHeight));
+                view->setCenter(defaultCenter);
+
+                game.SetResize(false);
+            }
+            window.setView(*view);
+
             mainTitleText.setString("Paused");
             window.draw(mainTitleText);
 
-            buttonText01.setString("Resume");
+            btnText01.setString("Resume");
 
-            window.draw(button01);
-            window.draw(buttonText01);
+            window.draw(btn01);
+            window.draw(btnText01);
 
-            buttonText02.setString("Not Used");
+            btnText02.setString("Not Used");
 
-            window.draw(button02);
-            window.draw(buttonText02);
+            window.draw(btn02);
+            window.draw(btnText02);
         }
 
         if (game.GetGameState() == GameState::MainMenu)
@@ -393,40 +548,20 @@ int main()
             mainTitleText.setString("Main Menu");
             window.draw(mainTitleText);
 
-            buttonText01.setString("Play");
+            btnText01.setString("Play");
 
-            window.draw(button01);
-            window.draw(buttonText01);
+            window.draw(btn01);
+            window.draw(btnText01);
 
-            buttonText02.setString("Not Used");
+            btnText02.setString("Not Used");
 
-            window.draw(button02);
-            window.draw(buttonText02);
+            window.draw(btn02);
+            window.draw(btnText02);
         }
 
-        mainTitleText.setPosition(
-            sf::Vector2f((gameWidth / 2U) - (mainTitleText.getLocalBounds().getSize().x / 2U), 0.0F));
-
-        button01.setPosition(sf::Vector2f(
-            (gameWidth / 2U) - ((button01.getLocalBounds().getSize().x * button01.getScale().x) / 2U),
-            (mainTitleText.getGlobalBounds().getPosition().y + mainTitleText.getLocalBounds().getSize().y) + 50.0F));
-
-        buttonText01.setPosition(sf::Vector2f(
-            button01.getGlobalBounds().getPosition().x +
-                ((button01.getGlobalBounds().getSize().x / 2U) - (buttonText01.getLocalBounds().getSize().x / 2U)),
-            button01.getGlobalBounds().getPosition().y +
-                ((button01.getGlobalBounds().getSize().y / 2U) - (buttonText01.getLocalBounds().getSize().y / 2U))));
-
-        button02.setPosition(
-            sf::Vector2f((gameWidth / 2U) - ((button02.getLocalBounds().getSize().x * button02.getScale().x) / 2U),
-                         (button01.getGlobalBounds().getPosition().y +
-                          (button01.getLocalBounds().getSize().y * button01.getScale().y))));
-
-        buttonText02.setPosition(sf::Vector2f(
-            button02.getGlobalBounds().getPosition().x +
-                ((button02.getGlobalBounds().getSize().x / 2U) - (buttonText02.getLocalBounds().getSize().x / 2U)),
-            button02.getGlobalBounds().getPosition().y +
-                ((button02.getGlobalBounds().getSize().y / 2U) - (buttonText02.getLocalBounds().getSize().y / 2U))));
+        SetTitlePos(mainTitleText);
+        SetBtnAndTextPos(btn01, mainTitleText, btnText01);
+        SetBtnAndTextPos(btn02, btn01, btnText02);
 
         window.display();
     }
