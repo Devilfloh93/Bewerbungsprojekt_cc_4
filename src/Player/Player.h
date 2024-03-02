@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <string>
 
-enum class PlayerMovement
+enum class PlayerMove
 {
     NotMoving = 0,
     Up,
@@ -24,9 +24,9 @@ public:
     float GetBaseSpeed() const;
     float GetSpeed() const;
 
-    PlayerMovement GetMovement() const;
+    PlayerMove GetMovement() const;
 
-    void SetMovement(const PlayerMovement movement);
+    void SetMovement(const PlayerMove movement);
     void SetSpeed(const float speed);
 
 private:
@@ -36,5 +36,5 @@ private:
     float m_food;
     float m_baseSpeed;
     float m_speed = m_baseSpeed;
-    PlayerMovement m_movement = PlayerMovement::NotMoving;
+    PlayerMove m_movement = PlayerMove::NotMoving;
 };
