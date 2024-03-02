@@ -7,4 +7,5 @@ target_link_libraries(
     PUBLIC sfml-graphics
     ${LIBRARY_NAME_PLAYER}
     ${LIBRARY_NAME_GAME}
-    ${LIBRARY_NAME_SURFACE})
+    ${LIBRARY_NAME_SURFACE}
+    ${LIBRARY_NAME_GUI})

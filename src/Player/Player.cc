@@ -25,7 +25,7 @@ float Player::GetFood() const
     return this->m_food;
 }
 
-PlayerMovement Player::GetMovement() const
+PlayerMove Player::GetMovement() const
 {
     return this->m_movement;
 }
@@ -40,7 +40,7 @@ float Player::GetSpeed() const
     return this->m_speed;
 }
 
-void Player::SetMovement(const PlayerMovement movement)
+void Player::SetMovement(const PlayerMove movement)
 {
     this->m_movement = movement;
 }

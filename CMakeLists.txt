@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(LIBRARY_NAME_GAME "lib_game")
 set(LIBRARY_NAME_PLAYER "lib_player")
 set(LIBRARY_NAME_SURFACE "lib_surface")
+set(LIBRARY_NAME_GUI "lib_gui")
 set(EXECUTABLE_NAME "main")
 
 include(FetchContent)

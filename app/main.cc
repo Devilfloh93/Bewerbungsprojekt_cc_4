@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "Gui.h"
 #include "Player.h"
 #include "Surface.h"
 #include <SFML/Graphics.hpp>
@@ -8,44 +9,6 @@
 #include <memory>
 #include <random>
 #include <vector>
-namespace
-{
-// GAME WINDOW
-const std::uint16_t gameWidth = 1280U;
-const std::uint16_t gameHeight = 720U;
-
-} // namespace
-
-void SetTitlePos(sf::Text &text)
-{
-    text.setPosition(sf::Vector2f((gameWidth / 2U) - (text.getLocalBounds().getSize().x / 2U), 0.0F));
-}
-
-void SetBtnAndTextPos(sf::Sprite &buttonObj, sf::Text &title, sf::Text &buttontext)
-{
-    buttonObj.setPosition(
-        sf::Vector2f((gameWidth / 2U) - ((buttonObj.getLocalBounds().getSize().x * buttonObj.getScale().x) / 2U),
-                     (title.getGlobalBounds().getPosition().y + title.getLocalBounds().getSize().y) + 50.0F));
-
-    buttontext.setPosition(sf::Vector2f(
-        buttonObj.getGlobalBounds().getPosition().x +
-            ((buttonObj.getGlobalBounds().getSize().x / 2U) - (buttontext.getLocalBounds().getSize().x / 2U)),
-        buttonObj.getGlobalBounds().getPosition().y +
-            ((buttonObj.getGlobalBounds().getSize().y / 2U) - (buttontext.getLocalBounds().getSize().y / 2U))));
-}
-
-void SetBtnAndTextPos(sf::Sprite &buttonObj, sf::Sprite &button, sf::Text &buttontext)
-{
-    buttonObj.setPosition(
-        sf::Vector2f((gameWidth / 2U) - ((buttonObj.getLocalBounds().getSize().x * buttonObj.getScale().x) / 2U),
-                     (button.getGlobalBounds().getPosition().y + button.getLocalBounds().getSize().y) + 50.0F));
-
-    buttontext.setPosition(sf::Vector2f(
-        buttonObj.getGlobalBounds().getPosition().x +
-            ((buttonObj.getGlobalBounds().getSize().x / 2U) - (buttontext.getLocalBounds().getSize().x / 2U)),
-        buttonObj.getGlobalBounds().getPosition().y +
-            ((buttonObj.getGlobalBounds().getSize().y / 2U) - (buttontext.getLocalBounds().getSize().y / 2U))));
-}
 
 int main()
 {
@@ -72,6 +35,7 @@ int main()
 
     // Init Game
     auto game = Game(PlayingView(view->getCenter().x, view->getCenter().y, view->getSize().x, view->getSize().y));
+
 
     //Init Player
     auto player = Player("PlayerName", 100.0F, 100.0F, 100.0F, 1.0F);
@@ -271,19 +235,19 @@ int main()
                     {
                     case sf::Keyboard::Key::A:
                         playerSprite.setTextureRect(sf::IntRect(8U, 200U, 16U, 16U));
-                        player.SetMovement(PlayerMovement::Left);
+                        player.SetMovement(PlayerMove::Left);
                         break;
                     case sf::Keyboard::Key::D:
                         playerSprite.setTextureRect(sf::IntRect(8U, 72U, 16U, 16U));
-                        player.SetMovement(PlayerMovement::Right);
+                        player.SetMovement(PlayerMove::Right);
                         break;
                     case sf::Keyboard::Key::W:
                         playerSprite.setTextureRect(sf::IntRect(8U, 136U, 16U, 16U));
-                        player.SetMovement(PlayerMovement::Up);
+                        player.SetMovement(PlayerMove::Up);
                         break;
                     case sf::Keyboard::Key::S:
                         playerSprite.setTextureRect(sf::IntRect(8U, 8U, 16U, 16U));
-                        player.SetMovement(PlayerMovement::Down);
+                        player.SetMovement(PlayerMove::Down);
                         break;
 
                     default:
@@ -293,7 +257,13 @@ int main()
 
                 if (event.type == sf::Event::KeyReleased)
                 {
-                    player.SetMovement(PlayerMovement::NotMoving);
+                    if (!(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) ||
+                          sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) ||
+                          sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W) ||
+                          sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)))
+                    {
+                        player.SetMovement(PlayerMove::NotMoving);
+                    }
                 }
 
                 if (event.type == sf::Event::MouseWheelScrolled)
@@ -429,10 +399,9 @@ int main()
 
             sf::Time elapsed = clock.getElapsedTime();
 
-
             switch (player.GetMovement())
             {
-            case PlayerMovement::Left:
+            case PlayerMove::Left:
                 if (elapsed.asMilliseconds() >= 0 && elapsed.asMilliseconds() < 200)
                 {
                     // RIGHT FEET
@@ -448,9 +417,16 @@ int main()
                     clock.restart();
                 }
 
-                playerSprite.setPosition(playerPos.x - playerSpeed, playerPos.y);
+                if (playerSprite.getPosition().x - playerSpeed > 0 + (surfaceTileSize / 2))
+                {
+                    playerSprite.setPosition(playerPos.x - playerSpeed, playerPos.y);
+                }
+                else
+                {
+                    playerSprite.setTextureRect(sf::IntRect(8U, 8U, 16U, 16U));
+                }
                 break;
-            case PlayerMovement::Right:
+            case PlayerMove::Right:
                 if (elapsed.asMilliseconds() >= 0 && elapsed.asMilliseconds() < 200)
                 {
                     // RIGHT FEET
@@ -466,9 +442,16 @@ int main()
                     clock.restart();
                 }
 
-                playerSprite.setPosition(playerPos.x + playerSpeed, playerPos.y);
+                if (playerSprite.getPosition().x + playerSpeed < gameAreaWidth - surfaceTileSize)
+                {
+                    playerSprite.setPosition(playerPos.x + playerSpeed, playerPos.y);
+                }
+                else
+                {
+                    playerSprite.setTextureRect(sf::IntRect(8U, 8U, 16U, 16U));
+                }
                 break;
-            case PlayerMovement::Down:
+            case PlayerMove::Down:
                 if (elapsed.asMilliseconds() >= 0 && elapsed.asMilliseconds() < 200)
                 {
                     // RIGHT FEET
@@ -484,9 +467,17 @@ int main()
                     clock.restart();
                 }
 
-                playerSprite.setPosition(playerPos.x, playerPos.y + playerSpeed);
+                if (playerSprite.getPosition().y + playerSpeed < gameAreaHeight - surfaceTileSize)
+                {
+                    playerSprite.setPosition(playerPos.x, playerPos.y + playerSpeed);
+                }
+                else
+                {
+                    playerSprite.setTextureRect(sf::IntRect(8U, 8U, 16U, 16U));
+                }
+
                 break;
-            case PlayerMovement::Up:
+            case PlayerMove::Up:
                 if (elapsed.asMilliseconds() >= 0 && elapsed.asMilliseconds() < 200)
                 {
                     // RIGHT FEET
@@ -502,9 +493,17 @@ int main()
                     clock.restart();
                 }
 
-                playerSprite.setPosition(playerPos.x, playerPos.y - playerSpeed);
+                if (playerSprite.getPosition().y - playerSpeed > 0 + (surfaceTileSize / 2))
+                {
+                    playerSprite.setPosition(playerPos.x, playerPos.y - playerSpeed);
+                }
+                else
+                {
+                    playerSprite.setTextureRect(sf::IntRect(8U, 8U, 16U, 16U));
+                }
+
                 break;
-            case PlayerMovement::NotMoving:
+            case PlayerMove::NotMoving:
                 playerSprite.setTextureRect(sf::IntRect(8U, 8U, 16U, 16U));
                 break;
 

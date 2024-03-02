@@ -1,6 +1,9 @@
 #pragma once
 #include <cstdint>
 
+inline const std::uint16_t gameWidth = 1280U;
+inline const std::uint16_t gameHeight = 720U;
+
 enum class GameState
 {
     MainMenu = 0,
