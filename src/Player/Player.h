@@ -1,4 +1,5 @@
 #pragma once
+#include <SFML/Graphics.hpp>
 #include <cstdint>
 #include <string>
 
@@ -35,6 +36,8 @@ private:
     float m_water;
     float m_food;
     float m_baseSpeed;
-    float m_speed = m_baseSpeed;
-    PlayerMove m_movement = PlayerMove::NotMoving;
+    float m_speed;
+    PlayerMove m_movement;
 };
+
+void InitPlayer(sf::Sprite &playerSprite, const sf::Texture &texture);

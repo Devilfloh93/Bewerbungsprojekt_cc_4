@@ -1,8 +1,6 @@
 #pragma once
 #include <cstdint>
 
-inline const std::uint16_t gameWidth = 1280U;
-inline const std::uint16_t gameHeight = 720U;
 
 enum class GameState
 {
@@ -38,9 +36,9 @@ public:
     void SetView(const PlayingView view);
 
 private:
-    GameState m_gameState = GameState::MainMenu;
-    std::uint8_t m_maxZoom = 3U;
-    std::uint8_t m_zoom = 0U;
-    bool m_resize = false;
+    GameState m_gameState;
+    std::uint8_t m_maxZoom;
+    std::uint8_t m_zoom;
+    bool m_resize;
     PlayingView m_view;
 };

@@ -3,6 +3,8 @@
 Player::Player(const std::string name, const float health, const float water, const float food, const float baseSpeed)
     : m_name(name), m_health(health), m_water(water), m_food(food), m_baseSpeed(baseSpeed)
 {
+    m_speed = m_baseSpeed;
+    m_movement = PlayerMove::NotMoving;
 }
 
 std::string Player::GetName() const
@@ -48,4 +50,11 @@ void Player::SetMovement(const PlayerMove movement)
 void Player::SetSpeed(const float speed)
 {
     this->m_speed = speed;
+}
+
+void InitPlayer(sf::Sprite &playerSprite, const sf::Texture &texture)
+{
+    playerSprite.setTexture(texture);
+    playerSprite.setTextureRect(sf::IntRect(8U, 8U, 16U, 16U));
+    playerSprite.setPosition(80.0F, 80.0F);
 }
