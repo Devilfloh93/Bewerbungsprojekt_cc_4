@@ -2,6 +2,10 @@
 
 Game::Game(const PlayingView view) : m_view(view)
 {
+    m_gameState = GameState::MainMenu;
+    m_maxZoom = 3U;
+    m_zoom = 0U;
+    m_resize = false;
 }
 
 GameState Game::GetGameState() const

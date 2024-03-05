@@ -41,3 +41,10 @@ public:
 
 private:
 };
+
+void InitSurface(std::vector<std::unique_ptr<Surface>> &surfaces,
+                 const std::uint32_t tileSize,
+                 const std::uint32_t maxTiles,
+                 const std::uint32_t width,
+                 const std::uint32_t height,
+                 const sf::Texture &texture);
