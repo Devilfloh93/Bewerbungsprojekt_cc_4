@@ -77,7 +77,7 @@ void SetBtnAndTextPos(const std::uint32_t width, sf::Sprite &btnObj, sf::Sprite 
 }
 
 
-void InitMenus(const std::uint32_t width,
+void InitMenus(const Game &game,
                const sf::Font &font,
                const sf::Texture &texture,
                std::vector<std::unique_ptr<Text>> &menus,
@@ -85,6 +85,8 @@ void InitMenus(const std::uint32_t width,
                const std::vector<ButtonCfg> &menuButtons)
 {
     sf::Sprite prevBtn;
+    auto width = game.GetWindowWidth();
+
     for (const auto &data : menuTitles)
     {
         sf::Text titleText;
@@ -102,7 +104,7 @@ void InitMenus(const std::uint32_t width,
 
         for (const auto &data1 : menuButtons)
         {
-            if (gameState == data1.textCfg.guiCfg.gameState)
+            if (gameState == data1.textCfg.guiCfg.gameState || data1.textCfg.guiCfg.gameState == GameState::All)
             {
                 btn.setTexture(texture);
                 btn.setTextureRect(data1.textureRect);
@@ -136,7 +138,8 @@ void DrawMenu(sf::RenderWindow &window, sf::View &view, std::vector<std::unique_
 
     for (const auto &data : menus)
     {
-        if (data->GetGameState() == state)
+        auto gameState = data->GetGameState();
+        if (gameState == state || gameState == GameState::All)
         {
             window.draw(data->GetSprite());
             window.draw(data->GetText());

@@ -1,4 +1,5 @@
 #pragma once
+#include "Game.h"
 #include <SFML/Graphics.hpp>
 #include <cstdint>
 #include <string>
@@ -47,9 +48,4 @@ private:
 
 void InitPlayer(sf::Sprite &playerSprite, const sf::Texture &texture);
 
-void HandlePlayerMovement(const Player &player,
-                          sf::Clock &clock,
-                          sf::Sprite &playerSprite,
-                          const uint32_t height,
-                          const uint32_t width,
-                          const uint32_t tileSize);
+void HandlePlayerMovement(const Player &player, sf::Clock &clock, sf::Sprite &playerSprite, const Game &game);

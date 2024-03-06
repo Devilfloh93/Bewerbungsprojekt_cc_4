@@ -9,7 +9,8 @@ enum class BtnFunc
 {
     Nothing = 0,
     Play,
-    Quit
+    Quit,
+    Options
 };
 
 struct GuiCfg
@@ -74,7 +75,7 @@ void SetBtnAndTextPos(const std::uint32_t width, sf::Sprite &btnObj, sf::Text &t
 
 void SetBtnAndTextPos(const std::uint32_t width, sf::Sprite &btnObj, sf::Sprite &btn, sf::Text &btntext);
 
-void InitMenus(const std::uint32_t width,
+void InitMenus(const Game &game,
                const sf::Font &font,
                const sf::Texture &texture,
                std::vector<std::unique_ptr<Text>> &menus,

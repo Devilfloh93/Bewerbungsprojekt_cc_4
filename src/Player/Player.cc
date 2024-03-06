@@ -1,6 +1,4 @@
 #include "Player.h"
-#include "Game.h"
-
 
 Player::Player(const std::string name, const PlayerSurvivalStats survivalStats, const float baseSpeed)
     : m_name(name), m_survivalStats(survivalStats), m_baseSpeed(baseSpeed)
@@ -61,16 +59,14 @@ void InitPlayer(sf::Sprite &playerSprite, const sf::Texture &texture)
     playerSprite.setPosition(80.0F, 80.0F);
 }
 
-void HandlePlayerMovement(const Player &player,
-                          sf::Clock &clock,
-                          sf::Sprite &playerSprite,
-                          const uint32_t height,
-                          const uint32_t width,
-                          const uint32_t tileSize)
+void HandlePlayerMovement(const Player &player, sf::Clock &clock, sf::Sprite &playerSprite, const Game &game)
 {
     auto elapsed = clock.getElapsedTime();
     auto speed = player.GetSpeed();
     auto playerPos = playerSprite.getPosition();
+    auto tileSize = game.GetTileSize();
+    auto width = game.GetGameWidth();
+    auto height = game.GetGameHeight();
 
     const static auto moveTexture = MovementTexture{.notMoving{8U, 8U, 16U, 16U},
                                                     .up01{72U, 136U, 16U, 16U},
