@@ -1,6 +1,19 @@
 #pragma once
+#include <SFML/Graphics.hpp>
 #include <cstdint>
 
+struct MovementTexture
+{
+    sf::IntRect notMoving;
+    sf::IntRect up01;
+    sf::IntRect up02;
+    sf::IntRect down01;
+    sf::IntRect down02;
+    sf::IntRect left01;
+    sf::IntRect left02;
+    sf::IntRect right01;
+    sf::IntRect right02;
+};
 
 enum class GameState
 {
@@ -9,36 +22,22 @@ enum class GameState
     Running
 };
 
-struct PlayingView
-{
-    float centerX;
-    float centerY;
-    float sizeX;
-    float sizeY;
-};
-
 class Game
 {
 
 public:
-    Game(const PlayingView view);
+    Game();
     ~Game() = default;
 
     GameState GetGameState() const;
     std::uint8_t GetMaxZoom() const;
     std::uint8_t GetZoom() const;
-    bool GetResize() const;
-    PlayingView GetView() const;
 
     void SetGameState(const GameState gameState);
     void SetZoom(const std::uint8_t zoom);
-    void SetResize(const bool resized);
-    void SetView(const PlayingView view);
 
 private:
     GameState m_gameState;
     std::uint8_t m_maxZoom;
     std::uint8_t m_zoom;
-    bool m_resize;
-    PlayingView m_view;
 };
