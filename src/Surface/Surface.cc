@@ -24,13 +24,14 @@ float Surface::GetSpeed() const
     return this->m_speed;
 }
 
-void InitSurface(std::vector<std::unique_ptr<Surface>> &surfaces,
-                 const std::uint32_t tileSize,
-                 const std::uint32_t maxTiles,
-                 const std::uint32_t width,
-                 const std::uint32_t height,
-                 const sf::Texture &texture)
+void InitSurface(std::vector<std::unique_ptr<Surface>> &surfaces, const Game &game, const sf::Texture &texture)
 {
+    const static SurfaceSpeed surfaceSpeed = {.grass = 1.5F, .water = 0.8F};
+    auto maxTiles = game.GetMaxTiles();
+    auto tileSize = game.GetTileSize();
+    auto width = game.GetGameWidth();
+    auto height = game.GetGameHeight();
+
     std::random_device rd;  // a seed source for the random number engine
     std::mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
 
@@ -112,10 +113,10 @@ void InitSurface(std::vector<std::unique_ptr<Surface>> &surfaces,
         switch (surfaceType)
         {
         case SurfaceType::Grass:
-            surfaces.push_back(std::make_unique<Grass>(tileSprite, 1.5F));
+            surfaces.push_back(std::make_unique<Grass>(tileSprite, surfaceSpeed.grass));
             break;
         case SurfaceType::Water:
-            surfaces.push_back(std::make_unique<Water>(tileSprite, 0.8F));
+            surfaces.push_back(std::make_unique<Water>(tileSprite, surfaceSpeed.water));
             break;
 
         default:
@@ -130,9 +131,10 @@ void DrawSurface(sf::RenderWindow &window,
                  const std::vector<std::unique_ptr<Surface>> &surfaces,
                  Player &player,
                  const sf::Sprite &playerSprite,
-                 const uint32_t surfaceTileSize)
+                 const Game &game)
 {
     auto playerPos = playerSprite.getPosition();
+    auto surfaceTileSize = game.GetTileSize();
 
     for (auto &data : surfaces)
     {

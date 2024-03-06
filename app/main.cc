@@ -11,13 +11,13 @@
 
 int main()
 {
-    const std::uint16_t windowWidth = 1280U;
-    const std::uint16_t windowHeight = 720U;
-    const std::uint32_t gameWidth = 8800U;
-    const std::uint32_t gameHeight = 4800U;
-    const std::uint32_t surfaceTileSize = 32U;
-    const std::uint32_t gameMaxTiles = ((gameWidth * gameHeight) / surfaceTileSize) / surfaceTileSize;
-    const auto defaultCenter = sf::Vector2f(windowWidth / 2U, windowHeight / 2U);
+    std::uint16_t windowWidth = 1280U;
+    std::uint16_t windowHeight = 720U;
+    auto game = Game(windowWidth, windowHeight);
+    std::uint32_t gameWidth = game.GetGameWidth();
+    std::uint32_t gameHeight = game.GetGameHeight();
+
+    auto defaultCenter = sf::Vector2f(windowWidth / 2U, windowHeight / 2U);
     sf::View menuView;
     menuView.setSize(sf::Vector2f(windowWidth, windowHeight));
     menuView.setCenter(defaultCenter);
@@ -53,7 +53,6 @@ int main()
     auto viewCenter = view->getCenter();
     auto viewSize = view->getSize();
 
-    auto game = Game();
 
     //Player Init
     auto player = Player("PlayerName", PlayerSurvivalStats{100.0F, 100.0F, 100.0F}, 1.0F);
@@ -70,27 +69,23 @@ int main()
                   .btnFnc = BtnFunc::Play,
                   .textureRect = {191U, 146U, 34U, 15U},
                   .scale = {5.0F, 5.0F}},
-        ButtonCfg{.textCfg = TextCfg{.guiCfg = GuiCfg{.gameState = GameState::MainMenu},
-                                     .text = "Not Used Main Menu",
-                                     .fontSize = 20U},
-                  .btnFnc = BtnFunc::Nothing,
-                  .textureRect = {191U, 146U, 34U, 15U},
-                  .scale = {5.0F, 5.0F}},
         ButtonCfg{.textCfg =
                       TextCfg{.guiCfg = GuiCfg{.gameState = GameState::Paused}, .text = "Resume", .fontSize = 20U},
                   .btnFnc = BtnFunc::Play,
                   .textureRect = {191U, 146U, 34U, 15U},
                   .scale = {5.0F, 5.0F}},
-        ButtonCfg{
-            .textCfg =
-                TextCfg{.guiCfg = GuiCfg{.gameState = GameState::Paused}, .text = "Not Used Paused", .fontSize = 20U},
-            .btnFnc = BtnFunc::Nothing,
-            .textureRect = {191U, 146U, 34U, 15U},
-            .scale = {5.0F, 5.0F}}};
+        ButtonCfg{.textCfg = TextCfg{.guiCfg = GuiCfg{.gameState = GameState::All}, .text = "Options", .fontSize = 20U},
+                  .btnFnc = BtnFunc::Options,
+                  .textureRect = {191U, 146U, 34U, 15U},
+                  .scale = {5.0F, 5.0F}},
+        ButtonCfg{.textCfg = TextCfg{.guiCfg = GuiCfg{.gameState = GameState::All}, .text = "Quit", .fontSize = 20U},
+                  .btnFnc = BtnFunc::Quit,
+                  .textureRect = {191U, 146U, 34U, 15U},
+                  .scale = {5.0F, 5.0F}}};
 
-    InitMenus(windowWidth, font01, btnTexture01, menus, menuTitles, menuButtons);
+    InitMenus(game, font01, btnTexture01, menus, menuTitles, menuButtons);
     InitPlayer(playerSprite, playerTexture01);
-    InitSurface(surfaces, surfaceTileSize, gameMaxTiles, gameWidth, gameHeight, surfaceTexture01);
+    InitSurface(surfaces, game, surfaceTexture01);
 
     while (window.isOpen())
     {
@@ -118,10 +113,30 @@ int main()
                         auto btnScale = data->GetSprite().getScale();
 
                         if (worldPos.x > btnPos.x && worldPos.x < btnPos.x + (btnLSize.x * btnScale.x) &&
-                            worldPos.y > btnPos.y && worldPos.y < btnPos.y + (btnLSize.y * btnScale.y) &&
-                            data->GetBtnFnc() == BtnFunc::Play)
+                            worldPos.y > btnPos.y && worldPos.y < btnPos.y + (btnLSize.y * btnScale.y))
                         {
-                            game.SetGameState(GameState::Running);
+                            switch (data->GetBtnFnc())
+                            {
+                            case BtnFunc::Play:
+                                game.SetGameState(GameState::Running);
+                                break;
+                            case BtnFunc::Quit:
+                                window.close();
+                                break;
+                            case BtnFunc::Options:
+                                game.SetWindowWidth(1920U);
+                                game.SetWindowHeight(1080U);
+                                // windowWidth = 1920U;
+                                // windowHeight = 1080U;
+                                // defaultCenter = sf::Vector2f(windowWidth / 2U, windowHeight / 2U);
+                                // menuView.setSize(sf::Vector2f(windowWidth, windowHeight));
+                                // menuView.setCenter(defaultCenter);
+                                // window.setSize(sf::Vector2u(windowWidth, windowHeight));
+                                break;
+                            default:
+                                break;
+                            }
+
                             btnClicked = true;
                             break;
                         }
@@ -285,8 +300,8 @@ int main()
         {
             window.setView(*view);
 
-            DrawSurface(window, surfaces, player, playerSprite, surfaceTileSize);
-            HandlePlayerMovement(player, clock, playerSprite, gameWidth, gameHeight, surfaceTileSize);
+            DrawSurface(window, surfaces, player, playerSprite, game);
+            HandlePlayerMovement(player, clock, playerSprite, game);
 
             window.draw(playerSprite);
         }
