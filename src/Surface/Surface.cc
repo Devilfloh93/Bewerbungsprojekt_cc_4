@@ -1,4 +1,5 @@
 #include "Surface.h"
+
 #include <random>
 
 Surface::Surface(const sf::Sprite sprite, const float speed) : m_sprite(sprite), m_speed(speed)
@@ -122,5 +123,30 @@ void InitSurface(std::vector<std::unique_ptr<Surface>> &surfaces,
         }
 
         ++j;
+    }
+}
+
+void DrawSurface(sf::RenderWindow &window,
+                 const std::vector<std::unique_ptr<Surface>> &surfaces,
+                 Player &player,
+                 const sf::Sprite &playerSprite,
+                 const uint32_t surfaceTileSize)
+{
+    auto playerPos = playerSprite.getPosition();
+
+    for (auto &data : surfaces)
+    {
+        auto sprite = data->GetSprite();
+        auto spritePos = sprite.getPosition();
+        auto tileSize = surfaceTileSize / 2;
+
+        if (playerPos.x >= spritePos.x - tileSize && playerPos.x <= spritePos.x + tileSize &&
+            playerPos.y >= spritePos.y - tileSize && playerPos.y <= spritePos.y + tileSize)
+        {
+            auto speed = data->GetSpeed();
+            player.SetSpeed(speed);
+        }
+
+        window.draw(sprite);
     }
 }

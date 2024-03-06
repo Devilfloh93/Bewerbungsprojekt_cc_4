@@ -1,4 +1,5 @@
 #pragma once
+#include "Player.h"
 #include <SFML/Graphics.hpp>
 
 enum class SurfaceType
@@ -48,3 +49,9 @@ void InitSurface(std::vector<std::unique_ptr<Surface>> &surfaces,
                  const std::uint32_t width,
                  const std::uint32_t height,
                  const sf::Texture &texture);
+
+void DrawSurface(sf::RenderWindow &window,
+                 const std::vector<std::unique_ptr<Surface>> &surfaces,
+                 Player &player,
+                 const sf::Sprite &playerSprite,
+                 const uint32_t surfaceTileSize);

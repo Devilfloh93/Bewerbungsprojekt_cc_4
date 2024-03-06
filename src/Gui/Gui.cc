@@ -36,33 +36,44 @@ BtnFunc Text::GetBtnFnc() const
 
 void SetTitlePos(const std::uint32_t width, sf::Text &text)
 {
-    text.setPosition(sf::Vector2f((width / 2U) - (text.getLocalBounds().getSize().x / 2U), 0.0F));
+    auto textLSize = text.getLocalBounds().getSize();
+    text.setPosition(sf::Vector2f((width / 2U) - (textLSize.x / 2U), 0.0F));
 }
 
 void SetBtnAndTextPos(const std::uint32_t width, sf::Sprite &btnObj, sf::Text &title, sf::Text &btntext)
 {
-    btnObj.setPosition(
-        sf::Vector2f((width / 2U) - ((btnObj.getLocalBounds().getSize().x * btnObj.getScale().x) / 2U),
-                     (title.getGlobalBounds().getPosition().y + title.getLocalBounds().getSize().y) + 50.0F));
+    auto btnObjLSize = btnObj.getLocalBounds().getSize();
+    auto btnObjScale = btnObj.getScale();
+    auto titleLSize = title.getLocalBounds().getSize();
+    auto titlePos = title.getGlobalBounds().getPosition();
+    auto btnTextLSize = btntext.getLocalBounds().getSize();
 
-    btntext.setPosition(
-        sf::Vector2f(btnObj.getGlobalBounds().getPosition().x +
-                         ((btnObj.getGlobalBounds().getSize().x / 2U) - (btntext.getLocalBounds().getSize().x / 2U)),
-                     btnObj.getGlobalBounds().getPosition().y +
-                         ((btnObj.getGlobalBounds().getSize().y / 2U) - (btntext.getLocalBounds().getSize().y / 2U))));
+    btnObj.setPosition(
+        sf::Vector2f((width / 2U) - ((btnObjLSize.x * btnObjScale.x) / 2U), (titlePos.y + titleLSize.y) + 50.0F));
+
+    auto btnObjPos = btnObj.getGlobalBounds().getPosition();
+    auto btnObjSize = btnObj.getGlobalBounds().getSize();
+
+    btntext.setPosition(sf::Vector2f(btnObjPos.x + ((btnObjSize.x / 2U) - (btnTextLSize.x / 2U)),
+                                     btnObjPos.y + ((btnObjSize.y / 2U) - (btnTextLSize.y / 2U))));
 }
 
-void SetBtnAndTextPos(const std::uint32_t width, sf::Sprite &btnObj, sf::Sprite &button, sf::Text &btntext)
+void SetBtnAndTextPos(const std::uint32_t width, sf::Sprite &btnObj, sf::Sprite &btn, sf::Text &btntext)
 {
-    btnObj.setPosition(
-        sf::Vector2f((width / 2U) - ((btnObj.getLocalBounds().getSize().x * btnObj.getScale().x) / 2U),
-                     (button.getGlobalBounds().getPosition().y + button.getLocalBounds().getSize().y) + 50.0F));
+    auto btnObjLSize = btnObj.getLocalBounds().getSize();
+    auto btnObjScale = btnObj.getScale();
+    auto btnLSize = btn.getLocalBounds().getSize();
+    auto btnPos = btn.getGlobalBounds().getPosition();
+    auto btnTextLSize = btntext.getLocalBounds().getSize();
 
-    btntext.setPosition(
-        sf::Vector2f(btnObj.getGlobalBounds().getPosition().x +
-                         ((btnObj.getGlobalBounds().getSize().x / 2U) - (btntext.getLocalBounds().getSize().x / 2U)),
-                     btnObj.getGlobalBounds().getPosition().y +
-                         ((btnObj.getGlobalBounds().getSize().y / 2U) - (btntext.getLocalBounds().getSize().y / 2U))));
+    btnObj.setPosition(
+        sf::Vector2f((width / 2U) - ((btnObjLSize.x * btnObjScale.x) / 2U), (btnPos.y + btnLSize.y) + 50.0F));
+
+    auto btnObjPos = btnObj.getGlobalBounds().getPosition();
+    auto btnObjSize = btnObj.getGlobalBounds().getSize();
+
+    btntext.setPosition(sf::Vector2f(btnObjPos.x + ((btnObjSize.x / 2U) - (btnTextLSize.x / 2U)),
+                                     btnObjPos.y + ((btnObjSize.y / 2U) - (btnTextLSize.y / 2U))));
 }
 
 
@@ -73,8 +84,6 @@ void InitMenus(const std::uint32_t width,
                const std::vector<TextCfg> &menuTitles,
                const std::vector<ButtonCfg> &menuButtons)
 {
-
-
     sf::Sprite prevBtn;
     for (const auto &data : menuTitles)
     {
@@ -117,6 +126,20 @@ void InitMenus(const std::uint32_t width,
 
                 menus.push_back(std::make_unique<Button>(data1.textCfg.guiCfg.gameState, data1.btnFnc, btnText, btn));
             }
+        }
+    }
+}
+
+void DrawMenu(sf::RenderWindow &window, sf::View &view, std::vector<std::unique_ptr<Text>> &menus, GameState state)
+{
+    window.setView(view);
+
+    for (const auto &data : menus)
+    {
+        if (data->GetGameState() == state)
+        {
+            window.draw(data->GetSprite());
+            window.draw(data->GetText());
         }
     }
 }

@@ -72,7 +72,7 @@ void SetTitlePos(const std::uint32_t width, sf::Text &text);
 
 void SetBtnAndTextPos(const std::uint32_t width, sf::Sprite &btnObj, sf::Text &title, sf::Text &btntext);
 
-void SetBtnAndTextPos(const std::uint32_t width, sf::Sprite &btnObj, sf::Sprite &button, sf::Text &btntext);
+void SetBtnAndTextPos(const std::uint32_t width, sf::Sprite &btnObj, sf::Sprite &btn, sf::Text &btntext);
 
 void InitMenus(const std::uint32_t width,
                const sf::Font &font,
@@ -80,3 +80,5 @@ void InitMenus(const std::uint32_t width,
                std::vector<std::unique_ptr<Text>> &menus,
                const std::vector<TextCfg> &menuTitles,
                const std::vector<ButtonCfg> &menuButtons);
+
+void DrawMenu(sf::RenderWindow &window, sf::View &view, std::vector<std::unique_ptr<Text>> &menus, GameState state);
