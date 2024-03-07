@@ -8,4 +8,5 @@ target_link_libraries(
     ${LIBRARY_NAME_PLAYER}
     ${LIBRARY_NAME_GAME}
     ${LIBRARY_NAME_SURFACE}
-    ${LIBRARY_NAME_GUI})
+    ${LIBRARY_NAME_GUI}
+    ${LIBRARY_NAME_ITEM})

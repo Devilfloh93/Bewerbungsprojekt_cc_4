@@ -6,4 +6,5 @@ target_include_directories(${LIBRARY_NAME_GUI} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR
 target_link_libraries(
     ${LIBRARY_NAME_GUI}
     PUBLIC sfml-graphics
-    ${LIBRARY_NAME_GAME})
+    ${LIBRARY_NAME_GAME}
+    nlohmann_json)

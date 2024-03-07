@@ -2,6 +2,12 @@
 #include <SFML/Graphics.hpp>
 #include <cstdint>
 
+struct ReturnView
+{
+    sf::Vector2f viewCenter;
+    sf::Vector2f viewSize;
+};
+
 struct MovementTexture
 {
     sf::IntRect notMoving;
@@ -20,7 +26,8 @@ enum class GameState
     All = 0,
     MainMenu,
     Paused,
-    Running
+    Running,
+    Options
 };
 
 class Game
@@ -36,14 +43,14 @@ public:
     std::uint16_t GetWindowWidth() const;
     std::uint16_t GetWindowHeight() const;
     std::uint32_t GetMaxTiles() const;
-    std::uint32_t GetTileSize() const;
-    std::uint32_t GetGameWidth() const;
-    std::uint32_t GetGameHeight() const;
+    std::uint8_t GetTileSize() const;
+    std::uint16_t GetGameWidth() const;
+    std::uint16_t GetGameHeight() const;
 
     void SetGameState(const GameState gameState);
     void SetZoom(const std::uint8_t zoom);
-    void SetWindowHeight(const std::uint32_t height);
-    void SetWindowWidth(const std::uint32_t width);
+    void SetWindowHeight(const std::uint16_t height);
+    void SetWindowWidth(const std::uint16_t width);
 
 private:
     GameState m_gameState;
@@ -51,8 +58,12 @@ private:
     std::uint8_t m_zoom;
     std::uint16_t m_windowWidth;
     std::uint16_t m_windowHeight;
-    std::uint32_t m_gameWidth;
-    std::uint32_t m_gameHeight;
-    std::uint32_t m_tileSize;
+    std::uint16_t m_gameWidth;
+    std::uint16_t m_gameHeight;
+    std::uint8_t m_tileSize;
     std::uint32_t m_maxTiles;
 };
+
+ReturnView InitView(Game &game, sf::View &view);
+
+void UpdateView(const Game &game, sf::View &view);

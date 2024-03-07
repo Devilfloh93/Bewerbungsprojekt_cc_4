@@ -1,37 +1,23 @@
 #pragma once
 #include "Game.h"
+
+#include "nlohmann/json.hpp"
 #include <SFML/Graphics.hpp>
 #include <array>
 #include <memory>
 #include <vector>
+
+using json = nlohmann::json;
 
 enum class BtnFunc
 {
     Nothing = 0,
     Play,
     Quit,
-    Options
+    Options,
+    Back
 };
 
-struct GuiCfg
-{
-    GameState gameState;
-};
-
-struct TextCfg
-{
-    GuiCfg guiCfg;
-    std::string text;
-    std::uint8_t fontSize;
-};
-
-struct ButtonCfg
-{
-    TextCfg textCfg;
-    BtnFunc btnFnc;
-    sf::IntRect textureRect;
-    sf::Vector2f scale;
-};
 
 class Text
 {
@@ -78,8 +64,8 @@ void SetBtnAndTextPos(const std::uint32_t width, sf::Sprite &btnObj, sf::Sprite 
 void InitMenus(const Game &game,
                const sf::Font &font,
                const sf::Texture &texture,
-               std::vector<std::unique_ptr<Text>> &menus,
-               const std::vector<TextCfg> &menuTitles,
-               const std::vector<ButtonCfg> &menuButtons);
+               std::vector<std::unique_ptr<Text>> &menus);
 
 void DrawMenu(sf::RenderWindow &window, sf::View &view, std::vector<std::unique_ptr<Text>> &menus, GameState state);
+
+void ProcessJSON(const json &j, std::vector<nlohmann::json_abi_v3_11_2::ordered_json> &vec);

@@ -53,25 +53,69 @@ std::uint32_t Game::GetMaxTiles() const
     return this->m_maxTiles;
 }
 
-std::uint32_t Game::GetTileSize() const
+std::uint8_t Game::GetTileSize() const
 {
     return this->m_tileSize;
 }
 
-std::uint32_t Game::GetGameWidth() const
+std::uint16_t Game::GetGameWidth() const
 {
     return this->m_gameWidth;
 }
-std::uint32_t Game::GetGameHeight() const
+std::uint16_t Game::GetGameHeight() const
 {
     return this->m_gameHeight;
 }
 
-void Game::SetWindowHeight(const std::uint32_t height)
+void Game::SetWindowHeight(const std::uint16_t height)
 {
     this->m_windowHeight = height;
 }
-void Game::SetWindowWidth(const std::uint32_t width)
+void Game::SetWindowWidth(const std::uint16_t width)
 {
     this->m_windowWidth = width;
+}
+
+ReturnView InitView(Game &game, sf::View &view)
+{
+    auto center = view.getCenter();
+
+    view.zoom(0.5F);
+    game.SetZoom(1U);
+
+    view.move({-(center.x / 2), -(center.y / 2)});
+
+    auto size = view.getSize();
+    center = view.getCenter();
+
+    return ReturnView{center, size};
+}
+
+void UpdateView(const Game &game, sf::View &view)
+{
+    auto width = game.GetGameWidth();
+    auto height = game.GetGameHeight();
+    auto size = view.getSize();
+    auto center = view.getCenter();
+
+    if (center.x >= width - (size.x / 2U))
+    {
+        view.setCenter({width - (size.x / 2U), center.y});
+        center = view.getCenter();
+    }
+    if (center.x <= 0U + (size.x / 2U))
+    {
+        view.setCenter({size.x / 2U, center.y});
+        center = view.getCenter();
+    }
+    if (center.y <= 0U + (size.y / 2U))
+    {
+        view.setCenter({center.x, size.y / 2U});
+        center = view.getCenter();
+    }
+    if (center.y >= height - (size.y / 2U))
+    {
+        view.setCenter({center.x, height - (size.y / 2U)});
+        center = view.getCenter();
+    }
 }

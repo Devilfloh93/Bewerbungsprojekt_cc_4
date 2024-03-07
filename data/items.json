@@ -1,0 +1,20 @@
+[
+    {
+        "id": 1,
+        "name": "Wood",
+        "texture": "",
+        "textureCoords": []
+    },
+    {
+        "id": 2,
+        "name": "Iron Ore",
+        "texture": "",
+        "textureCoords": []
+    },
+    {
+        "id": 3,
+        "name": "Apple",
+        "texture": "",
+        "textureCoords": []
+    }
+]
