@@ -8,6 +8,7 @@ set(LIBRARY_NAME_GAME "lib_game")
 set(LIBRARY_NAME_PLAYER "lib_player")
 set(LIBRARY_NAME_SURFACE "lib_surface")
 set(LIBRARY_NAME_GUI "lib_gui")
+set(LIBRARY_NAME_ITEM "lib_item")
 set(EXECUTABLE_NAME "main")
 
 include(FetchContent)
@@ -15,6 +16,13 @@ FetchContent_Declare(SFML
     GIT_REPOSITORY https://github.com/SFML/SFML.git
     GIT_TAG 2.6.x)
 FetchContent_MakeAvailable(SFML)
+
+FetchContent_Declare(
+    nlohmann_json
+    GIT_REPOSITORY https://github.com/nlohmann/json.git
+    GIT_TAG v3.11.2
+    GIT_SHALLOW TRUE)
+FetchContent_MakeAvailable(nlohmann_json)
 
 add_subdirectory(app)
 add_subdirectory(src)
