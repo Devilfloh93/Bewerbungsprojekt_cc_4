@@ -14,7 +14,6 @@ public:
     std::uint16_t GetID() const;
     std::string GetName() const;
 
-
 private:
     std::uint16_t m_ID;
     std::string m_name;

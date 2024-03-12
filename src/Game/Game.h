@@ -67,6 +67,8 @@ private:
     std::uint32_t m_maxTiles;
 };
 
-ReturnView InitView(Game &game, sf::View &view);
+void InitView(Game &game, sf::View &view);
 
 void UpdateView(const Game &game, sf::View &view);
+
+void HandleViewPosition(const sf::RenderWindow &window, const Game &game, sf::View &view);

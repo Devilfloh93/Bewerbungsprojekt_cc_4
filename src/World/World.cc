@@ -18,10 +18,8 @@ Collision World::GetCollision() const
     return this->m_collision;
 }
 
-
 void InitWorld(std::vector<std::unique_ptr<World>> &world, const sf::Texture &texture)
 {
-
     sf::Sprite tileSprite;
 
     std::ifstream file("./data/world.json");
