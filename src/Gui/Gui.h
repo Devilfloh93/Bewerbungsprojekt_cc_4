@@ -74,3 +74,8 @@ void DrawMenu(sf::RenderWindow &window,
               MenuState menuState);
 
 void ProcessJSON(const json &j, std::vector<nlohmann::json_abi_v3_11_2::ordered_json> &vec);
+
+bool HandleMenuBtnClicked(sf::RenderWindow &window,
+                       std::vector<std::unique_ptr<Button>> &buttons,
+                       MenuState state,
+                       Game &game);

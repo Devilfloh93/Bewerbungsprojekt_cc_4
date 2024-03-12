@@ -199,13 +199,13 @@ void DrawMenu(sf::RenderWindow &window,
               sf::View &view,
               std::vector<std::unique_ptr<Title>> &titles,
               std::vector<std::unique_ptr<Button>> &buttons,
-              MenuState menuState)
+              MenuState state)
 {
     window.setView(view);
 
     for (const auto &data : titles)
     {
-        if (menuState == data->GetMenuState())
+        if (state == data->GetMenuState())
         {
             window.draw(data->GetText());
         }
@@ -213,10 +213,10 @@ void DrawMenu(sf::RenderWindow &window,
         for (const auto &data1 : buttons)
         {
             bool showBtn = false;
-            auto data2 = data1->GetMenuState();
-            for (const auto &data3 : data2)
+            auto menuStates = data1->GetMenuState();
+            for (const auto &data3 : menuStates)
             {
-                if (menuState == data3)
+                if (state == data3)
                 {
                     showBtn = true;
                     break;
@@ -230,4 +230,88 @@ void DrawMenu(sf::RenderWindow &window,
             }
         }
     }
+}
+
+bool HandleMenuBtnClicked(sf::RenderWindow &window,
+                          std::vector<std::unique_ptr<Button>> &buttons,
+                          MenuState state,
+                          Game &game)
+{
+    // get the current mouse position in the window
+    auto pixelPos = sf::Mouse::getPosition(window);
+    // convert it to world coordinates
+    auto worldPos = window.mapPixelToCoords(pixelPos);
+    bool breakLoop = false;
+
+    for (const auto &data : buttons)
+    {
+        auto btnPos = data->GetSprite().getPosition();
+        auto btnLSize = data->GetSprite().getLocalBounds().getSize();
+        auto btnScale = data->GetSprite().getScale();
+        auto data1 = data->GetMenuState();
+
+        bool clickBtn = false;
+        for (const auto &data2 : data1)
+        {
+            if (state == data2)
+            {
+                clickBtn = true;
+                break;
+            }
+        }
+
+        if (worldPos.x > btnPos.x && worldPos.x < btnPos.x + (btnLSize.x * btnScale.x) && worldPos.y > btnPos.y &&
+            worldPos.y < btnPos.y + (btnLSize.y * btnScale.y) && clickBtn)
+        {
+            switch (data->GetBtnFnc())
+            {
+            case BtnFunc::Play:
+                game.SetPlaying(true);
+                game.SetMenuState(MenuState::Playing);
+                breakLoop = true;
+                break;
+            case BtnFunc::Resume:
+                game.SetMenuState(MenuState::Playing);
+                breakLoop = true;
+                break;
+            case BtnFunc::Quit:
+                window.close();
+                breakLoop = true;
+                break;
+            case BtnFunc::Options:
+                game.SetMenuState(MenuState::Options);
+                /*
+                    TODO: ADD OPTIONS TO OPTION MENU
+                */
+                // game.SetWindowWidth(1920U);
+                // game.SetWindowHeight(1080U);
+                // windowWidth = game.GetWindowWidth();
+                // windowHeight = game.GetWindowHeight();
+                // window.setSize(sf::Vector2u(windowWidth, windowHeight));
+                break;
+            case BtnFunc::Back:
+                if (game.GetPlaying())
+                {
+                    if (game.GetMenuState() == MenuState::Inventory)
+                    {
+                        game.SetMenuState(MenuState::Playing);
+                    }
+                    else
+                    {
+                        game.SetMenuState(MenuState::Pause);
+                    }
+                }
+                else
+                {
+                    game.SetMenuState(MenuState::Main);
+                }
+                breakLoop = true;
+                break;
+            default:
+                break;
+            }
+            break;
+        }
+    }
+    return breakLoop;
 }

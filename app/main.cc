@@ -18,10 +18,6 @@ int main()
     //  std::uint16_t windowWidth = sf::VideoMode::getDesktopMode().width;
     //  std::uint16_t windowHeight = sf::VideoMode::getDesktopMode().height;
 
-    auto game = Game(windowWidth, windowHeight);
-    auto gameWidth = game.GetGameWidth();
-    auto gameHeight = game.GetGameHeight();
-
     auto defaultCenter = sf::Vector2f(windowWidth / 2U, windowHeight / 2U);
     sf::View menuView;
     menuView.setSize(sf::Vector2f(windowWidth, windowHeight));
@@ -32,7 +28,13 @@ int main()
     window.setVerticalSyncEnabled(true);
     window.setFramerateLimit(60U);
     window.setKeyRepeatEnabled(false);
-    auto view = std::make_unique<sf::View>(defaultCenter, sf::Vector2f(windowWidth, windowHeight));
+
+    auto view = sf::View(defaultCenter, sf::Vector2f(windowWidth, windowHeight));
+    // auto setupView = std::make_unique<sf::View>(defaultCenter, sf::Vector2f(windowWidth, windowHeight));
+
+    auto game = Game(windowWidth, windowHeight);
+    auto gameWidth = game.GetGameWidth();
+    auto gameHeight = game.GetGameHeight();
 
     sf::Clock clock;
 
@@ -69,7 +71,7 @@ int main()
     InitSurface(surfaces, game, surfaceTexture01);
     InitWorld(world, worldTexture01);
     InitItems(allItems);
-    auto [viewCenter, viewSize] = InitView(game, *view);
+    InitView(game, view);
 
     while (window.isOpen())
     {
@@ -86,141 +88,11 @@ int main()
             case sf::Event::MouseButtonPressed:
                 if (game.GetMenuState() != MenuState::Playing)
                 {
-                    // get the current mouse position in the window
-                    auto pixelPos = sf::Mouse::getPosition(window);
-                    // convert it to world coordinates
-                    auto worldPos = window.mapPixelToCoords(pixelPos);
-                    for (const auto &data : buttons)
-                    {
-                        auto btnPos = data->GetSprite().getPosition();
-                        auto btnLSize = data->GetSprite().getLocalBounds().getSize();
-                        auto btnScale = data->GetSprite().getScale();
-                        auto data1 = data->GetMenuState();
-
-                        bool clickBtn = false;
-                        for (const auto &data2 : data1)
-                        {
-                            if (state == data2)
-                            {
-                                clickBtn = true;
-                                break;
-                            }
-                        }
-
-                        if (worldPos.x > btnPos.x && worldPos.x < btnPos.x + (btnLSize.x * btnScale.x) &&
-                            worldPos.y > btnPos.y && worldPos.y < btnPos.y + (btnLSize.y * btnScale.y) && clickBtn)
-                        {
-                            switch (data->GetBtnFnc())
-                            {
-                            case BtnFunc::Play:
-                                game.SetPlaying(true);
-                                game.SetMenuState(MenuState::Playing);
-                                breakLoop = true;
-                                break;
-                            case BtnFunc::Resume:
-                                game.SetMenuState(MenuState::Playing);
-                                breakLoop = true;
-                                break;
-                            case BtnFunc::Quit:
-                                window.close();
-                                breakLoop = true;
-                                break;
-                            case BtnFunc::Options:
-                                game.SetMenuState(MenuState::Options);
-                                /*
-                                    TODO: ADD OPTIONS TO OPTION MENU
-                                */
-                                // game.SetWindowWidth(1920U);
-                                // game.SetWindowHeight(1080U);
-                                // windowWidth = game.GetWindowWidth();
-                                // windowHeight = game.GetWindowHeight();
-                                // window.setSize(sf::Vector2u(windowWidth, windowHeight));
-                                break;
-                            case BtnFunc::Back:
-                                if (game.GetPlaying())
-                                {
-                                    if (game.GetMenuState() == MenuState::Inventory)
-                                    {
-                                        game.SetMenuState(MenuState::Playing);
-                                    }
-                                    else
-                                    {
-                                        game.SetMenuState(MenuState::Pause);
-                                    }
-                                }
-                                else
-                                {
-                                    game.SetMenuState(MenuState::Main);
-                                }
-                                breakLoop = true;
-                                break;
-                            default:
-                                break;
-                            }
-                            break;
-                        }
-                    }
+                    breakLoop = HandleMenuBtnClicked(window, buttons, state, game);
                 }
                 else if (game.GetPlaying() && game.GetMenuState() == MenuState::Playing)
                 {
-                    // get the current mouse position in the window
-                    sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
-                    // convert it to world coordinates
-                    sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
-
-                    auto moveX = worldPos.x - viewCenter.x;
-                    auto moveY = worldPos.y - viewCenter.y;
-
-                    // RIGHT
-                    if (moveX > 0U)
-                    {
-                        if (moveX + viewCenter.x >= gameWidth - (viewSize.x / 2U))
-                        {
-                            view->setCenter({gameWidth - (viewSize.x / 2U), viewCenter.y});
-                        }
-                        else
-                        {
-                            view->move({moveX, 0U});
-                        }
-                    }
-                    else // LEFT
-                    {
-                        if (viewCenter.x + (moveX) <= 0U + (viewSize.x / 2U))
-                        {
-                            view->setCenter({viewSize.x / 2U, viewCenter.y});
-                        }
-                        else
-                        {
-                            view->move({moveX, 0U});
-                        }
-                    }
-                    viewCenter = view->getCenter();
-
-                    // UP
-                    if (moveY < 0U)
-                    {
-                        if (moveY + viewCenter.y <= 0U + (viewSize.y / 2U))
-                        {
-                            view->setCenter({viewCenter.x, viewSize.y / 2U});
-                        }
-                        else
-                        {
-                            view->move({0U, moveY});
-                        }
-                    }
-                    else // DOWN
-                    {
-                        if (moveY + viewCenter.y >= gameHeight - (viewSize.y / 2U))
-                        {
-                            view->setCenter({viewCenter.x, gameHeight - (viewSize.y / 2U)});
-                        }
-                        else
-                        {
-                            view->move({0U, moveY});
-                        }
-                    }
-                    viewCenter = view->getCenter();
-                    viewSize = view->getSize();
+                    HandleViewPosition(window, game, view);
                 }
                 break;
             case sf::Event::KeyPressed:
@@ -273,7 +145,7 @@ int main()
                     {
                         if (game.GetZoom() < game.GetMaxZoom())
                         {
-                            view->zoom(0.5F);
+                            view.zoom(0.5F);
                             game.SetZoom(1U);
                         }
                     }
@@ -281,14 +153,12 @@ int main()
                     {
                         if (game.GetZoom() > 0U)
                         {
-                            view->zoom(2.0F);
+                            view.zoom(2.0F);
                             game.SetZoom(-1);
                         }
                     }
 
-                    UpdateView(game, *view);
-                    viewCenter = view->getCenter();
-                    viewSize = view->getSize();
+                    UpdateView(game, view);
                 }
                 break;
             default:
@@ -306,7 +176,7 @@ int main()
 
         if (game.GetPlaying() && menuState == MenuState::Playing)
         {
-            window.setView(*view);
+            window.setView(view);
 
             DrawSurface(window, surfaces, player, playerSprite, game);
 
