@@ -21,13 +21,13 @@ struct MovementTexture
     sf::IntRect right02;
 };
 
-enum class GameState
+enum class MenuState
 {
-    All = 0,
-    MainMenu,
-    Paused,
-    Running,
-    Options
+    Playing = 0,
+    Main,
+    Pause,
+    Options,
+    Inventory
 };
 
 class Game
@@ -37,7 +37,8 @@ public:
     Game(const std::uint16_t windowWidth, const std::uint16_t windowHeight);
     ~Game() = default;
 
-    GameState GetGameState() const;
+    bool GetPlaying() const;
+    MenuState GetMenuState() const;
     std::uint8_t GetMaxZoom() const;
     std::uint8_t GetZoom() const;
     std::uint16_t GetWindowWidth() const;
@@ -47,13 +48,15 @@ public:
     std::uint16_t GetGameWidth() const;
     std::uint16_t GetGameHeight() const;
 
-    void SetGameState(const GameState gameState);
+    void SetPlaying(const bool playing);
+    void SetMenuState(const MenuState menuState);
     void SetZoom(const std::uint8_t zoom);
     void SetWindowHeight(const std::uint16_t height);
     void SetWindowWidth(const std::uint16_t width);
 
 private:
-    GameState m_gameState;
+    bool m_playing;
+    MenuState m_menuState;
     std::uint8_t m_maxZoom;
     std::uint8_t m_zoom;
     std::uint16_t m_windowWidth;

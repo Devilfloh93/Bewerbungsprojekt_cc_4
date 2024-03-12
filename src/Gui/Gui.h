@@ -1,6 +1,5 @@
 #pragma once
 #include "Game.h"
-
 #include "nlohmann/json.hpp"
 #include <SFML/Graphics.hpp>
 #include <array>
@@ -9,49 +8,50 @@
 
 using json = nlohmann::json;
 
+
 enum class BtnFunc
 {
     Nothing = 0,
     Play,
     Quit,
     Options,
-    Back
+    Back,
+    Resume
 };
 
-
-class Text
+class Title
 {
 
 public:
-    Text(const GameState gameState, const BtnFunc btnfnc, const sf::Text text, const sf::Sprite sprite);
-    ~Text() = default;
+    Title(const MenuState menuState, const sf::Text text);
+    ~Title() = default;
+
+    sf::Text GetText() const;
+
+    MenuState GetMenuState() const;
+
+private:
+    MenuState m_menuState;
+    sf::Text m_text;
+};
+
+class Button
+{
+public:
+    Button(const std::vector<MenuState> menuState, const BtnFunc btnfnc, const sf::Text text, const sf::Sprite sprite);
+    ~Button() = default;
 
     sf::Text GetText() const;
     sf::Sprite GetSprite() const;
 
-    GameState GetGameState() const;
+    std::vector<MenuState> GetMenuState() const;
     BtnFunc GetBtnFnc() const;
 
 private:
-    GameState m_gameState;
+    std::vector<MenuState> m_menuState;
     sf::Text m_text;
     sf::Sprite m_sprite;
     BtnFunc m_btnfnc;
-};
-
-class Button : public Text
-{
-
-public:
-    Button(const GameState gameState, const BtnFunc btnfnc, const sf::Text text, const sf::Sprite sprite);
-    ~Button() = default;
-
-    // sf::Sprite GetSprite() const;
-    // BtnFunc GetBtnFnc() const;
-
-private:
-    // sf::Sprite m_sprite;
-    // BtnFunc m_btnfnc;
 };
 
 
@@ -64,8 +64,13 @@ void SetBtnAndTextPos(const std::uint32_t width, sf::Sprite &btnObj, sf::Sprite 
 void InitMenus(const Game &game,
                const sf::Font &font,
                const sf::Texture &texture,
-               std::vector<std::unique_ptr<Text>> &menus);
+               std::vector<std::unique_ptr<Title>> &titles,
+               std::vector<std::unique_ptr<Button>> &buttons);
 
-void DrawMenu(sf::RenderWindow &window, sf::View &view, std::vector<std::unique_ptr<Text>> &menus, GameState state);
+void DrawMenu(sf::RenderWindow &window,
+              sf::View &view,
+              std::vector<std::unique_ptr<Title>> &titles,
+              std::vector<std::unique_ptr<Button>> &buttons,
+              MenuState menuState);
 
 void ProcessJSON(const json &j, std::vector<nlohmann::json_abi_v3_11_2::ordered_json> &vec);

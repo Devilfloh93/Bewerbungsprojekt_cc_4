@@ -1,7 +1,9 @@
 #pragma once
 #include "Game.h"
+#include "World.h"
 #include <SFML/Graphics.hpp>
 #include <cstdint>
+#include <memory>
 #include <string>
 
 struct PlayerSurvivalStats
@@ -48,4 +50,8 @@ private:
 
 void InitPlayer(sf::Sprite &playerSprite, const sf::Texture &texture);
 
-void HandlePlayerMovement(const Player &player, sf::Clock &clock, sf::Sprite &playerSprite, const Game &game);
+void HandlePlayerMovement(const Player &player,
+                          sf::Clock &clock,
+                          sf::Sprite &playerSprite,
+                          const Game &game,
+                          const std::vector<std::unique_ptr<World>> &world);
