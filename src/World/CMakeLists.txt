@@ -1,2 +1,2 @@
 target_include_directories(${EXECUTABLE_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_sources(${EXECUTABLE_NAME} PRIVATE Gui.cc Gui.h)
+target_sources(${EXECUTABLE_NAME} PRIVATE World.cc World.h)

@@ -1,14 +1,6 @@
-cmake_minimum_required(VERSION 3.17)
-project(NewProject VERSION 0.1.0 LANGUAGES C CXX)
+cmake_minimum_required(VERSION 3.20)
+project(NewProject LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
-
-set(LIBRARY_NAME_GAME "lib_game")
-set(LIBRARY_NAME_PLAYER "lib_player")
-set(LIBRARY_NAME_SURFACE "lib_surface")
-set(LIBRARY_NAME_GUI "lib_gui")
-set(LIBRARY_NAME_ITEM "lib_item")
 set(EXECUTABLE_NAME "main")
 
 include(FetchContent)
@@ -24,5 +16,15 @@ FetchContent_Declare(
     GIT_SHALLOW TRUE)
 FetchContent_MakeAvailable(nlohmann_json)
 
-add_subdirectory(app)
-add_subdirectory(src)
+# Necessary for shared library on Windows
+#set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
+add_executable(${EXECUTABLE_NAME})
+set_target_properties(${EXECUTABLE_NAME} PROPERTIES OUTPUT_NAME "GoodGame") #LINK_FLAGS "/ENTRY:mainCRTStartup /SUBSYSTEM:WINDOWS")
+target_sources(${EXECUTABLE_NAME} PRIVATE "./app/main.cc")
+target_compile_features(${EXECUTABLE_NAME} PUBLIC cxx_std_20)
+target_include_directories(${EXECUTABLE_NAME} PRIVATE "${PROJECT_SOURCE_DIR}")
+target_link_libraries(${EXECUTABLE_NAME} PUBLIC sfml-graphics nlohmann_json)
+add_subdirectory("src")
+
+install(TARGETS ${EXECUTABLE_NAME})

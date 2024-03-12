@@ -4,32 +4,44 @@
 
 using json = nlohmann::json;
 
-Text::Text(const GameState gameState, const BtnFunc btnfnc, const sf::Text text, const sf::Sprite sprite)
-    : m_gameState(gameState), m_text(text), m_sprite(sprite), m_btnfnc(btnfnc)
+Title::Title(const MenuState menuState, const sf::Text text) : m_menuState(menuState), m_text(text)
 {
 }
 
-Button::Button(const GameState gameState, const BtnFunc btnfnc, const sf::Text text, const sf::Sprite sprite)
-    : Text(gameState, btnfnc, text, sprite)
+Button::Button(const std::vector<MenuState> menuState,
+               const BtnFunc btnfnc,
+               const sf::Text text,
+               const sf::Sprite sprite)
+    : m_menuState(menuState), m_text(text), m_sprite(sprite), m_btnfnc(btnfnc)
 {
 }
 
-sf::Text Text::GetText() const
+sf::Text Title::GetText() const
 {
     return this->m_text;
 }
 
-GameState Text::GetGameState() const
+MenuState Title::GetMenuState() const
 {
-    return this->m_gameState;
+    return this->m_menuState;
 }
 
-sf::Sprite Text::GetSprite() const
+sf::Text Button::GetText() const
+{
+    return this->m_text;
+}
+
+std::vector<MenuState> Button::GetMenuState() const
+{
+    return this->m_menuState;
+}
+
+sf::Sprite Button::GetSprite() const
 {
     return this->m_sprite;
 }
 
-BtnFunc Text::GetBtnFnc() const
+BtnFunc Button::GetBtnFnc() const
 {
     return this->m_btnfnc;
 }
@@ -91,7 +103,8 @@ void ProcessJSON(const json &j, std::vector<nlohmann::json_abi_v3_11_2::ordered_
 void InitMenus(const Game &game,
                const sf::Font &font,
                const sf::Texture &texture,
-               std::vector<std::unique_ptr<Text>> &menus)
+               std::vector<std::unique_ptr<Title>> &titles,
+               std::vector<std::unique_ptr<Button>> &buttons)
 {
     sf::Sprite prevBtn;
     auto width = game.GetWindowWidth();
@@ -125,17 +138,27 @@ void InitMenus(const Game &game,
             sf::Sprite btn;
 
             bool firstButton = true;
-            auto gameState = data["state"];
+            auto state = data["state"];
             titleText.setFont(font);
             titleText.setCharacterSize(data["fontSize"]);
             titleText.setString(static_cast<std::string>(data["name"]));
 
             SetTitlePos(width, titleText);
-            menus.push_back(std::make_unique<Text>(data["state"], BtnFunc::Nothing, titleText, btn));
+            titles.push_back(std::make_unique<Title>(data["state"], titleText));
 
             for (const auto &data1 : menuButtons)
             {
-                if (gameState == data1["state"])
+                bool addBtn = false;
+                for (const auto &data2 : data1["state"])
+                {
+                    if (state == data2)
+                    {
+                        addBtn = true;
+                        break;
+                    }
+                }
+
+                if (addBtn)
                 {
                     btn.setTexture(texture);
                     btn.setTextureRect({data1["textureCoords"][0],
@@ -160,7 +183,7 @@ void InitMenus(const Game &game,
                     prevBtn = btn;
                     firstButton = false;
 
-                    menus.push_back(std::make_unique<Button>(data1["state"], data1["fnc"], btnText, btn));
+                    buttons.push_back(std::make_unique<Button>(data1["state"], data1["fnc"], btnText, btn));
                 }
             }
         }
@@ -172,17 +195,39 @@ void InitMenus(const Game &game,
     }
 }
 
-void DrawMenu(sf::RenderWindow &window, sf::View &view, std::vector<std::unique_ptr<Text>> &menus, GameState state)
+void DrawMenu(sf::RenderWindow &window,
+              sf::View &view,
+              std::vector<std::unique_ptr<Title>> &titles,
+              std::vector<std::unique_ptr<Button>> &buttons,
+              MenuState menuState)
 {
     window.setView(view);
 
-    for (const auto &data : menus)
+    for (const auto &data : titles)
     {
-        auto gameState = data->GetGameState();
-        if (gameState == state)
+        if (menuState == data->GetMenuState())
         {
-            window.draw(data->GetSprite());
             window.draw(data->GetText());
+        }
+
+        for (const auto &data1 : buttons)
+        {
+            bool showBtn = false;
+            auto data2 = data1->GetMenuState();
+            for (const auto &data3 : data2)
+            {
+                if (menuState == data3)
+                {
+                    showBtn = true;
+                    break;
+                }
+            }
+
+            if (showBtn)
+            {
+                window.draw(data1->GetSprite());
+                window.draw(data1->GetText());
+            }
         }
     }
 }

@@ -3,6 +3,7 @@
 #include "Item.h"
 #include "Player.h"
 #include "Surface.h"
+#include "World.h"
 #include <SFML/Graphics.hpp>
 #include <array>
 #include <cstdint>
@@ -36,8 +37,10 @@ int main()
     sf::Clock clock;
 
     // Vector
+    std::vector<std::unique_ptr<World>> world;
     std::vector<std::unique_ptr<Surface>> surfaces;
-    std::vector<std::unique_ptr<Text>> menus;
+    std::vector<std::unique_ptr<Title>> titles;
+    std::vector<std::unique_ptr<Button>> buttons;
     std::vector<std::unique_ptr<Item>> allItems;
 
     // Fonts
@@ -51,6 +54,9 @@ int main()
     sf::Texture surfaceTexture01;
     surfaceTexture01.loadFromFile("ressources/textures/TileSet_V2.png");
 
+    sf::Texture worldTexture01;
+    worldTexture01.loadFromFile("ressources/textures/Premium_TreesUpdated_No_Outline.png");
+
     sf::Texture playerTexture01;
     playerTexture01.loadFromFile("ressources/textures/Human-Worker-Red.png");
 
@@ -58,9 +64,10 @@ int main()
     auto player = Player("PlayerName", PlayerSurvivalStats{100.0F, 100.0F, 100.0F}, 1.0F);
     sf::Sprite playerSprite;
 
-    InitMenus(game, font01, btnTexture01, menus);
+    InitMenus(game, font01, btnTexture01, titles, buttons);
     InitPlayer(playerSprite, playerTexture01);
     InitSurface(surfaces, game, surfaceTexture01);
+    InitWorld(world, worldTexture01);
     InitItems(allItems);
     auto [viewCenter, viewSize] = InitView(game, *view);
 
@@ -69,7 +76,7 @@ int main()
         for (auto event = sf::Event{}; window.pollEvent(event);)
         {
             bool breakLoop = false;
-            auto gameState = game.GetGameState();
+            auto state = game.GetMenuState();
             switch (event.type)
             {
             case sf::Event::Closed:
@@ -77,26 +84,41 @@ int main()
                 breakLoop = true;
                 break;
             case sf::Event::MouseButtonPressed:
-                if (gameState != GameState::Running)
+                if (game.GetMenuState() != MenuState::Playing)
                 {
                     // get the current mouse position in the window
                     auto pixelPos = sf::Mouse::getPosition(window);
                     // convert it to world coordinates
                     auto worldPos = window.mapPixelToCoords(pixelPos);
-                    for (const auto &data : menus)
+                    for (const auto &data : buttons)
                     {
                         auto btnPos = data->GetSprite().getPosition();
                         auto btnLSize = data->GetSprite().getLocalBounds().getSize();
                         auto btnScale = data->GetSprite().getScale();
+                        auto data1 = data->GetMenuState();
+
+                        bool clickBtn = false;
+                        for (const auto &data2 : data1)
+                        {
+                            if (state == data2)
+                            {
+                                clickBtn = true;
+                                break;
+                            }
+                        }
 
                         if (worldPos.x > btnPos.x && worldPos.x < btnPos.x + (btnLSize.x * btnScale.x) &&
-                            worldPos.y > btnPos.y && worldPos.y < btnPos.y + (btnLSize.y * btnScale.y) &&
-                            gameState == data->GetGameState())
+                            worldPos.y > btnPos.y && worldPos.y < btnPos.y + (btnLSize.y * btnScale.y) && clickBtn)
                         {
                             switch (data->GetBtnFnc())
                             {
                             case BtnFunc::Play:
-                                game.SetGameState(GameState::Running);
+                                game.SetPlaying(true);
+                                game.SetMenuState(MenuState::Playing);
+                                breakLoop = true;
+                                break;
+                            case BtnFunc::Resume:
+                                game.SetMenuState(MenuState::Playing);
                                 breakLoop = true;
                                 break;
                             case BtnFunc::Quit:
@@ -104,7 +126,7 @@ int main()
                                 breakLoop = true;
                                 break;
                             case BtnFunc::Options:
-                                game.SetGameState(GameState::Options);
+                                game.SetMenuState(MenuState::Options);
                                 /*
                                     TODO: ADD OPTIONS TO OPTION MENU
                                 */
@@ -115,7 +137,21 @@ int main()
                                 // window.setSize(sf::Vector2u(windowWidth, windowHeight));
                                 break;
                             case BtnFunc::Back:
-                                game.SetGameState(GameState::Paused);
+                                if (game.GetPlaying())
+                                {
+                                    if (game.GetMenuState() == MenuState::Inventory)
+                                    {
+                                        game.SetMenuState(MenuState::Playing);
+                                    }
+                                    else
+                                    {
+                                        game.SetMenuState(MenuState::Pause);
+                                    }
+                                }
+                                else
+                                {
+                                    game.SetMenuState(MenuState::Main);
+                                }
                                 breakLoop = true;
                                 break;
                             default:
@@ -125,8 +161,7 @@ int main()
                         }
                     }
                 }
-
-                if (gameState == GameState::Running)
+                else if (game.GetPlaying() && game.GetMenuState() == MenuState::Playing)
                 {
                     // get the current mouse position in the window
                     sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
@@ -189,12 +224,16 @@ int main()
                 }
                 break;
             case sf::Event::KeyPressed:
-                if (gameState == GameState::Running)
+                if (game.GetPlaying() && game.GetMenuState() == MenuState::Playing)
                 {
                     switch (event.key.code)
                     {
                     case sf::Keyboard::Key::Escape:
-                        game.SetGameState(GameState::Paused);
+                        game.SetMenuState(MenuState::Pause);
+                        breakLoop = true;
+                        break;
+                    case sf::Keyboard::Key::I:
+                        game.SetMenuState(MenuState::Inventory);
                         breakLoop = true;
                         break;
                     case sf::Keyboard::Key::A:
@@ -216,7 +255,7 @@ int main()
                 }
                 break;
             case sf::Event::KeyReleased:
-                if (gameState == GameState::Running)
+                if (game.GetPlaying() && game.GetMenuState() == MenuState::Playing)
                 {
                     if (!(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) ||
                           sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) ||
@@ -228,7 +267,7 @@ int main()
                 }
                 break;
             case sf::Event::MouseWheelScrolled:
-                if (gameState == GameState::Running)
+                if (game.GetPlaying() && game.GetMenuState() == MenuState::Playing)
                 {
                     if (event.mouseWheelScroll.delta > 0U)
                     {
@@ -262,17 +301,20 @@ int main()
             }
         }
 
-        auto gameState = game.GetGameState();
+        auto menuState = game.GetMenuState();
         window.clear(sf::Color(50U, 50U, 50U));
 
-        if (gameState == GameState::Running)
+        if (game.GetPlaying() && menuState == MenuState::Playing)
         {
             window.setView(*view);
 
             DrawSurface(window, surfaces, player, playerSprite, game);
-            HandlePlayerMovement(player, clock, playerSprite, game);
 
+            HandlePlayerMovement(player, clock, playerSprite, game, world);
             window.draw(playerSprite);
+
+            DrawWorld(window, world);
+
 
             for (const auto &data : allItems)
             {
@@ -284,19 +326,23 @@ int main()
             }
         }
 
-        if (gameState == GameState::Paused)
+        switch (menuState)
         {
-            DrawMenu(window, menuView, menus, GameState::Paused);
-        }
+        case MenuState::Pause:
+            DrawMenu(window, menuView, titles, buttons, MenuState::Pause);
+            break;
+        case MenuState::Options:
+            DrawMenu(window, menuView, titles, buttons, MenuState::Options);
+            break;
+        case MenuState::Main:
+            DrawMenu(window, menuView, titles, buttons, MenuState::Main);
+            break;
+        case MenuState::Inventory:
+            DrawMenu(window, menuView, titles, buttons, MenuState::Inventory);
+            break;
 
-        if (gameState == GameState::Options)
-        {
-            DrawMenu(window, menuView, menus, GameState::Options);
-        }
-
-        if (gameState == GameState::MainMenu)
-        {
-            DrawMenu(window, menuView, menus, GameState::MainMenu);
+        default:
+            break;
         }
 
         window.display();

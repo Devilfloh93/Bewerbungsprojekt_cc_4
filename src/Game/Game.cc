@@ -3,9 +3,10 @@
 Game::Game(const std::uint16_t windowWidth, const std::uint16_t windowHeight)
     : m_windowWidth(windowWidth), m_windowHeight(windowHeight)
 {
-    m_gameState = GameState::MainMenu;
+    m_menuState = MenuState::Main;
     m_maxZoom = 3U;
     m_zoom = 0U;
+    m_playing = false;
 
     m_gameWidth = 8800U;
     m_gameHeight = 4800U;
@@ -13,14 +14,24 @@ Game::Game(const std::uint16_t windowWidth, const std::uint16_t windowHeight)
     m_maxTiles = ((m_gameWidth * m_gameHeight) / m_tileSize) / m_tileSize;
 }
 
-GameState Game::GetGameState() const
+MenuState Game::GetMenuState() const
 {
-    return this->m_gameState;
+    return this->m_menuState;
 }
 
-void Game::SetGameState(const GameState gameState)
+void Game::SetPlaying(const bool playing)
 {
-    this->m_gameState = gameState;
+    this->m_playing = playing;
+}
+
+bool Game::GetPlaying() const
+{
+    return this->m_playing;
+}
+
+void Game::SetMenuState(const MenuState menuState)
+{
+    this->m_menuState = menuState;
 }
 
 std::uint8_t Game::GetMaxZoom() const

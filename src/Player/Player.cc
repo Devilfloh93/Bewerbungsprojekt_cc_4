@@ -1,4 +1,5 @@
 #include "Player.h"
+#include <iostream>
 
 Player::Player(const std::string name, const PlayerSurvivalStats survivalStats, const float baseSpeed)
     : m_name(name), m_survivalStats(survivalStats), m_baseSpeed(baseSpeed)
@@ -59,7 +60,11 @@ void InitPlayer(sf::Sprite &playerSprite, const sf::Texture &texture)
     playerSprite.setPosition(80.0F, 80.0F);
 }
 
-void HandlePlayerMovement(const Player &player, sf::Clock &clock, sf::Sprite &playerSprite, const Game &game)
+void HandlePlayerMovement(const Player &player,
+                          sf::Clock &clock,
+                          sf::Sprite &playerSprite,
+                          const Game &game,
+                          const std::vector<std::unique_ptr<World>> &world)
 {
     auto elapsed = clock.getElapsedTime();
     auto speed = player.GetSpeed();
@@ -77,6 +82,39 @@ void HandlePlayerMovement(const Player &player, sf::Clock &clock, sf::Sprite &pl
                                                     .left02{8U, 200U, 16U, 16U},
                                                     .right01{72U, 72U, 16U, 16U},
                                                     .right02{8U, 72U, 16U, 16U}};
+
+    bool canMoveUP = true;
+    bool canMoveDOWN = true;
+    bool canMoveLEFT = true;
+    bool canMoveRIGHT = true;
+
+    for (const auto &data : world)
+    {
+        auto objPos = data->GetSprite().getPosition();
+        auto objCollision = data->GetCollision();
+        auto objSize = data->GetSprite().getLocalBounds().getSize();
+
+        if (playerPos.x >= objPos.x && playerPos.x <= objPos.x + objCollision.x &&
+            playerPos.y <= objPos.y + objSize.y && playerPos.y > objPos.y + objCollision.y)
+        {
+            canMoveUP = false;
+        }
+        if (playerPos.x >= objPos.x && playerPos.x <= objPos.x + objCollision.x &&
+            playerPos.y <= objPos.y + objCollision.y && playerPos.y + speed >= objPos.y + objCollision.y)
+        {
+            canMoveDOWN = false;
+        }
+        if (playerPos.x >= objPos.x && playerPos.x - speed <= objPos.x + objCollision.x &&
+            playerPos.y + speed <= objPos.y + objSize.y && playerPos.y >= objPos.y + objCollision.y)
+        {
+            canMoveLEFT = false;
+        }
+        if (playerPos.x + speed >= objPos.x && playerPos.x <= objPos.x + objCollision.x &&
+            playerPos.y + speed <= objPos.y + objSize.y && playerPos.y >= objPos.y + objCollision.y)
+        {
+            canMoveRIGHT = false;
+        }
+    }
 
     switch (player.GetMovement())
     {
@@ -96,7 +134,7 @@ void HandlePlayerMovement(const Player &player, sf::Clock &clock, sf::Sprite &pl
             clock.restart();
         }
 
-        if (playerPos.x - speed > 0 + (tileSize / 2))
+        if (playerPos.x - speed > 0 + (tileSize / 2) && canMoveLEFT)
         {
             playerSprite.setPosition(playerPos.x - speed, playerPos.y);
         }
@@ -121,7 +159,7 @@ void HandlePlayerMovement(const Player &player, sf::Clock &clock, sf::Sprite &pl
             clock.restart();
         }
 
-        if (playerPos.x + speed < width - tileSize)
+        if (playerPos.x + speed < width - tileSize && canMoveRIGHT)
         {
             playerSprite.setPosition(playerPos.x + speed, playerPos.y);
         }
@@ -146,7 +184,7 @@ void HandlePlayerMovement(const Player &player, sf::Clock &clock, sf::Sprite &pl
             clock.restart();
         }
 
-        if (playerPos.y + speed < height - tileSize)
+        if (playerPos.y + speed < height - tileSize && canMoveDOWN)
         {
             playerSprite.setPosition(playerPos.x, playerPos.y + speed);
         }
@@ -172,7 +210,7 @@ void HandlePlayerMovement(const Player &player, sf::Clock &clock, sf::Sprite &pl
             clock.restart();
         }
 
-        if (playerPos.y - speed > 0 + (tileSize / 2))
+        if (playerPos.y - speed > 0 + (tileSize / 2) && canMoveUP)
         {
             playerSprite.setPosition(playerPos.x, playerPos.y - speed);
         }
