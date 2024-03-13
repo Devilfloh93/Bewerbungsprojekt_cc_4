@@ -18,24 +18,28 @@ int main()
     //  std::uint16_t windowWidth = sf::VideoMode::getDesktopMode().width;
     //  std::uint16_t windowHeight = sf::VideoMode::getDesktopMode().height;
 
+    // Init Game
+    auto game = Game(windowWidth, windowHeight);
+    auto gameWidth = game.GetGameWidth();
+    auto gameHeight = game.GetGameHeight();
+
+    //Init Views
     auto defaultCenter = sf::Vector2f(windowWidth / 2U, windowHeight / 2U);
+
     sf::View menuView;
     menuView.setSize(sf::Vector2f(windowWidth, windowHeight));
     menuView.setCenter(defaultCenter);
 
+    auto view = sf::View(defaultCenter, sf::Vector2f(windowWidth, windowHeight));
+
+    // Init Window
     sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), "Good Game",
                             sf::Style::Close); // Create window
     window.setVerticalSyncEnabled(true);
     window.setFramerateLimit(60U);
     window.setKeyRepeatEnabled(false);
 
-    auto view = sf::View(defaultCenter, sf::Vector2f(windowWidth, windowHeight));
-    // auto setupView = std::make_unique<sf::View>(defaultCenter, sf::Vector2f(windowWidth, windowHeight));
-
-    auto game = Game(windowWidth, windowHeight);
-    auto gameWidth = game.GetGameWidth();
-    auto gameHeight = game.GetGameHeight();
-
+    // Clocks
     sf::Clock clock;
 
     // Vector
@@ -49,27 +53,24 @@ int main()
     sf::Font font01;
     font01.loadFromFile("ressources/font/Round9x13.ttf");
 
-    //Textures
+    // Textures
     sf::Texture btnTexture01;
     btnTexture01.loadFromFile("ressources/textures/Buttons_all_01.png");
 
     sf::Texture surfaceTexture01;
     surfaceTexture01.loadFromFile("ressources/textures/TileSet_V2.png");
 
-    sf::Texture worldTexture01;
-    worldTexture01.loadFromFile("ressources/textures/Premium_TreesUpdated_No_Outline.png");
-
     sf::Texture playerTexture01;
     playerTexture01.loadFromFile("ressources/textures/Human-Worker-Red.png");
 
-    //Player Init
+    // Player Init
     auto player = Player("PlayerName", PlayerSurvivalStats{100.0F, 100.0F, 100.0F}, 1.0F);
     sf::Sprite playerSprite;
 
     InitMenus(game, font01, btnTexture01, titles, buttons);
     InitPlayer(playerSprite, playerTexture01);
     InitSurface(surfaces, game, surfaceTexture01);
-    InitWorld(world, worldTexture01);
+    InitWorld(world);
     InitItems(allItems);
     InitView(game, view);
 
@@ -184,7 +185,6 @@ int main()
             window.draw(playerSprite);
 
             DrawWorld(window, world);
-
 
             for (const auto &data : allItems)
             {

@@ -24,6 +24,6 @@ private:
     Collision m_collision;
 };
 
-void InitWorld(std::vector<std::unique_ptr<World>> &world, const sf::Texture &texture);
+void InitWorld(std::vector<std::unique_ptr<World>> &world);
 
 void DrawWorld(sf::RenderWindow &window, const std::vector<std::unique_ptr<World>> &world);

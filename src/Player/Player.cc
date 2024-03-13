@@ -69,6 +69,7 @@ void HandlePlayerMovement(const Player &player,
     auto elapsed = clock.getElapsedTime();
     auto speed = player.GetSpeed();
     auto playerPos = playerSprite.getPosition();
+    auto playerSize = playerSprite.getLocalBounds().getSize();
     auto tileSize = game.GetTileSize();
     auto width = game.GetGameWidth();
     auto height = game.GetGameHeight();
@@ -94,25 +95,52 @@ void HandlePlayerMovement(const Player &player,
         auto objCollision = data->GetCollision();
         auto objSize = data->GetSprite().getLocalBounds().getSize();
 
-        if (playerPos.x >= objPos.x && playerPos.x <= objPos.x + objCollision.x &&
-            playerPos.y <= objPos.y + objSize.y && playerPos.y > objPos.y + objCollision.y)
+        if (objCollision.x != 0 && objCollision.y != 0)
         {
-            canMoveUP = false;
+
+            if (playerPos.x >= objPos.x && playerPos.x <= objPos.x + objCollision.x &&
+                playerPos.y - speed <= objPos.y + objSize.y && playerPos.y >= objPos.y + objCollision.y)
+            {
+                canMoveUP = false;
+            }
+            if (playerPos.x >= objPos.x && playerPos.x <= objPos.x + objCollision.x &&
+                playerPos.y <= objPos.y + objCollision.y && playerPos.y + speed >= objPos.y + objCollision.y)
+            {
+                canMoveDOWN = false;
+            }
+            if (playerPos.x >= objPos.x && playerPos.x - speed <= objPos.x + objCollision.x &&
+                playerPos.y <= objPos.y + objSize.y && playerPos.y >= objPos.y + objCollision.y)
+            {
+                canMoveLEFT = false;
+            }
+            if (playerPos.x + speed >= objPos.x && playerPos.x <= objPos.x && playerPos.y <= objPos.y + objSize.y &&
+                playerPos.y >= objPos.y + objCollision.y)
+            {
+                canMoveRIGHT = false;
+            }
         }
-        if (playerPos.x >= objPos.x && playerPos.x <= objPos.x + objCollision.x &&
-            playerPos.y <= objPos.y + objCollision.y && playerPos.y + speed >= objPos.y + objCollision.y)
+        else
         {
-            canMoveDOWN = false;
-        }
-        if (playerPos.x >= objPos.x && playerPos.x - speed <= objPos.x + objCollision.x &&
-            playerPos.y + speed <= objPos.y + objSize.y && playerPos.y >= objPos.y + objCollision.y)
-        {
-            canMoveLEFT = false;
-        }
-        if (playerPos.x + speed >= objPos.x && playerPos.x <= objPos.x + objCollision.x &&
-            playerPos.y + speed <= objPos.y + objSize.y && playerPos.y >= objPos.y + objCollision.y)
-        {
-            canMoveRIGHT = false;
+            if ((playerPos.x + playerSize.x) >= objPos.x && playerPos.x <= objPos.x + objSize.x &&
+                playerPos.y - speed <= objPos.y + objSize.y && playerPos.y + playerSize.y >= objPos.y)
+            {
+                canMoveUP = false;
+            }
+            if ((playerPos.x + playerSize.x) >= objPos.x && playerPos.x <= objPos.x + objSize.x &&
+                playerPos.y <= objPos.y + objSize.y && (playerPos.y + playerSize.y) + speed >= objPos.y)
+            {
+                canMoveDOWN = false;
+            }
+            if (playerPos.x >= objPos.x && playerPos.x - speed <= objPos.x + objSize.x &&
+                playerPos.y <= objPos.y + objSize.y && playerPos.y + playerSize.y >= objPos.y)
+            {
+                canMoveLEFT = false;
+            }
+            if ((playerPos.x + playerSize.x) + speed >= objPos.x && playerPos.x <= objPos.x &&
+                playerPos.y <= objPos.y + objSize.y && playerPos.y + playerSize.y >= objPos.y)
+            {
+                canMoveRIGHT = false;
+            }
         }
     }
 

@@ -18,7 +18,7 @@ Collision World::GetCollision() const
     return this->m_collision;
 }
 
-void InitWorld(std::vector<std::unique_ptr<World>> &world, const sf::Texture &texture)
+void InitWorld(std::vector<std::unique_ptr<World>> &world)
 {
     sf::Sprite tileSprite;
 
@@ -30,8 +30,14 @@ void InitWorld(std::vector<std::unique_ptr<World>> &world, const sf::Texture &te
 
         for (const auto &data : jsonData)
         {
+            auto texturePath = data["texture"];
+
+            auto texture = new sf::Texture();
+
+            texture->loadFromFile(texturePath);
+
             auto collision = data["collision"];
-            tileSprite.setTexture(texture);
+            tileSprite.setTexture(*texture);
             tileSprite.setTextureRect({data["textureCoords"][0],
                                        data["textureCoords"][1],
                                        data["textureCoords"][2],
