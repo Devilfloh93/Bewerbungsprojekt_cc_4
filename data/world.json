@@ -70,6 +70,7 @@
                 201
             ]
         ],
+        "texture": "ressources/textures/Premium_TreesUpdated_No_Outline.png",
         "textureCoords": [
             391,
             144,
@@ -79,6 +80,25 @@
         "collision": [
             32,
             40
+        ]
+    },
+    {
+        "pos": [
+            [
+                40,
+                40
+            ]
+        ],
+        "texture": "ressources/textures/Chests.png",
+        "textureCoords": [
+            1,
+            11,
+            30,
+            22
+        ],
+        "collision": [
+            0,
+            0
         ]
     }
 ]
