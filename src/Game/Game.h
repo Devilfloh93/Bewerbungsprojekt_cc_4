@@ -54,6 +54,10 @@ public:
     void SetWindowHeight(const std::uint16_t height);
     void SetWindowWidth(const std::uint16_t width);
 
+    void InitView(sf::View &view);
+    void UpdateView(sf::View &view);
+    void HandleViewPosition(const sf::RenderWindow &window, sf::View &view);
+
 private:
     bool m_playing;
     MenuState m_menuState;
@@ -66,9 +70,3 @@ private:
     std::uint8_t m_tileSize;
     std::uint32_t m_maxTiles;
 };
-
-void InitView(Game &game, sf::View &view);
-
-void UpdateView(const Game &game, sf::View &view);
-
-void HandleViewPosition(const sf::RenderWindow &window, const Game &game, sf::View &view);

@@ -53,21 +53,20 @@ void Player::SetSpeed(const float speed)
     this->m_speed = speed;
 }
 
-void InitPlayer(sf::Sprite &playerSprite, const sf::Texture &texture)
+void Player::Init(sf::Sprite &playerSprite, const sf::Texture &texture)
 {
     playerSprite.setTexture(texture);
     playerSprite.setTextureRect(sf::IntRect(8U, 8U, 16U, 16U));
     playerSprite.setPosition(80.0F, 80.0F);
 }
 
-void HandlePlayerMovement(const Player &player,
-                          sf::Clock &clock,
-                          sf::Sprite &playerSprite,
-                          const Game &game,
-                          const std::vector<std::unique_ptr<World>> &world)
+void Player::HandleMovement(sf::Clock &clock,
+                            sf::Sprite &playerSprite,
+                            const Game &game,
+                            const std::vector<std::unique_ptr<World>> &world)
 {
     auto elapsed = clock.getElapsedTime();
-    auto speed = player.GetSpeed();
+    auto speed = this->m_speed;
     auto playerPos = playerSprite.getPosition();
     auto playerSize = playerSprite.getLocalBounds().getSize();
     auto tileSize = game.GetTileSize();
@@ -100,152 +99,94 @@ void HandlePlayerMovement(const Player &player,
 
             if (playerPos.x >= objPos.x && playerPos.x <= objPos.x + objCollision.x &&
                 playerPos.y - speed <= objPos.y + objSize.y && playerPos.y >= objPos.y + objCollision.y)
-            {
                 canMoveUP = false;
-            }
+
             if (playerPos.x >= objPos.x && playerPos.x <= objPos.x + objCollision.x &&
                 playerPos.y <= objPos.y + objCollision.y && playerPos.y + speed >= objPos.y + objCollision.y)
-            {
                 canMoveDOWN = false;
-            }
+
             if (playerPos.x >= objPos.x && playerPos.x - speed <= objPos.x + objCollision.x &&
                 playerPos.y <= objPos.y + objSize.y && playerPos.y >= objPos.y + objCollision.y)
-            {
                 canMoveLEFT = false;
-            }
+
             if (playerPos.x + speed >= objPos.x && playerPos.x <= objPos.x && playerPos.y <= objPos.y + objSize.y &&
                 playerPos.y >= objPos.y + objCollision.y)
-            {
                 canMoveRIGHT = false;
-            }
         }
         else
         {
             if ((playerPos.x + playerSize.x) >= objPos.x && playerPos.x <= objPos.x + objSize.x &&
                 playerPos.y - speed <= objPos.y + objSize.y && playerPos.y + playerSize.y >= objPos.y)
-            {
                 canMoveUP = false;
-            }
+
             if ((playerPos.x + playerSize.x) >= objPos.x && playerPos.x <= objPos.x + objSize.x &&
                 playerPos.y <= objPos.y + objSize.y && (playerPos.y + playerSize.y) + speed >= objPos.y)
-            {
                 canMoveDOWN = false;
-            }
+
             if (playerPos.x >= objPos.x && playerPos.x - speed <= objPos.x + objSize.x &&
                 playerPos.y <= objPos.y + objSize.y && playerPos.y + playerSize.y >= objPos.y)
-            {
                 canMoveLEFT = false;
-            }
+
             if ((playerPos.x + playerSize.x) + speed >= objPos.x && playerPos.x <= objPos.x &&
                 playerPos.y <= objPos.y + objSize.y && playerPos.y + playerSize.y >= objPos.y)
-            {
                 canMoveRIGHT = false;
-            }
         }
     }
 
-    switch (player.GetMovement())
+    switch (this->m_movement)
     {
     case PlayerMove::Left:
         if (elapsed.asMilliseconds() >= 0 && elapsed.asMilliseconds() < 200)
-        {
-            // RIGHT FEET
             playerSprite.setTextureRect(moveTexture.left01);
-        }
         else if (elapsed.asMilliseconds() >= 200 && elapsed.asMilliseconds() < 400)
-        {
-            // LEFT FEET
             playerSprite.setTextureRect(moveTexture.left02);
-        }
         else
-        {
             clock.restart();
-        }
 
         if (playerPos.x - speed > 0 + (tileSize / 2) && canMoveLEFT)
-        {
             playerSprite.setPosition(playerPos.x - speed, playerPos.y);
-        }
         else
-        {
             playerSprite.setTextureRect(moveTexture.notMoving);
-        }
         break;
     case PlayerMove::Right:
         if (elapsed.asMilliseconds() >= 0 && elapsed.asMilliseconds() < 200)
-        {
-            // RIGHT FEET
             playerSprite.setTextureRect(moveTexture.right01);
-        }
         else if (elapsed.asMilliseconds() >= 200 && elapsed.asMilliseconds() < 400)
-        {
-            // LEFT FEET
             playerSprite.setTextureRect(moveTexture.right02);
-        }
         else
-        {
             clock.restart();
-        }
 
         if (playerPos.x + speed < width - tileSize && canMoveRIGHT)
-        {
             playerSprite.setPosition(playerPos.x + speed, playerPos.y);
-        }
         else
-        {
             playerSprite.setTextureRect(moveTexture.notMoving);
-        }
         break;
     case PlayerMove::Down:
         if (elapsed.asMilliseconds() >= 0 && elapsed.asMilliseconds() < 200)
-        {
-            // RIGHT FEET
             playerSprite.setTextureRect(moveTexture.down01);
-        }
         else if (elapsed.asMilliseconds() >= 200 && elapsed.asMilliseconds() < 400)
-        {
-            // LEFT FEET
             playerSprite.setTextureRect(moveTexture.down02);
-        }
         else
-        {
             clock.restart();
-        }
 
         if (playerPos.y + speed < height - tileSize && canMoveDOWN)
-        {
             playerSprite.setPosition(playerPos.x, playerPos.y + speed);
-        }
         else
-        {
             playerSprite.setTextureRect(moveTexture.notMoving);
-        }
 
         break;
     case PlayerMove::Up:
         if (elapsed.asMilliseconds() >= 0 && elapsed.asMilliseconds() < 200)
-        {
-            // RIGHT FEET
             playerSprite.setTextureRect(moveTexture.up01);
-        }
         else if (elapsed.asMilliseconds() >= 200 && elapsed.asMilliseconds() < 400)
-        {
-            // LEFT FEET
             playerSprite.setTextureRect(moveTexture.up02);
-        }
         else
-        {
             clock.restart();
-        }
 
         if (playerPos.y - speed > 0 + (tileSize / 2) && canMoveUP)
-        {
             playerSprite.setPosition(playerPos.x, playerPos.y - speed);
-        }
         else
-        {
             playerSprite.setTextureRect(moveTexture.notMoving);
-        }
 
         break;
     case PlayerMove::NotMoving:

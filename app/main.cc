@@ -47,7 +47,8 @@ int main()
     std::vector<std::unique_ptr<Surface>> surfaces;
     std::vector<std::unique_ptr<Title>> titles;
     std::vector<std::unique_ptr<Button>> buttons;
-    std::vector<std::unique_ptr<Item>> allItems;
+    std::vector<std::unique_ptr<AllItems>> allItems;
+    std::vector<std::unique_ptr<Item>> items;
 
     // Fonts
     sf::Font font01;
@@ -67,12 +68,12 @@ int main()
     auto player = Player("PlayerName", PlayerSurvivalStats{100.0F, 100.0F, 100.0F}, 1.0F);
     sf::Sprite playerSprite;
 
-    InitMenus(game, font01, btnTexture01, titles, buttons);
-    InitPlayer(playerSprite, playerTexture01);
+    Menu::Init(game, font01, btnTexture01, titles, buttons);
+    player.Init(playerSprite, playerTexture01);
     InitSurface(surfaces, game, surfaceTexture01);
     InitWorld(world);
     InitItems(allItems);
-    InitView(game, view);
+    game.InitView(view);
 
     while (window.isOpen())
     {
@@ -88,13 +89,9 @@ int main()
                 break;
             case sf::Event::MouseButtonPressed:
                 if (game.GetMenuState() != MenuState::Playing)
-                {
-                    breakLoop = HandleMenuBtnClicked(window, buttons, state, game);
-                }
+                    breakLoop = Menu::HandleBtnClicked(window, buttons, state, game);
                 else if (game.GetPlaying() && game.GetMenuState() == MenuState::Playing)
-                {
-                    HandleViewPosition(window, game, view);
-                }
+                    game.HandleViewPosition(window, view);
                 break;
             case sf::Event::KeyPressed:
                 if (game.GetPlaying() && game.GetMenuState() == MenuState::Playing)
@@ -121,7 +118,23 @@ int main()
                     case sf::Keyboard::Key::S:
                         player.SetMovement(PlayerMove::Down);
                         break;
+                    case sf::Keyboard::Key::P:
+                        for (const auto &data : allItems)
+                        {
+                            sf::Sprite itemSprite;
+                            auto texture = data->GetTexture();
+                            auto textureCoords = data->GetTextureCoords();
+                            auto itemID = data->GetID();
+                            auto itemName = data->GetName();
 
+                            itemSprite.setTexture(*texture);
+                            itemSprite.setTextureRect(textureCoords);
+                            itemSprite.setPosition(50, 100);
+
+                            items.push_back(std::make_unique<Item>(itemSprite, itemID, itemName));
+                        }
+
+                        break;
                     default:
                         break;
                     }
@@ -130,13 +143,13 @@ int main()
             case sf::Event::KeyReleased:
                 if (game.GetPlaying() && game.GetMenuState() == MenuState::Playing)
                 {
-                    if (!(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) ||
-                          sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) ||
-                          sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W) ||
-                          sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)))
-                    {
+                    bool keyPressed = (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) ||
+                                       sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) ||
+                                       sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W) ||
+                                       sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S));
+
+                    if (!keyPressed)
                         player.SetMovement(PlayerMove::NotMoving);
-                    }
                 }
                 break;
             case sf::Event::MouseWheelScrolled:
@@ -159,7 +172,7 @@ int main()
                         }
                     }
 
-                    UpdateView(game, view);
+                    game.UpdateView(view);
                 }
                 break;
             default:
@@ -167,9 +180,7 @@ int main()
             }
 
             if (breakLoop)
-            {
                 break;
-            }
         }
 
         auto menuState = game.GetMenuState();
@@ -181,34 +192,26 @@ int main()
 
             DrawSurface(window, surfaces, player, playerSprite, game);
 
-            HandlePlayerMovement(player, clock, playerSprite, game, world);
+            player.HandleMovement(clock, playerSprite, game, world);
             window.draw(playerSprite);
 
             DrawWorld(window, world);
-
-            for (const auto &data : allItems)
-            {
-                /*
-                Todo: Implement Inventory, Draw Items on Ground, Add collect Item, Remove This Later
-                */
-                std::cout << "ItemID: " << data->GetID() << std::endl;
-                std::cout << "ItemName: " << data->GetName() << std::endl;
-            }
+            DrawItems(window, items);
         }
 
         switch (menuState)
         {
         case MenuState::Pause:
-            DrawMenu(window, menuView, titles, buttons, MenuState::Pause);
+            Menu::Draw(window, menuView, titles, buttons, MenuState::Pause);
             break;
         case MenuState::Options:
-            DrawMenu(window, menuView, titles, buttons, MenuState::Options);
+            Menu::Draw(window, menuView, titles, buttons, MenuState::Options);
             break;
         case MenuState::Main:
-            DrawMenu(window, menuView, titles, buttons, MenuState::Main);
+            Menu::Draw(window, menuView, titles, buttons, MenuState::Main);
             break;
         case MenuState::Inventory:
-            DrawMenu(window, menuView, titles, buttons, MenuState::Inventory);
+            Menu::Draw(window, menuView, titles, buttons, MenuState::Inventory);
             break;
 
         default:

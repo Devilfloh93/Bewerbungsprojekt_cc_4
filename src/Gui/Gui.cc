@@ -46,14 +46,22 @@ BtnFunc Button::GetBtnFnc() const
     return this->m_btnfnc;
 }
 
+void ProcessJSON(const json &j, std::vector<nlohmann::json_abi_v3_11_2::ordered_json> &vec)
+{
+    for (auto it = j.begin(); it != j.end(); ++it)
+    {
+        if (it->is_object())
+            vec.push_back(*it);
+    }
+}
 
-void SetTitlePos(const std::uint32_t width, sf::Text &text)
+void Menu::SetTitlePos(const std::uint32_t width, sf::Text &text)
 {
     auto textLSize = text.getLocalBounds().getSize();
     text.setPosition(sf::Vector2f((width / 2U) - (textLSize.x / 2U), 0.0F));
 }
 
-void SetBtnAndTextPos(const std::uint32_t width, sf::Sprite &btnObj, sf::Text &title, sf::Text &btntext)
+void Menu::SetBtnAndTextPos(const std::uint32_t width, sf::Sprite &btnObj, sf::Text &title, sf::Text &btntext)
 {
     auto btnObjLSize = btnObj.getLocalBounds().getSize();
     auto btnObjScale = btnObj.getScale();
@@ -71,7 +79,7 @@ void SetBtnAndTextPos(const std::uint32_t width, sf::Sprite &btnObj, sf::Text &t
                                      btnObjPos.y + ((btnObjSize.y / 2U) - (btnTextLSize.y / 2U))));
 }
 
-void SetBtnAndTextPos(const std::uint32_t width, sf::Sprite &btnObj, sf::Sprite &btn, sf::Text &btntext)
+void Menu::SetBtnAndTextPos(const std::uint32_t width, sf::Sprite &btnObj, sf::Sprite &btn, sf::Text &btntext)
 {
     auto btnObjLSize = btnObj.getLocalBounds().getSize();
     auto btnObjScale = btnObj.getScale();
@@ -88,23 +96,11 @@ void SetBtnAndTextPos(const std::uint32_t width, sf::Sprite &btnObj, sf::Sprite 
     btntext.setPosition(sf::Vector2f(btnObjPos.x + ((btnObjSize.x / 2U) - (btnTextLSize.x / 2U)),
                                      btnObjPos.y + ((btnObjSize.y / 2U) - (btnTextLSize.y / 2U))));
 }
-
-void ProcessJSON(const json &j, std::vector<nlohmann::json_abi_v3_11_2::ordered_json> &vec)
-{
-    for (auto it = j.begin(); it != j.end(); ++it)
-    {
-        if (it->is_object())
-        {
-            vec.push_back(*it);
-        }
-    }
-}
-
-void InitMenus(const Game &game,
-               const sf::Font &font,
-               const sf::Texture &texture,
-               std::vector<std::unique_ptr<Title>> &titles,
-               std::vector<std::unique_ptr<Button>> &buttons)
+void Menu::Init(const Game &game,
+                const sf::Font &font,
+                const sf::Texture &texture,
+                std::vector<std::unique_ptr<Title>> &titles,
+                std::vector<std::unique_ptr<Button>> &buttons)
 {
     sf::Sprite prevBtn;
     auto width = game.GetWindowWidth();
@@ -121,14 +117,10 @@ void InitMenus(const Game &game,
         for (auto it = jsonData.begin(); it != jsonData.end(); ++it)
         {
             if (it.key() == "Titles")
-            {
                 ProcessJSON(*it, menuTitles);
-            }
 
             if (it.key() == "Buttons")
-            {
                 ProcessJSON(*it, menuButtons);
-            }
         }
 
         for (const auto &data : menuTitles)
@@ -172,13 +164,9 @@ void InitMenus(const Game &game,
                     btnText.setString(static_cast<std::string>(data1["name"]));
 
                     if (firstButton)
-                    {
                         SetBtnAndTextPos(width, btn, titleText, btnText);
-                    }
                     else
-                    {
                         SetBtnAndTextPos(width, btn, prevBtn, btnText);
-                    }
 
                     prevBtn = btn;
                     firstButton = false;
@@ -195,20 +183,18 @@ void InitMenus(const Game &game,
     }
 }
 
-void DrawMenu(sf::RenderWindow &window,
-              sf::View &view,
-              std::vector<std::unique_ptr<Title>> &titles,
-              std::vector<std::unique_ptr<Button>> &buttons,
-              MenuState state)
+void Menu::Draw(sf::RenderWindow &window,
+                sf::View &view,
+                std::vector<std::unique_ptr<Title>> &titles,
+                std::vector<std::unique_ptr<Button>> &buttons,
+                MenuState state)
 {
     window.setView(view);
 
     for (const auto &data : titles)
     {
         if (state == data->GetMenuState())
-        {
             window.draw(data->GetText());
-        }
 
         for (const auto &data1 : buttons)
         {
@@ -232,10 +218,10 @@ void DrawMenu(sf::RenderWindow &window,
     }
 }
 
-bool HandleMenuBtnClicked(sf::RenderWindow &window,
-                          std::vector<std::unique_ptr<Button>> &buttons,
-                          MenuState state,
-                          Game &game)
+bool Menu::HandleBtnClicked(sf::RenderWindow &window,
+                            std::vector<std::unique_ptr<Button>> &buttons,
+                            MenuState state,
+                            Game &game)
 {
     // get the current mouse position in the window
     auto pixelPos = sf::Mouse::getPosition(window);
@@ -293,13 +279,9 @@ bool HandleMenuBtnClicked(sf::RenderWindow &window,
                 if (game.GetPlaying())
                 {
                     if (game.GetMenuState() == MenuState::Inventory)
-                    {
                         game.SetMenuState(MenuState::Playing);
-                    }
                     else
-                    {
                         game.SetMenuState(MenuState::Pause);
-                    }
                 }
                 else
                 {
