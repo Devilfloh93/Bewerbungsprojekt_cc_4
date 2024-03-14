@@ -54,28 +54,30 @@ private:
     BtnFunc m_btnfnc;
 };
 
+void ProcessJSON(const json &j, std::vector<nlohmann::json_abi_v3_11_2::ordered_json> &vec);
 
+namespace Menu
+{
 void SetTitlePos(const std::uint32_t width, sf::Text &text);
 
 void SetBtnAndTextPos(const std::uint32_t width, sf::Sprite &btnObj, sf::Text &title, sf::Text &btntext);
 
 void SetBtnAndTextPos(const std::uint32_t width, sf::Sprite &btnObj, sf::Sprite &btn, sf::Text &btntext);
 
-void InitMenus(const Game &game,
-               const sf::Font &font,
-               const sf::Texture &texture,
-               std::vector<std::unique_ptr<Title>> &titles,
-               std::vector<std::unique_ptr<Button>> &buttons);
+void Init(const Game &game,
+          const sf::Font &font,
+          const sf::Texture &texture,
+          std::vector<std::unique_ptr<Title>> &titles,
+          std::vector<std::unique_ptr<Button>> &buttons);
 
-void DrawMenu(sf::RenderWindow &window,
-              sf::View &view,
-              std::vector<std::unique_ptr<Title>> &titles,
-              std::vector<std::unique_ptr<Button>> &buttons,
-              MenuState menuState);
+void Draw(sf::RenderWindow &window,
+          sf::View &view,
+          std::vector<std::unique_ptr<Title>> &titles,
+          std::vector<std::unique_ptr<Button>> &buttons,
+          MenuState menuState);
 
-void ProcessJSON(const json &j, std::vector<nlohmann::json_abi_v3_11_2::ordered_json> &vec);
-
-bool HandleMenuBtnClicked(sf::RenderWindow &window,
-                       std::vector<std::unique_ptr<Button>> &buttons,
-                       MenuState state,
-                       Game &game);
+bool HandleBtnClicked(sf::RenderWindow &window,
+                      std::vector<std::unique_ptr<Button>> &buttons,
+                      MenuState state,
+                      Game &game);
+} // namespace Menu

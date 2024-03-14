@@ -87,20 +87,20 @@ void Game::SetWindowWidth(const std::uint16_t width)
     this->m_windowWidth = width;
 }
 
-void InitView(Game &game, sf::View &view)
+void Game::InitView(sf::View &view)
 {
     auto center = view.getCenter();
 
     view.zoom(0.5F);
-    game.SetZoom(1U);
+    this->SetZoom(1U);
 
     view.move({-(center.x / 2), -(center.y / 2)});
 }
 
-void UpdateView(const Game &game, sf::View &view)
+void Game::UpdateView(sf::View &view)
 {
-    auto width = game.GetGameWidth();
-    auto height = game.GetGameHeight();
+    auto width = this->m_gameWidth;
+    auto height = this->m_gameHeight;
     auto size = view.getSize();
     auto center = view.getCenter();
 
@@ -126,15 +126,15 @@ void UpdateView(const Game &game, sf::View &view)
     }
 }
 
-void HandleViewPosition(const sf::RenderWindow &window, const Game &game, sf::View &view)
+void Game::HandleViewPosition(const sf::RenderWindow &window, sf::View &view)
 {
     // get the current mouse position in the window
     sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
     // convert it to world coordinates
     sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
 
-    auto width = game.GetGameWidth();
-    auto height = game.GetGameHeight();
+    auto width = this->m_gameWidth;
+    auto height = this->m_gameHeight;
 
     auto center = view.getCenter();
     auto size = view.getSize();
@@ -146,24 +146,16 @@ void HandleViewPosition(const sf::RenderWindow &window, const Game &game, sf::Vi
     if (moveX > 0U)
     {
         if (moveX + center.x >= width - (size.x / 2U))
-        {
             view.setCenter({width - (size.x / 2U), center.y});
-        }
         else
-        {
             view.move({moveX, 0U});
-        }
     }
     else // LEFT
     {
         if (center.x + (moveX) <= 0U + (size.x / 2U))
-        {
             view.setCenter({size.x / 2U, center.y});
-        }
         else
-        {
             view.move({moveX, 0U});
-        }
     }
     center = view.getCenter();
 
@@ -171,23 +163,15 @@ void HandleViewPosition(const sf::RenderWindow &window, const Game &game, sf::Vi
     if (moveY < 0U)
     {
         if (moveY + center.y <= 0U + (size.y / 2U))
-        {
             view.setCenter({center.x, size.y / 2U});
-        }
         else
-        {
             view.move({0U, moveY});
-        }
     }
     else // DOWN
     {
         if (moveY + center.y >= height - (size.y / 2U))
-        {
             view.setCenter({center.x, height - (size.y / 2U)});
-        }
         else
-        {
             view.move({0U, moveY});
-        }
     }
 }

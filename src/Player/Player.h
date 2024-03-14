@@ -1,5 +1,6 @@
 #pragma once
 #include "Game.h"
+#include "Item.h"
 #include "World.h"
 #include <SFML/Graphics.hpp>
 #include <cstdint>
@@ -40,6 +41,13 @@ public:
     void SetMovement(const PlayerMove movement);
     void SetSpeed(const float speed);
 
+    void Init(sf::Sprite &playerSprite, const sf::Texture &texture);
+
+    void HandleMovement(sf::Clock &clock,
+                        sf::Sprite &playerSprite,
+                        const Game &game,
+                        const std::vector<std::unique_ptr<World>> &world);
+
 private:
     std::string m_name;
     PlayerSurvivalStats m_survivalStats;
@@ -47,11 +55,3 @@ private:
     float m_speed;
     PlayerMove m_movement;
 };
-
-void InitPlayer(sf::Sprite &playerSprite, const sf::Texture &texture);
-
-void HandlePlayerMovement(const Player &player,
-                          sf::Clock &clock,
-                          sf::Sprite &playerSprite,
-                          const Game &game,
-                          const std::vector<std::unique_ptr<World>> &world);

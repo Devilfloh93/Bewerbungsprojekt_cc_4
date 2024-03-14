@@ -4,23 +4,12 @@
         "name": "Wood",
         "icon": "",
         "iconCoords": [],
-        "texture": "",
-        "textureCoords": []
-    },
-    {
-        "id": 2,
-        "name": "Iron Ore",
-        "icon": "",
-        "iconCoords": [],
-        "texture": "",
-        "textureCoords": []
-    },
-    {
-        "id": 3,
-        "name": "Apple",
-        "icon": "",
-        "iconCoords": [],
-        "texture": "",
-        "textureCoords": []
+        "texture": "ressources/textures/NatureLoot.png",
+        "textureCoords": [
+            230,
+            8,
+            19,
+            18
+        ]
     }
 ]
