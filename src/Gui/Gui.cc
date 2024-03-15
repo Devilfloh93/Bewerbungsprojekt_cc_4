@@ -97,11 +97,15 @@ void Menu::SetBtnAndTextPos(const std::uint32_t width, sf::Sprite &btnObj, sf::S
                                      btnObjPos.y + ((btnObjSize.y / 2U) - (btnTextLSize.y / 2U))));
 }
 void Menu::Init(const Game &game,
-                const sf::Font &font,
-                const sf::Texture &texture,
                 std::vector<std::unique_ptr<Title>> &titles,
                 std::vector<std::unique_ptr<Button>> &buttons)
 {
+    auto texture = new sf::Texture();
+    texture->loadFromFile("ressources/textures/Buttons_all_01.png");
+
+    auto font = new sf::Font();
+    font->loadFromFile("ressources/font/Round9x13.ttf");
+
     sf::Sprite prevBtn;
     auto width = game.GetWindowWidth();
 
@@ -131,7 +135,7 @@ void Menu::Init(const Game &game,
 
             bool firstButton = true;
             auto state = data["state"];
-            titleText.setFont(font);
+            titleText.setFont(*font);
             titleText.setCharacterSize(data["fontSize"]);
             titleText.setString(static_cast<std::string>(data["name"]));
 
@@ -152,14 +156,14 @@ void Menu::Init(const Game &game,
 
                 if (addBtn)
                 {
-                    btn.setTexture(texture);
+                    btn.setTexture(*texture);
                     btn.setTextureRect({data1["textureCoords"][0],
                                         data1["textureCoords"][1],
                                         data1["textureCoords"][2],
                                         data1["textureCoords"][3]});
                     btn.setScale({data1["scale"][0], data1["scale"][1]});
 
-                    btnText.setFont(font);
+                    btnText.setFont(*font);
                     btnText.setCharacterSize(data1["fontSize"]);
                     btnText.setString(static_cast<std::string>(data1["name"]));
 

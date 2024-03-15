@@ -1,8 +1,11 @@
 #include "Player.h"
 #include <iostream>
 
-Player::Player(const std::string name, const PlayerSurvivalStats survivalStats, const float baseSpeed)
-    : m_name(name), m_survivalStats(survivalStats), m_baseSpeed(baseSpeed)
+Player::Player(sf::Sprite *sprite,
+               const std::string name,
+               const PlayerSurvivalStats survivalStats,
+               const float baseSpeed)
+    : m_sprite(sprite), m_name(name), m_survivalStats(survivalStats), m_baseSpeed(baseSpeed)
 {
     m_speed = m_baseSpeed;
     m_movement = PlayerMove::NotMoving;
@@ -53,22 +56,18 @@ void Player::SetSpeed(const float speed)
     this->m_speed = speed;
 }
 
-void Player::Init(sf::Sprite &playerSprite, const sf::Texture &texture)
+sf::Sprite *Player::GetSprite() const
 {
-    playerSprite.setTexture(texture);
-    playerSprite.setTextureRect(sf::IntRect(8U, 8U, 16U, 16U));
-    playerSprite.setPosition(80.0F, 80.0F);
+    return this->m_sprite;
 }
 
-void Player::HandleMovement(sf::Clock &clock,
-                            sf::Sprite &playerSprite,
-                            const Game &game,
-                            const std::vector<std::unique_ptr<World>> &world)
+void Player::HandleMovement(sf::Clock &clock, const Game &game, const std::vector<std::unique_ptr<World>> &world)
 {
     auto elapsed = clock.getElapsedTime();
     auto speed = this->m_speed;
-    auto playerPos = playerSprite.getPosition();
-    auto playerSize = playerSprite.getLocalBounds().getSize();
+    auto sprite = this->m_sprite;
+    auto playerPos = sprite->getPosition();
+    auto playerSize = sprite->getLocalBounds().getSize();
     auto tileSize = game.GetTileSize();
     auto width = game.GetGameWidth();
     auto height = game.GetGameHeight();
@@ -137,63 +136,189 @@ void Player::HandleMovement(sf::Clock &clock,
     {
     case PlayerMove::Left:
         if (elapsed.asMilliseconds() >= 0 && elapsed.asMilliseconds() < 200)
-            playerSprite.setTextureRect(moveTexture.left01);
+            sprite->setTextureRect(moveTexture.left01);
         else if (elapsed.asMilliseconds() >= 200 && elapsed.asMilliseconds() < 400)
-            playerSprite.setTextureRect(moveTexture.left02);
+            sprite->setTextureRect(moveTexture.left02);
         else
             clock.restart();
 
         if (playerPos.x - speed > 0 + (tileSize / 2) && canMoveLEFT)
-            playerSprite.setPosition(playerPos.x - speed, playerPos.y);
+            sprite->setPosition(playerPos.x - speed, playerPos.y);
         else
-            playerSprite.setTextureRect(moveTexture.notMoving);
+            sprite->setTextureRect(moveTexture.notMoving);
         break;
     case PlayerMove::Right:
         if (elapsed.asMilliseconds() >= 0 && elapsed.asMilliseconds() < 200)
-            playerSprite.setTextureRect(moveTexture.right01);
+            sprite->setTextureRect(moveTexture.right01);
         else if (elapsed.asMilliseconds() >= 200 && elapsed.asMilliseconds() < 400)
-            playerSprite.setTextureRect(moveTexture.right02);
+            sprite->setTextureRect(moveTexture.right02);
         else
             clock.restart();
 
         if (playerPos.x + speed < width - tileSize && canMoveRIGHT)
-            playerSprite.setPosition(playerPos.x + speed, playerPos.y);
+            sprite->setPosition(playerPos.x + speed, playerPos.y);
         else
-            playerSprite.setTextureRect(moveTexture.notMoving);
+            sprite->setTextureRect(moveTexture.notMoving);
         break;
     case PlayerMove::Down:
         if (elapsed.asMilliseconds() >= 0 && elapsed.asMilliseconds() < 200)
-            playerSprite.setTextureRect(moveTexture.down01);
+            sprite->setTextureRect(moveTexture.down01);
         else if (elapsed.asMilliseconds() >= 200 && elapsed.asMilliseconds() < 400)
-            playerSprite.setTextureRect(moveTexture.down02);
+            sprite->setTextureRect(moveTexture.down02);
         else
             clock.restart();
 
         if (playerPos.y + speed < height - tileSize && canMoveDOWN)
-            playerSprite.setPosition(playerPos.x, playerPos.y + speed);
+            sprite->setPosition(playerPos.x, playerPos.y + speed);
         else
-            playerSprite.setTextureRect(moveTexture.notMoving);
+            sprite->setTextureRect(moveTexture.notMoving);
 
         break;
     case PlayerMove::Up:
         if (elapsed.asMilliseconds() >= 0 && elapsed.asMilliseconds() < 200)
-            playerSprite.setTextureRect(moveTexture.up01);
+            sprite->setTextureRect(moveTexture.up01);
         else if (elapsed.asMilliseconds() >= 200 && elapsed.asMilliseconds() < 400)
-            playerSprite.setTextureRect(moveTexture.up02);
+            sprite->setTextureRect(moveTexture.up02);
         else
             clock.restart();
 
         if (playerPos.y - speed > 0 + (tileSize / 2) && canMoveUP)
-            playerSprite.setPosition(playerPos.x, playerPos.y - speed);
+            sprite->setPosition(playerPos.x, playerPos.y - speed);
         else
-            playerSprite.setTextureRect(moveTexture.notMoving);
+            sprite->setTextureRect(moveTexture.notMoving);
 
         break;
     case PlayerMove::NotMoving:
-        playerSprite.setTextureRect(moveTexture.notMoving);
+        sprite->setTextureRect(moveTexture.notMoving);
         break;
 
     default:
         break;
     }
+}
+
+void Player::UseItem(const std::vector<std::unique_ptr<World>> &world,
+                     const std::vector<std::unique_ptr<ItemCfg>> &itemCfg,
+                     std::vector<std::unique_ptr<Item>> &items)
+{
+    auto speed = this->m_speed;
+    auto sprite = this->m_sprite;
+    auto playerPos = sprite->getPosition();
+    auto playerSize = sprite->getLocalBounds().getSize();
+
+    bool useItem = false;
+    std::uint8_t itemOutputID = 0U;
+    sf::Vector2f itemPos = {0.0F, 0.0F};
+    for (const auto &data : world)
+    {
+        auto objPos = data->GetSprite().getPosition();
+        auto objCollision = data->GetCollision();
+        auto objSize = data->GetSprite().getLocalBounds().getSize();
+        itemOutputID = data->GetItemOutputID();
+
+        if (objCollision.x != 0U && objCollision.y != 0U)
+        {
+            if (playerPos.x >= objPos.x && playerPos.x <= objPos.x + objCollision.x &&
+                playerPos.y - speed <= objPos.y + objSize.y && playerPos.y >= objPos.y + objCollision.y)
+            {
+                itemPos = {playerPos.x, playerPos.y + 20};
+                useItem = true;
+                break;
+            }
+
+            if (playerPos.x >= objPos.x && playerPos.x <= objPos.x + objCollision.x &&
+                playerPos.y <= objPos.y + objCollision.y && playerPos.y + speed >= objPos.y + objCollision.y)
+            {
+                itemPos = {playerPos.x, playerPos.y - 20};
+                useItem = true;
+                break;
+            }
+
+            if (playerPos.x >= objPos.x && playerPos.x - speed <= objPos.x + objCollision.x &&
+                playerPos.y <= objPos.y + objSize.y && playerPos.y >= objPos.y + objCollision.y)
+            {
+                itemPos = {playerPos.x + 20, playerPos.y};
+                useItem = true;
+                break;
+            }
+
+            if (playerPos.x + speed >= objPos.x && playerPos.x <= objPos.x && playerPos.y <= objPos.y + objSize.y &&
+                playerPos.y >= objPos.y + objCollision.y)
+            {
+                itemPos = {playerPos.x - 20, playerPos.y};
+                useItem = true;
+                break;
+            }
+        }
+        else
+        {
+            if ((playerPos.x + playerSize.x) >= objPos.x && playerPos.x <= objPos.x + objSize.x &&
+                playerPos.y - speed <= objPos.y + objSize.y && playerPos.y + playerSize.y >= objPos.y)
+            {
+                itemPos = {playerPos.x, playerPos.y + 20};
+                useItem = true;
+                break;
+            }
+
+            if ((playerPos.x + playerSize.x) >= objPos.x && playerPos.x <= objPos.x + objSize.x &&
+                playerPos.y <= objPos.y + objSize.y && (playerPos.y + playerSize.y) + speed >= objPos.y)
+            {
+                itemPos = {playerPos.x, playerPos.y - 20};
+                useItem = true;
+                break;
+            }
+
+            if (playerPos.x >= objPos.x && playerPos.x - speed <= objPos.x + objSize.x &&
+                playerPos.y <= objPos.y + objSize.y && playerPos.y + playerSize.y >= objPos.y)
+            {
+                itemPos = {playerPos.x + 20, playerPos.y};
+                useItem = true;
+                break;
+            }
+
+            if ((playerPos.x + playerSize.x) + speed >= objPos.x && playerPos.x <= objPos.x &&
+                playerPos.y <= objPos.y + objSize.y && playerPos.y + playerSize.y >= objPos.y)
+            {
+                itemPos = {playerPos.x - 20, playerPos.y};
+                useItem = true;
+                break;
+            }
+        }
+    }
+
+    if (useItem)
+    {
+        for (const auto &data : itemCfg)
+        {
+            sf::Sprite itemSprite;
+            auto texture = data->GetTexture();
+            auto textureCoords = data->GetTextureCoords();
+            auto itemID = data->GetID();
+            auto itemName = data->GetName();
+
+            if (itemOutputID == itemID)
+            {
+                itemSprite.setTexture(*texture);
+                itemSprite.setTextureRect(textureCoords);
+                itemSprite.setPosition(itemPos.x, itemPos.y);
+                items.push_back(std::make_unique<Item>(itemSprite, itemID, itemName));
+                break;
+            }
+        }
+    }
+}
+
+Player InitPlayer()
+{
+    auto sprite = new sf::Sprite();
+
+    auto texture = new sf::Texture();
+    texture->loadFromFile("ressources/textures/Human-Worker-Red.png");
+
+    sprite->setTexture(*texture);
+    sprite->setTextureRect(sf::IntRect(8U, 8U, 16U, 16U));
+    sprite->setPosition(80.0F, 80.0F);
+
+    auto player = Player(sprite, "PlayerName", PlayerSurvivalStats{100.0F, 100.0F, 100.0F}, 1.0F);
+    return player;
 }

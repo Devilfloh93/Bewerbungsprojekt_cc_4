@@ -64,11 +64,7 @@ void SetBtnAndTextPos(const std::uint32_t width, sf::Sprite &btnObj, sf::Text &t
 
 void SetBtnAndTextPos(const std::uint32_t width, sf::Sprite &btnObj, sf::Sprite &btn, sf::Text &btntext);
 
-void Init(const Game &game,
-          const sf::Font &font,
-          const sf::Texture &texture,
-          std::vector<std::unique_ptr<Title>> &titles,
-          std::vector<std::unique_ptr<Button>> &buttons);
+void Init(const Game &game, std::vector<std::unique_ptr<Title>> &titles, std::vector<std::unique_ptr<Button>> &buttons);
 
 void Draw(sf::RenderWindow &window,
           sf::View &view,

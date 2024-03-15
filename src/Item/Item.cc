@@ -5,30 +5,30 @@
 
 using json = nlohmann::json;
 
-AllItems::AllItems(const sf::Texture *texture,
-                   const sf::IntRect &textureCoords,
-                   const std::uint16_t ID,
-                   const std::string name)
+ItemCfg::ItemCfg(const sf::Texture *texture,
+                 const sf::IntRect &textureCoords,
+                 const std::uint16_t ID,
+                 const std::string name)
     : m_texture(texture), m_textureCoords(textureCoords), m_ID(ID), m_name(name)
 {
 }
 
-std::uint16_t AllItems::GetID() const
+std::uint16_t ItemCfg::GetID() const
 {
     return this->m_ID;
 }
 
-std::string AllItems::GetName() const
+std::string ItemCfg::GetName() const
 {
     return this->m_name;
 }
 
-const sf::Texture *AllItems::GetTexture() const
+const sf::Texture *ItemCfg::GetTexture() const
 {
     return this->m_texture;
 }
 
-sf::IntRect AllItems::GetTextureCoords() const
+sf::IntRect ItemCfg::GetTextureCoords() const
 {
     return this->m_textureCoords;
 }
@@ -53,9 +53,9 @@ sf::Sprite Item::GetSprite() const
     return this->m_sprite;
 }
 
-void InitItems(std::vector<std::unique_ptr<AllItems>> &items)
+void InitItemCfg(std::vector<std::unique_ptr<ItemCfg>> &items)
 {
-    std::ifstream file("./data/items.json");
+    std::ifstream file("./data/itemCfg.json");
 
     std::vector<nlohmann::json_abi_v3_11_2::ordered_json> jsonItems;
 
@@ -75,7 +75,7 @@ void InitItems(std::vector<std::unique_ptr<AllItems>> &items)
 
             texture->loadFromFile(texturePath);
 
-            items.push_back(std::make_unique<AllItems>(texture, textureCoords, data["id"], data["name"]));
+            items.push_back(std::make_unique<ItemCfg>(texture, textureCoords, data["id"], data["name"]));
         }
     }
 }

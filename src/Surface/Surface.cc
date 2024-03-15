@@ -24,8 +24,11 @@ float Surface::GetSpeed() const
     return this->m_speed;
 }
 
-void InitSurface(std::vector<std::unique_ptr<Surface>> &surfaces, const Game &game, const sf::Texture &texture)
+void InitSurface(std::vector<std::unique_ptr<Surface>> &surfaces, const Game &game)
 {
+    auto texture = new sf::Texture();
+    texture->loadFromFile("ressources/textures/TileSet_V2.png");
+
     const static SurfaceSpeed surfaceSpeed = {.grass = 1.5F, .water = 0.8F};
     auto maxTiles = game.GetMaxTiles();
     auto tileSize = game.GetTileSize();
@@ -51,7 +54,7 @@ void InitSurface(std::vector<std::unique_ptr<Surface>> &surfaces, const Game &ga
             ++k;
         }
 
-        tileSprite.setTexture(texture);
+        tileSprite.setTexture(*texture);
 
         if (j == 0 && k == 0 || (j * tileSize == (width - tileSize) && k == 0) ||
             (k * tileSize == (height - tileSize) && j == 0) ||
@@ -130,10 +133,10 @@ void InitSurface(std::vector<std::unique_ptr<Surface>> &surfaces, const Game &ga
 void DrawSurface(sf::RenderWindow &window,
                  const std::vector<std::unique_ptr<Surface>> &surfaces,
                  Player &player,
-                 const sf::Sprite &playerSprite,
                  const Game &game)
 {
-    auto playerPos = playerSprite.getPosition();
+    auto playerSprite = player.GetSprite();
+    auto playerPos = playerSprite->getPosition();
     auto surfaceTileSize = game.GetTileSize();
 
     for (auto &data : surfaces)

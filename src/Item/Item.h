@@ -5,15 +5,15 @@
 #include <string>
 #include <vector>
 
-class AllItems
+class ItemCfg
 {
 
 public:
-    AllItems(const sf::Texture *texture,
-             const sf::IntRect &textureCoords,
-             const std::uint16_t ID,
-             const std::string name);
-    ~AllItems() = default;
+    ItemCfg(const sf::Texture *texture,
+            const sf::IntRect &textureCoords,
+            const std::uint16_t ID,
+            const std::string name);
+    ~ItemCfg() = default;
 
     const sf::Texture *GetTexture() const;
     sf::IntRect GetTextureCoords() const;
@@ -46,6 +46,6 @@ private:
     std::string m_name;
 };
 
-void InitItems(std::vector<std::unique_ptr<AllItems>> &items);
+void InitItemCfg(std::vector<std::unique_ptr<ItemCfg>> &items);
 
 void DrawItems(sf::RenderWindow &window, const std::vector<std::unique_ptr<Item>> &items);

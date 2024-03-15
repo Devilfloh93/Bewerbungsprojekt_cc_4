@@ -26,7 +26,7 @@ enum class PlayerMove
 class Player
 {
 public:
-    Player(const std::string name, const PlayerSurvivalStats survivalStats, const float baseSpeed);
+    Player(sf::Sprite *sprite, const std::string name, const PlayerSurvivalStats survivalStats, const float baseSpeed);
     ~Player() = default;
 
     std::string GetName() const;
@@ -35,23 +35,27 @@ public:
     float GetFood() const;
     float GetBaseSpeed() const;
     float GetSpeed() const;
+    sf::Sprite *GetSprite() const;
 
     PlayerMove GetMovement() const;
 
     void SetMovement(const PlayerMove movement);
     void SetSpeed(const float speed);
 
-    void Init(sf::Sprite &playerSprite, const sf::Texture &texture);
+    void HandleMovement(sf::Clock &clock, const Game &game, const std::vector<std::unique_ptr<World>> &world);
 
-    void HandleMovement(sf::Clock &clock,
-                        sf::Sprite &playerSprite,
-                        const Game &game,
-                        const std::vector<std::unique_ptr<World>> &world);
+
+    void UseItem(const std::vector<std::unique_ptr<World>> &world,
+                 const std::vector<std::unique_ptr<ItemCfg>> &itemCfg,
+                 std::vector<std::unique_ptr<Item>> &items);
 
 private:
+    sf::Sprite *m_sprite;
     std::string m_name;
     PlayerSurvivalStats m_survivalStats;
     float m_baseSpeed;
     float m_speed;
     PlayerMove m_movement;
 };
+
+Player InitPlayer();
