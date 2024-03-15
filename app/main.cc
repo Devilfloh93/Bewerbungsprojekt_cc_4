@@ -43,36 +43,30 @@ int main()
     sf::Clock clock;
 
     // Vector
+    std::vector<std::unique_ptr<ItemCfg>> itemCfg;
+
     std::vector<std::unique_ptr<World>> world;
     std::vector<std::unique_ptr<Surface>> surfaces;
     std::vector<std::unique_ptr<Title>> titles;
     std::vector<std::unique_ptr<Button>> buttons;
-    std::vector<std::unique_ptr<AllItems>> allItems;
     std::vector<std::unique_ptr<Item>> items;
 
-    // Fonts
-    sf::Font font01;
-    font01.loadFromFile("ressources/font/Round9x13.ttf");
-
-    // Textures
-    sf::Texture btnTexture01;
-    btnTexture01.loadFromFile("ressources/textures/Buttons_all_01.png");
-
-    sf::Texture surfaceTexture01;
-    surfaceTexture01.loadFromFile("ressources/textures/TileSet_V2.png");
-
-    sf::Texture playerTexture01;
-    playerTexture01.loadFromFile("ressources/textures/Human-Worker-Red.png");
-
     // Player Init
-    auto player = Player("PlayerName", PlayerSurvivalStats{100.0F, 100.0F, 100.0F}, 1.0F);
-    sf::Sprite playerSprite;
+    auto player = InitPlayer();
 
-    Menu::Init(game, font01, btnTexture01, titles, buttons);
-    player.Init(playerSprite, playerTexture01);
-    InitSurface(surfaces, game, surfaceTexture01);
+    // Menu Init
+    Menu::Init(game, titles, buttons);
+
+    // Surface Init
+    InitSurface(surfaces, game);
+
+    // World Init
     InitWorld(world);
-    InitItems(allItems);
+
+    // Item Init
+    InitItemCfg(itemCfg);
+
+    // View Init
     game.InitView(view);
 
     while (window.isOpen())
@@ -119,21 +113,7 @@ int main()
                         player.SetMovement(PlayerMove::Down);
                         break;
                     case sf::Keyboard::Key::P:
-                        for (const auto &data : allItems)
-                        {
-                            sf::Sprite itemSprite;
-                            auto texture = data->GetTexture();
-                            auto textureCoords = data->GetTextureCoords();
-                            auto itemID = data->GetID();
-                            auto itemName = data->GetName();
-
-                            itemSprite.setTexture(*texture);
-                            itemSprite.setTextureRect(textureCoords);
-                            itemSprite.setPosition(50, 100);
-
-                            items.push_back(std::make_unique<Item>(itemSprite, itemID, itemName));
-                        }
-
+                        player.UseItem(world, itemCfg, items);
                         break;
                     default:
                         break;
@@ -190,28 +170,28 @@ int main()
         {
             window.setView(view);
 
-            DrawSurface(window, surfaces, player, playerSprite, game);
+            DrawSurface(window, surfaces, player, game);
 
-            player.HandleMovement(clock, playerSprite, game, world);
-            window.draw(playerSprite);
+            player.HandleMovement(clock, game, world);
 
-            DrawWorld(window, world);
             DrawItems(window, items);
+            window.draw(*(player.GetSprite()));
+            DrawWorld(window, world);
         }
 
         switch (menuState)
         {
         case MenuState::Pause:
-            Menu::Draw(window, menuView, titles, buttons, MenuState::Pause);
+            Menu::Draw(window, menuView, titles, buttons, menuState);
             break;
         case MenuState::Options:
-            Menu::Draw(window, menuView, titles, buttons, MenuState::Options);
+            Menu::Draw(window, menuView, titles, buttons, menuState);
             break;
         case MenuState::Main:
-            Menu::Draw(window, menuView, titles, buttons, MenuState::Main);
+            Menu::Draw(window, menuView, titles, buttons, menuState);
             break;
         case MenuState::Inventory:
-            Menu::Draw(window, menuView, titles, buttons, MenuState::Inventory);
+            Menu::Draw(window, menuView, titles, buttons, menuState);
             break;
 
         default:

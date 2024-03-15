@@ -4,7 +4,8 @@
 
 using json = nlohmann::json;
 
-World::World(const sf::Sprite sprite, const Collision collision) : m_sprite(sprite), m_collision(collision)
+World::World(const sf::Sprite sprite, const Collision collision, const std::uint8_t itemOutputID)
+    : m_sprite(sprite), m_collision(collision), m_itemOutputID(itemOutputID)
 {
 }
 
@@ -17,12 +18,16 @@ Collision World::GetCollision() const
 {
     return this->m_collision;
 }
+std::uint8_t World::GetItemOutputID() const
+{
+    return this->m_itemOutputID;
+}
 
 void InitWorld(std::vector<std::unique_ptr<World>> &world)
 {
     sf::Sprite tileSprite;
 
-    std::ifstream file("./data/world.json");
+    std::ifstream file("./data/worldCfg.json");
 
     if (file.is_open())
     {
@@ -37,6 +42,7 @@ void InitWorld(std::vector<std::unique_ptr<World>> &world)
             texture->loadFromFile(texturePath);
 
             auto collision = data["collision"];
+            auto itemOutputID = data["itemOutputID"];
             tileSprite.setTexture(*texture);
             tileSprite.setTextureRect({data["textureCoords"][0],
                                        data["textureCoords"][1],
@@ -46,7 +52,8 @@ void InitWorld(std::vector<std::unique_ptr<World>> &world)
             for (const auto &data1 : data["pos"])
             {
                 tileSprite.setPosition(data1[0], data1[1]);
-                world.push_back(std::make_unique<World>(tileSprite, Collision{.x = collision[0], .y = collision[1]}));
+                world.push_back(
+                    std::make_unique<World>(tileSprite, Collision{.x = collision[0], .y = collision[1]}, itemOutputID));
             }
         }
     }
