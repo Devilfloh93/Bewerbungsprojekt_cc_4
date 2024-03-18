@@ -33,19 +33,20 @@ sf::IntRect ItemCfg::GetTextureCoords() const
     return this->m_textureCoords;
 }
 
-Item::Item(const sf::Sprite &sprite, const std::uint16_t ID, const std::string name)
-    : m_sprite(sprite), m_ID(ID), m_name(name)
+Item::Item(const sf::Sprite &sprite, const std::uint16_t ID, const std::uint16_t count)
+    : m_sprite(sprite), m_ID(ID), m_count(count)
 {
 }
+
+std::uint16_t Item::GetCount() const
+{
+    return this->m_count;
+}
+
 
 std::uint16_t Item::GetID() const
 {
     return this->m_ID;
-}
-
-std::string Item::GetName() const
-{
-    return this->m_name;
 }
 
 sf::Sprite Item::GetSprite() const
@@ -65,6 +66,8 @@ void InitItemCfg(std::vector<std::unique_ptr<ItemCfg>> &items)
 
         for (const auto &data : jsonData)
         {
+            auto ID = data["id"];
+            auto name = data["name"];
             auto texturePath = data["texture"];
             auto textureCoords = sf::IntRect(data["textureCoords"][0],
                                              data["textureCoords"][1],
@@ -75,7 +78,7 @@ void InitItemCfg(std::vector<std::unique_ptr<ItemCfg>> &items)
 
             texture->loadFromFile(texturePath);
 
-            items.push_back(std::make_unique<ItemCfg>(texture, textureCoords, data["id"], data["name"]));
+            items.push_back(std::make_unique<ItemCfg>(texture, textureCoords, ID, name));
         }
     }
 }

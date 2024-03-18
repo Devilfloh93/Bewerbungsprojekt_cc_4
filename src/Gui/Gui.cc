@@ -96,6 +96,31 @@ void Menu::SetBtnAndTextPos(const std::uint32_t width, sf::Sprite &btnObj, sf::S
     btntext.setPosition(sf::Vector2f(btnObjPos.x + ((btnObjSize.x / 2U) - (btnTextLSize.x / 2U)),
                                      btnObjPos.y + ((btnObjSize.y / 2U) - (btnTextLSize.y / 2U))));
 }
+
+void Menu::SetTextBeforeIcon(sf::Sprite &icon, sf::Text &text, sf::Sprite &prevIcon)
+{
+    auto prevIconPos = prevIcon.getGlobalBounds().getPosition();
+    auto iconLSize = icon.getLocalBounds().getSize();
+    icon.setPosition(prevIconPos.x, prevIconPos.y + iconLSize.y);
+
+    iconLSize = icon.getLocalBounds().getSize();
+    auto textLSize = text.getLocalBounds().getSize();
+    auto iconPos = icon.getPosition();
+
+    text.setPosition(sf::Vector2f(iconPos.x + (iconLSize.x + (iconLSize.x / 2)), iconPos.y));
+}
+
+void Menu::SetTextBeforeIcon(const std::uint16_t x, const std::uint16_t y, sf::Sprite &icon, sf::Text &text)
+{
+    icon.setPosition(x, y);
+
+    auto iconLSize = icon.getLocalBounds().getSize();
+    auto textLSize = text.getLocalBounds().getSize();
+    auto iconPos = icon.getPosition();
+
+    text.setPosition(sf::Vector2f(iconPos.x + (iconLSize.x + (iconLSize.x / 2)), iconPos.y));
+}
+
 void Menu::Init(const Game &game,
                 std::vector<std::unique_ptr<Title>> &titles,
                 std::vector<std::unique_ptr<Button>> &buttons)
@@ -187,11 +212,12 @@ void Menu::Init(const Game &game,
     }
 }
 
+
 void Menu::Draw(sf::RenderWindow &window,
                 sf::View &view,
-                std::vector<std::unique_ptr<Title>> &titles,
-                std::vector<std::unique_ptr<Button>> &buttons,
-                MenuState state)
+                const std::vector<std::unique_ptr<Title>> &titles,
+                const std::vector<std::unique_ptr<Button>> &buttons,
+                const MenuState state)
 {
     window.setView(view);
 
@@ -222,9 +248,49 @@ void Menu::Draw(sf::RenderWindow &window,
     }
 }
 
+void Menu::Draw(sf::RenderWindow &window,
+                sf::View &view,
+                const std::vector<std::unique_ptr<Title>> &titles,
+                const std::vector<std::unique_ptr<Button>> &buttons,
+                const MenuState state,
+                Player &player,
+                const std::vector<std::unique_ptr<ItemCfg>> &itemCfg)
+{
+    window.setView(view);
+
+    for (const auto &data : titles)
+    {
+        if (state == data->GetMenuState())
+            window.draw(data->GetText());
+
+        if (state == MenuState::Inventory)
+            player.DrawInventoryItems(window, itemCfg);
+
+        for (const auto &data1 : buttons)
+        {
+            bool showBtn = false;
+            auto menuStates = data1->GetMenuState();
+            for (const auto &data3 : menuStates)
+            {
+                if (state == data3)
+                {
+                    showBtn = true;
+                    break;
+                }
+            }
+
+            if (showBtn)
+            {
+                window.draw(data1->GetSprite());
+                window.draw(data1->GetText());
+            }
+        }
+    }
+}
+
 bool Menu::HandleBtnClicked(sf::RenderWindow &window,
-                            std::vector<std::unique_ptr<Button>> &buttons,
-                            MenuState state,
+                            const std::vector<std::unique_ptr<Button>> &buttons,
+                            const MenuState state,
                             Game &game)
 {
     // get the current mouse position in the window

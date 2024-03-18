@@ -10,15 +10,16 @@ struct ReturnView
 
 struct MovementTexture
 {
-    sf::IntRect notMoving;
-    sf::IntRect up01;
-    sf::IntRect up02;
+    sf::IntRect up00; // Not Moving
+    sf::IntRect up01; // Left Moving Feet
+    sf::IntRect up02; // Right Moving Feet
+    sf::IntRect down00;
     sf::IntRect down01;
     sf::IntRect down02;
+    sf::IntRect left00;
     sf::IntRect left01;
-    sf::IntRect left02;
+    sf::IntRect right00;
     sf::IntRect right01;
-    sf::IntRect right02;
 };
 
 enum class MenuState
