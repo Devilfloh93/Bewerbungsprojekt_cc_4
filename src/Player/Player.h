@@ -37,17 +37,23 @@ public:
     float GetSpeed() const;
     sf::Sprite *GetSprite() const;
 
-    PlayerMove GetMovement() const;
+    PlayerMove GetMove() const;
+    PlayerMove GetLastMove() const;
 
-    void SetMovement(const PlayerMove movement);
+    void SetMove(const PlayerMove move);
     void SetSpeed(const float speed);
 
-    void HandleMovement(sf::Clock &clock, const Game &game, const std::vector<std::unique_ptr<World>> &world);
+    void HandleMove(sf::Clock &clock,
+                    const Game &game,
+                    const std::vector<std::unique_ptr<World>> &world,
+                    std::vector<std::unique_ptr<Item>> &items);
 
 
     void UseItem(const std::vector<std::unique_ptr<World>> &world,
                  const std::vector<std::unique_ptr<ItemCfg>> &itemCfg,
                  std::vector<std::unique_ptr<Item>> &items);
+
+    void DrawInventoryItems(sf::RenderWindow &window, const std::vector<std::unique_ptr<ItemCfg>> &itemCfg);
 
 private:
     sf::Sprite *m_sprite;
@@ -55,7 +61,9 @@ private:
     PlayerSurvivalStats m_survivalStats;
     float m_baseSpeed;
     float m_speed;
-    PlayerMove m_movement;
+    PlayerMove m_move;
+    PlayerMove m_lastMove;
+    std::map<std::uint32_t, std::uint16_t> m_items;
 };
 
 Player InitPlayer();

@@ -1,12 +1,25 @@
 [
     {
         "id": 1,
-        "name": "Wood",
+        "name": "Black Wood",
         "icon": "",
         "iconCoords": [],
         "texture": "ressources/textures/NatureLoot.png",
         "textureCoords": [
             230,
+            8,
+            19,
+            18
+        ]
+    },
+    {
+        "id": 2,
+        "name": "White Wood",
+        "icon": "",
+        "iconCoords": [],
+        "texture": "ressources/textures/NatureLoot.png",
+        "textureCoords": [
+            70,
             8,
             19,
             18

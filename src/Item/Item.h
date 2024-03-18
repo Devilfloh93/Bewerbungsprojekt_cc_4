@@ -32,18 +32,18 @@ class Item
 {
 
 public:
-    Item(const sf::Sprite &sprite, const std::uint16_t ID, const std::string name);
+    Item(const sf::Sprite &sprite, const std::uint16_t ID, const std::uint16_t count);
     ~Item() = default;
 
     sf::Sprite GetSprite() const;
 
     std::uint16_t GetID() const;
-    std::string GetName() const;
+    std::uint16_t GetCount() const;
 
 private:
     sf::Sprite m_sprite;
     std::uint16_t m_ID;
-    std::string m_name;
+    std::uint16_t m_count;
 };
 
 void InitItemCfg(std::vector<std::unique_ptr<ItemCfg>> &items);

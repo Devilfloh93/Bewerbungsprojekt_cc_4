@@ -86,6 +86,46 @@
     {
         "pos": [
             [
+                60,
+                30
+            ],
+            [
+                40,
+                50
+            ],
+            [
+                152,
+                165
+            ],
+            [
+                180,
+                234
+            ],
+            [
+                265,
+                310
+            ],
+            [
+                310,
+                190
+            ]
+        ],
+        "itemOutputID": 2,
+        "texture": "ressources/textures/Premium_TreesUpdated_No_Outline.png",
+        "textureCoords": [
+            454,
+            12,
+            48,
+            85
+        ],
+        "collision": [
+            32,
+            60
+        ]
+    },
+    {
+        "pos": [
+            [
                 40,
                 40
             ]

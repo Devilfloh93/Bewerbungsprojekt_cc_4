@@ -101,16 +101,16 @@ int main()
                         breakLoop = true;
                         break;
                     case sf::Keyboard::Key::A:
-                        player.SetMovement(PlayerMove::Left);
+                        player.SetMove(PlayerMove::Left);
                         break;
                     case sf::Keyboard::Key::D:
-                        player.SetMovement(PlayerMove::Right);
+                        player.SetMove(PlayerMove::Right);
                         break;
                     case sf::Keyboard::Key::W:
-                        player.SetMovement(PlayerMove::Up);
+                        player.SetMove(PlayerMove::Up);
                         break;
                     case sf::Keyboard::Key::S:
-                        player.SetMovement(PlayerMove::Down);
+                        player.SetMove(PlayerMove::Down);
                         break;
                     case sf::Keyboard::Key::P:
                         player.UseItem(world, itemCfg, items);
@@ -129,7 +129,7 @@ int main()
                                        sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S));
 
                     if (!keyPressed)
-                        player.SetMovement(PlayerMove::NotMoving);
+                        player.SetMove(PlayerMove::NotMoving);
                 }
                 break;
             case sf::Event::MouseWheelScrolled:
@@ -172,7 +172,7 @@ int main()
 
             DrawSurface(window, surfaces, player, game);
 
-            player.HandleMovement(clock, game, world);
+            player.HandleMove(clock, game, world, items);
 
             DrawItems(window, items);
             window.draw(*(player.GetSprite()));
@@ -191,7 +191,7 @@ int main()
             Menu::Draw(window, menuView, titles, buttons, menuState);
             break;
         case MenuState::Inventory:
-            Menu::Draw(window, menuView, titles, buttons, menuState);
+            Menu::Draw(window, menuView, titles, buttons, menuState, player, itemCfg);
             break;
 
         default:
