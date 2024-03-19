@@ -13,17 +13,23 @@ class World
 {
 
 public:
-    World(const sf::Sprite sprite, const Collision collision, const std::uint8_t itemOutputID);
+    World(const sf::Sprite sprite,
+          const Collision collision,
+          const std::uint8_t itemOutputID,
+          const sf::IntRect textureProg);
     ~World() = default;
 
     sf::Sprite GetSprite() const;
     Collision GetCollision() const;
     std::uint8_t GetItemOutputID() const;
 
+    void UpdateTextureRect();
+
 private:
     sf::Sprite m_sprite;
     Collision m_collision;
     std::uint8_t m_itemOutputID;
+    sf::IntRect m_textureProg;
 };
 
 void InitWorld(std::vector<std::unique_ptr<World>> &world);

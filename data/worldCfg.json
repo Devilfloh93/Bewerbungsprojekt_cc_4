@@ -78,6 +78,12 @@
             48,
             65
         ],
+        "textureProgressCoords": [
+            262,
+            157,
+            20,
+            20
+        ],
         "collision": [
             32,
             40
@@ -118,6 +124,12 @@
             48,
             85
         ],
+        "textureProgressCoords": [
+            261,
+            44,
+            22,
+            21
+        ],
         "collision": [
             32,
             60
@@ -137,6 +149,12 @@
             11,
             30,
             22
+        ],
+        "textureProgressCoords": [
+            0,
+            0,
+            0,
+            0
         ],
         "collision": [
             0,
