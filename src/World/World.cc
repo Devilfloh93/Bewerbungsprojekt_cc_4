@@ -4,8 +4,11 @@
 
 using json = nlohmann::json;
 
-World::World(const sf::Sprite sprite, const Collision collision, const std::uint8_t itemOutputID)
-    : m_sprite(sprite), m_collision(collision), m_itemOutputID(itemOutputID)
+World::World(const sf::Sprite sprite,
+             const Collision collision,
+             const std::uint8_t itemOutputID,
+             const sf::IntRect textureProg)
+    : m_sprite(sprite), m_collision(collision), m_itemOutputID(itemOutputID), m_textureProg(textureProg)
 {
 }
 
@@ -18,9 +21,16 @@ Collision World::GetCollision() const
 {
     return this->m_collision;
 }
+
 std::uint8_t World::GetItemOutputID() const
 {
     return this->m_itemOutputID;
+}
+
+void World::UpdateTextureRect()
+{
+    if (m_textureProg.getSize().x > 0 && m_textureProg.getSize().y > 0)
+        this->m_sprite.setTextureRect(m_textureProg);
 }
 
 void InitWorld(std::vector<std::unique_ptr<World>> &world)
@@ -43,6 +53,11 @@ void InitWorld(std::vector<std::unique_ptr<World>> &world)
 
             auto collision = data["collision"];
             auto itemOutputID = data["itemOutputID"];
+            auto textureProg = sf::IntRect{data["textureProgressCoords"][0],
+                                           data["textureProgressCoords"][1],
+                                           data["textureProgressCoords"][2],
+                                           data["textureProgressCoords"][3]};
+
             tileSprite.setTexture(*texture);
             tileSprite.setTextureRect({data["textureCoords"][0],
                                        data["textureCoords"][1],
@@ -52,8 +67,10 @@ void InitWorld(std::vector<std::unique_ptr<World>> &world)
             for (const auto &data1 : data["pos"])
             {
                 tileSprite.setPosition(data1[0], data1[1]);
-                world.push_back(
-                    std::make_unique<World>(tileSprite, Collision{.x = collision[0], .y = collision[1]}, itemOutputID));
+                world.push_back(std::make_unique<World>(tileSprite,
+                                                        Collision{.x = collision[0], .y = collision[1]},
+                                                        itemOutputID,
+                                                        textureProg));
             }
         }
     }

@@ -217,7 +217,6 @@ void Player::HandleMove(sf::Clock &clock,
             if (newItem)
             {
                 this->m_items[ID] = count;
-                this->m_items[2] = 1;
             }
             remove = true;
         }
@@ -327,9 +326,10 @@ void Player::UseItem(const std::vector<std::unique_ptr<World>> &world,
     sf::Vector2f itemPos = {0.0F, 0.0F};
     for (const auto &data : world)
     {
-        auto objPos = data->GetSprite().getPosition();
+        auto objSprite = data->GetSprite();
+        auto objPos = objSprite.getPosition();
         auto objCollision = data->GetCollision();
-        auto objSize = data->GetSprite().getLocalBounds().getSize();
+        auto objSize = objSprite.getLocalBounds().getSize();
         itemOutputID = data->GetItemOutputID();
 
         if (objCollision.x != 0U && objCollision.y != 0U)
@@ -339,7 +339,6 @@ void Player::UseItem(const std::vector<std::unique_ptr<World>> &world,
             {
                 itemPos = {playerPos.x, playerPos.y + 20};
                 useItem = true;
-                break;
             }
 
             if (playerPos.x >= objPos.x && playerPos.x <= objPos.x + objCollision.x &&
@@ -347,7 +346,6 @@ void Player::UseItem(const std::vector<std::unique_ptr<World>> &world,
             {
                 itemPos = {playerPos.x, playerPos.y - 20};
                 useItem = true;
-                break;
             }
 
             if (playerPos.x >= objPos.x && playerPos.x - speed <= objPos.x + objCollision.x &&
@@ -355,7 +353,6 @@ void Player::UseItem(const std::vector<std::unique_ptr<World>> &world,
             {
                 itemPos = {playerPos.x + 20, playerPos.y};
                 useItem = true;
-                break;
             }
 
             if (playerPos.x + speed >= objPos.x && playerPos.x <= objPos.x && playerPos.y <= objPos.y + objSize.y &&
@@ -363,7 +360,6 @@ void Player::UseItem(const std::vector<std::unique_ptr<World>> &world,
             {
                 itemPos = {playerPos.x - 20, playerPos.y};
                 useItem = true;
-                break;
             }
         }
         else
@@ -373,7 +369,6 @@ void Player::UseItem(const std::vector<std::unique_ptr<World>> &world,
             {
                 itemPos = {playerPos.x, playerPos.y + 20};
                 useItem = true;
-                break;
             }
 
             if ((playerPos.x + playerSize.x) >= objPos.x && playerPos.x <= objPos.x + objSize.x &&
@@ -381,7 +376,6 @@ void Player::UseItem(const std::vector<std::unique_ptr<World>> &world,
             {
                 itemPos = {playerPos.x, playerPos.y - 20};
                 useItem = true;
-                break;
             }
 
             if (playerPos.x >= objPos.x && playerPos.x - speed <= objPos.x + objSize.x &&
@@ -389,7 +383,6 @@ void Player::UseItem(const std::vector<std::unique_ptr<World>> &world,
             {
                 itemPos = {playerPos.x + 20, playerPos.y};
                 useItem = true;
-                break;
             }
 
             if ((playerPos.x + playerSize.x) + speed >= objPos.x && playerPos.x <= objPos.x &&
@@ -397,8 +390,13 @@ void Player::UseItem(const std::vector<std::unique_ptr<World>> &world,
             {
                 itemPos = {playerPos.x - 20, playerPos.y};
                 useItem = true;
-                break;
             }
+        }
+
+        if (useItem)
+        {
+            data->UpdateTextureRect();
+            break;
         }
     }
 
