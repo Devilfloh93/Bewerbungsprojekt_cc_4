@@ -2,15 +2,15 @@
 
 #include <random>
 
-Surface::Surface(const sf::Sprite sprite, const float speed) : m_sprite(sprite), m_speed(speed)
+Surface::Surface(const sf::Sprite &sprite, const float speed) : m_sprite(sprite), m_speed(speed)
 {
 }
 
-Grass::Grass(const sf::Sprite sprite, const float speed) : Surface(sprite, speed)
+Grass::Grass(const sf::Sprite &sprite, const float speed) : Surface(sprite, speed)
 {
 }
 
-Water::Water(const sf::Sprite sprite, const float speed) : Surface(sprite, speed)
+Water::Water(const sf::Sprite &sprite, const float speed) : Surface(sprite, speed)
 {
 }
 

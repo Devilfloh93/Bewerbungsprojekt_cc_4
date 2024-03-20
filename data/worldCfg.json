@@ -72,21 +72,21 @@
         ],
         "itemOutputID": 1,
         "textureID": 4,
-        "textureCoords": [
+        "textureData": [
             391,
             144,
             48,
-            65
+            65,
+            32,
+            40
         ],
-        "textureProgressCoords": [
+        "textureProgData": [
             262,
             157,
             20,
-            20
-        ],
-        "collision": [
-            32,
-            40
+            20,
+            0,
+            0
         ]
     },
     {
@@ -118,21 +118,21 @@
         ],
         "itemOutputID": 2,
         "textureID": 4,
-        "textureCoords": [
+        "textureData": [
             454,
             12,
             48,
-            85
+            85,
+            32,
+            60
         ],
-        "textureProgressCoords": [
+        "textureProgData": [
             261,
             44,
             22,
-            21
-        ],
-        "collision": [
-            32,
-            60
+            21,
+            0,
+            0
         ]
     },
     {
@@ -144,19 +144,19 @@
         ],
         "itemOutputID": 0,
         "textureID": 1,
-        "textureCoords": [
+        "textureData": [
             1,
             11,
             30,
-            22
-        ],
-        "textureProgressCoords": [
-            0,
-            0,
+            22,
             0,
             0
         ],
-        "collision": [
+        "textureProgData": [
+            0,
+            0,
+            0,
+            0,
             0,
             0
         ]

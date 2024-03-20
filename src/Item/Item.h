@@ -10,20 +10,26 @@ class ItemCfg
 {
 
 public:
-    ItemCfg(sf::Texture *texture, const sf::IntRect textureCoords, const std::uint16_t ID, const std::string name);
+    ItemCfg(sf::Texture *texture,
+            const sf::IntRect textureCoords,
+            const std::uint8_t ID,
+            const std::string_view name,
+            const std::uint8_t maxDrop);
     ~ItemCfg() = default;
 
     sf::Texture *GetTexture() const;
     sf::IntRect GetTextureCoords() const;
 
-    std::uint16_t GetID() const;
+    std::uint8_t GetID() const;
     std::string GetName() const;
+    std::uint8_t GetMaxDrop() const;
 
 private:
     sf::Texture *m_texture;
     sf::IntRect m_textureCoords;
     std::uint16_t m_ID;
     std::string m_name;
+    std::uint8_t m_maxDrop;
 };
 
 class Item

@@ -2,6 +2,7 @@
     {
         "id": 1,
         "name": "Black Wood",
+        "maxDrop": 3,
         "textureID": 3,
         "textureCoords": [
             230,
@@ -13,6 +14,7 @@
     {
         "id": 2,
         "name": "White Wood",
+        "maxDrop": 2,
         "textureID": 3,
         "textureCoords": [
             70,

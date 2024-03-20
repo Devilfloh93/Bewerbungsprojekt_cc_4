@@ -5,12 +5,16 @@
 
 using json = nlohmann::json;
 
-ItemCfg::ItemCfg(sf::Texture *texture, const sf::IntRect textureCoords, const std::uint16_t ID, const std::string name)
-    : m_texture(texture), m_textureCoords(textureCoords), m_ID(ID), m_name(name)
+ItemCfg::ItemCfg(sf::Texture *texture,
+                 const sf::IntRect textureCoords,
+                 const std::uint8_t ID,
+                 const std::string_view name,
+                 const std::uint8_t maxDrop)
+    : m_texture(texture), m_textureCoords(textureCoords), m_ID(ID), m_name(name), m_maxDrop(maxDrop)
 {
 }
 
-std::uint16_t ItemCfg::GetID() const
+std::uint8_t ItemCfg::GetID() const
 {
     return this->m_ID;
 }
@@ -28,6 +32,11 @@ sf::Texture *ItemCfg::GetTexture() const
 sf::IntRect ItemCfg::GetTextureCoords() const
 {
     return this->m_textureCoords;
+}
+
+std::uint8_t ItemCfg::GetMaxDrop() const
+{
+    return this->m_maxDrop;
 }
 
 Item::Item(const sf::Sprite &sprite, const std::uint16_t ID, const std::uint16_t count)
@@ -65,6 +74,7 @@ void InitItemCfg(std::vector<std::unique_ptr<ItemCfg>> &items, const std::vector
         {
             std::uint8_t ID = data["id"];
             std::string name = data["name"];
+            std::uint8_t maxDrop = data["maxDrop"];
             sf::Texture *texture;
             std::uint8_t textureID = data["textureID"];
             auto textureCoords = sf::IntRect(data["textureCoords"][0],
@@ -81,7 +91,7 @@ void InitItemCfg(std::vector<std::unique_ptr<ItemCfg>> &items, const std::vector
                 }
             }
 
-            items.push_back(std::make_unique<ItemCfg>(texture, textureCoords, ID, name));
+            items.push_back(std::make_unique<ItemCfg>(texture, textureCoords, ID, name, maxDrop));
         }
         file.close();
     }

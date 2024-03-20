@@ -2,9 +2,10 @@
 #include "Gui.h"
 #include <format>
 #include <iostream>
+#include <random>
 
 Player::Player(sf::Sprite *sprite,
-               const std::string name,
+               const std::string_view name,
                const PlayerSurvivalStats survivalStats,
                const float baseSpeed)
     : m_sprite(sprite), m_name(name), m_survivalStats(survivalStats), m_baseSpeed(baseSpeed)
@@ -14,7 +15,7 @@ Player::Player(sf::Sprite *sprite,
     m_lastMove = m_move;
 }
 
-std::string Player::GetName() const
+std::string_view Player::GetName() const
 {
     return this->m_name;
 }
@@ -395,6 +396,7 @@ void Player::UseItem(const std::vector<std::unique_ptr<World>> &world,
 
         if (useItem)
         {
+            data->UpdatePosition();
             data->UpdateTextureRect();
             break;
         }
@@ -402,20 +404,26 @@ void Player::UseItem(const std::vector<std::unique_ptr<World>> &world,
 
     if (useItem)
     {
+        std::random_device rd;  // a seed source for the random number engine
+        std::mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
+
         for (const auto &data : itemCfg)
         {
             sf::Sprite itemSprite;
             auto texture = data->GetTexture();
             auto textureCoords = data->GetTextureCoords();
             auto itemID = data->GetID();
-            std::uint16_t count = 1;
+            auto maxDrop = data->GetMaxDrop();
+
+            // Random Drop Count
+            std::uniform_int_distribution<> dist(1U, maxDrop);
 
             if (itemOutputID == itemID)
             {
                 itemSprite.setTexture(*texture);
                 itemSprite.setTextureRect(textureCoords);
                 itemSprite.setPosition(itemPos.x, itemPos.y);
-                items.push_back(std::make_unique<Item>(itemSprite, itemID, count));
+                items.push_back(std::make_unique<Item>(itemSprite, itemID, dist(gen)));
                 break;
             }
         }

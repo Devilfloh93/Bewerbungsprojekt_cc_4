@@ -4,11 +4,11 @@
 
 using json = nlohmann::json;
 
-World::World(const sf::Sprite sprite,
+World::World(const sf::Sprite &sprite,
              const Collision collision,
              const std::uint8_t itemOutputID,
-             const sf::IntRect textureProg)
-    : m_sprite(sprite), m_collision(collision), m_itemOutputID(itemOutputID), m_textureProg(textureProg)
+             const TextureProgData textureProgData)
+    : m_sprite(sprite), m_collision(collision), m_itemOutputID(itemOutputID), m_textureProgData(textureProgData)
 {
 }
 
@@ -29,12 +29,24 @@ std::uint8_t World::GetItemOutputID() const
 
 void World::UpdateTextureRect()
 {
-    if (m_textureProg.getSize().x > 0 && m_textureProg.getSize().y > 0)
-        this->m_sprite.setTextureRect(m_textureProg);
+    if (m_textureProgData.rect.getSize().x > 0 && m_textureProgData.rect.getSize().y > 0)
+        this->m_sprite.setTextureRect(m_textureProgData.rect);
+}
+
+void World::UpdatePosition()
+{
+    auto pos = this->m_sprite.getPosition();
+    auto size = this->m_sprite.getLocalBounds().getSize();
+    auto textureSize = this->m_textureProgData.rect.getSize();
+
+    this->m_sprite.setPosition(pos.x + ((size.x / 2) - (textureSize.x / 2)), pos.y + (size.y - textureSize.y));
+    this->m_collision.x = this->m_textureProgData.collision.x;
+    this->m_collision.y = this->m_textureProgData.collision.y;
 }
 
 void InitWorld(std::vector<std::unique_ptr<World>> &world, const std::vector<std::unique_ptr<Texture>> &textures)
 {
+
     sf::Sprite tileSprite;
 
     std::ifstream file("./data/worldCfg.json");
@@ -46,16 +58,19 @@ void InitWorld(std::vector<std::unique_ptr<World>> &world, const std::vector<std
         sf::Texture *texture;
         for (const auto &data : jsonData)
         {
-            auto collision = Collision{.x = data["collision"][0], .y = data["collision"][1]};
+            auto collision = Collision{.x = data["textureData"][4], .y = data["textureData"][5]};
             std::uint8_t itemOutputID = data["itemOutputID"];
-            auto textureCoords = sf::IntRect(data["textureCoords"][0],
-                                             data["textureCoords"][1],
-                                             data["textureCoords"][2],
-                                             data["textureCoords"][3]);
-            auto textureProg = sf::IntRect{data["textureProgressCoords"][0],
-                                           data["textureProgressCoords"][1],
-                                           data["textureProgressCoords"][2],
-                                           data["textureProgressCoords"][3]};
+            auto textureCoords = sf::IntRect(data["textureData"][0],
+                                             data["textureData"][1],
+                                             data["textureData"][2],
+                                             data["textureData"][3]);
+            auto textureProgData = TextureProgData{
+                .rect = sf::IntRect{data["textureProgData"][0],
+                                    data["textureProgData"][1],
+                                    data["textureProgData"][2],
+                                    data["textureProgData"][3]},
+                .collision = Collision{.x = data["textureProgData"][4], .y = data["textureProgData"][5]}};
+
             std::uint8_t textureID = data["textureID"];
 
             for (const auto &data2 : textures)
@@ -73,7 +88,7 @@ void InitWorld(std::vector<std::unique_ptr<World>> &world, const std::vector<std
             for (const auto &data1 : data["pos"])
             {
                 tileSprite.setPosition(data1[0], data1[1]);
-                world.push_back(std::make_unique<World>(tileSprite, collision, itemOutputID, textureProg));
+                world.push_back(std::make_unique<World>(tileSprite, collision, itemOutputID, textureProgData));
             }
         }
         file.close();
