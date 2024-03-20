@@ -50,7 +50,9 @@ public:
 private:
 };
 
-void InitSurface(std::vector<std::unique_ptr<Surface>> &surfaces, const Game &game);
+void InitSurface(std::vector<std::unique_ptr<Surface>> &surfaces,
+                 const Game &game,
+                 const std::vector<std::unique_ptr<Texture>> &textures);
 
 void DrawSurface(sf::RenderWindow &window,
                  const std::vector<std::unique_ptr<Surface>> &surfaces,

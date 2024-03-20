@@ -5,10 +5,7 @@
 
 using json = nlohmann::json;
 
-ItemCfg::ItemCfg(const sf::Texture *texture,
-                 const sf::IntRect &textureCoords,
-                 const std::uint16_t ID,
-                 const std::string name)
+ItemCfg::ItemCfg(sf::Texture *texture, const sf::IntRect textureCoords, const std::uint16_t ID, const std::string name)
     : m_texture(texture), m_textureCoords(textureCoords), m_ID(ID), m_name(name)
 {
 }
@@ -23,7 +20,7 @@ std::string ItemCfg::GetName() const
     return this->m_name;
 }
 
-const sf::Texture *ItemCfg::GetTexture() const
+sf::Texture *ItemCfg::GetTexture() const
 {
     return this->m_texture;
 }
@@ -54,7 +51,7 @@ sf::Sprite Item::GetSprite() const
     return this->m_sprite;
 }
 
-void InitItemCfg(std::vector<std::unique_ptr<ItemCfg>> &items)
+void InitItemCfg(std::vector<std::unique_ptr<ItemCfg>> &items, const std::vector<std::unique_ptr<Texture>> &textures)
 {
     std::ifstream file("./data/itemCfg.json");
 
@@ -66,20 +63,27 @@ void InitItemCfg(std::vector<std::unique_ptr<ItemCfg>> &items)
 
         for (const auto &data : jsonData)
         {
-            auto ID = data["id"];
-            auto name = data["name"];
-            auto texturePath = data["texture"];
+            std::uint8_t ID = data["id"];
+            std::string name = data["name"];
+            sf::Texture *texture;
+            std::uint8_t textureID = data["textureID"];
             auto textureCoords = sf::IntRect(data["textureCoords"][0],
                                              data["textureCoords"][1],
                                              data["textureCoords"][2],
                                              data["textureCoords"][3]);
 
-            auto texture = new sf::Texture();
-
-            texture->loadFromFile(texturePath);
+            for (const auto &data1 : textures)
+            {
+                auto texID = data1->GetID();
+                if (texID == textureID)
+                {
+                    texture = data1->GetTexture();
+                }
+            }
 
             items.push_back(std::make_unique<ItemCfg>(texture, textureCoords, ID, name));
         }
+        file.close();
     }
 }
 

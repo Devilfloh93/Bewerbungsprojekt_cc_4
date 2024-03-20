@@ -71,7 +71,7 @@
             ]
         ],
         "itemOutputID": 1,
-        "texture": "ressources/textures/Premium_TreesUpdated_No_Outline.png",
+        "textureID": 4,
         "textureCoords": [
             391,
             144,
@@ -117,7 +117,7 @@
             ]
         ],
         "itemOutputID": 2,
-        "texture": "ressources/textures/Premium_TreesUpdated_No_Outline.png",
+        "textureID": 4,
         "textureCoords": [
             454,
             12,
@@ -143,7 +143,7 @@
             ]
         ],
         "itemOutputID": 0,
-        "texture": "ressources/textures/Chests.png",
+        "textureID": 1,
         "textureCoords": [
             1,
             11,

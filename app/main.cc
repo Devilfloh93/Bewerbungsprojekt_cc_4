@@ -1,8 +1,10 @@
+#include "Font.h"
 #include "Game.h"
 #include "Gui.h"
 #include "Item.h"
 #include "Player.h"
 #include "Surface.h"
+#include "Texture.h"
 #include "World.h"
 #include <SFML/Graphics.hpp>
 #include <array>
@@ -44,30 +46,45 @@ int main()
 
     // Vector
     std::vector<std::unique_ptr<ItemCfg>> itemCfg;
-
     std::vector<std::unique_ptr<World>> world;
     std::vector<std::unique_ptr<Surface>> surfaces;
     std::vector<std::unique_ptr<Title>> titles;
     std::vector<std::unique_ptr<Button>> buttons;
     std::vector<std::unique_ptr<Item>> items;
+    std::vector<std::unique_ptr<Texture>> textures;
+    std::vector<std::unique_ptr<Font>> fonts;
+
+    // Texture Init
+    InitTexture(textures);
+    std::cout << "Texture Init Done!" << std::endl;
+
+    // Font Init
+    InitFont(fonts);
+    std::cout << "Font Init Done!" << std::endl;
 
     // Player Init
-    auto player = InitPlayer();
+    auto player = InitPlayer(textures);
+    std::cout << "Player Init Done!" << std::endl;
 
     // Menu Init
-    Menu::Init(game, titles, buttons);
+    Menu::Init(game, titles, buttons, textures, fonts);
+    std::cout << "Menu Init Done!" << std::endl;
 
     // Surface Init
-    InitSurface(surfaces, game);
+    InitSurface(surfaces, game, textures);
+    std::cout << "Surface Init Done!" << std::endl;
 
     // World Init
-    InitWorld(world);
+    InitWorld(world, textures);
+    std::cout << "World Init Done!" << std::endl;
 
     // Item Init
-    InitItemCfg(itemCfg);
+    InitItemCfg(itemCfg, textures);
+    std::cout << "Item Init Done!" << std::endl;
 
     // View Init
     game.InitView(view);
+    std::cout << "View Init Done!" << std::endl;
 
     while (window.isOpen())
     {

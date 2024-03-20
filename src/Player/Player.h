@@ -66,4 +66,4 @@ private:
     std::map<std::uint32_t, std::uint16_t> m_items;
 };
 
-Player InitPlayer();
+Player InitPlayer(const std::vector<std::unique_ptr<Texture>> &textures);

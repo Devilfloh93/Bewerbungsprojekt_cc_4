@@ -123,14 +123,10 @@ void Menu::SetTextBeforeIcon(const std::uint16_t x, const std::uint16_t y, sf::S
 
 void Menu::Init(const Game &game,
                 std::vector<std::unique_ptr<Title>> &titles,
-                std::vector<std::unique_ptr<Button>> &buttons)
+                std::vector<std::unique_ptr<Button>> &buttons,
+                const std::vector<std::unique_ptr<Texture>> &textures,
+                const std::vector<std::unique_ptr<Font>> &fonts)
 {
-    auto texture = new sf::Texture();
-    texture->loadFromFile("ressources/textures/Buttons_all_01.png");
-
-    auto font = new sf::Font();
-    font->loadFromFile("ressources/font/Round9x13.ttf");
-
     sf::Sprite prevBtn;
     auto width = game.GetWindowWidth();
 
@@ -159,13 +155,27 @@ void Menu::Init(const Game &game,
             sf::Sprite btn;
 
             bool firstButton = true;
-            auto state = data["state"];
+            MenuState state = data["state"];
+            std::uint8_t fontSize = data["fontSize"];
+            std::string text = data["name"];
+            std::uint8_t fontID = data["fontID"];
+            sf::Font *font;
+
+            for (const auto &data5 : fonts)
+            {
+                auto fonID = data5->GetID();
+                if (fonID == fontID)
+                {
+                    font = data5->GetFont();
+                }
+            }
+
             titleText.setFont(*font);
-            titleText.setCharacterSize(data["fontSize"]);
-            titleText.setString(static_cast<std::string>(data["name"]));
+            titleText.setCharacterSize(fontSize);
+            titleText.setString(text);
 
             SetTitlePos(width, titleText);
-            titles.push_back(std::make_unique<Title>(data["state"], titleText));
+            titles.push_back(std::make_unique<Title>(state, titleText));
 
             for (const auto &data1 : menuButtons)
             {
@@ -181,16 +191,44 @@ void Menu::Init(const Game &game,
 
                 if (addBtn)
                 {
+                    auto textureRect = sf::IntRect{data1["textureCoords"][0],
+                                                   data1["textureCoords"][1],
+                                                   data1["textureCoords"][2],
+                                                   data1["textureCoords"][3]};
+                    auto scale = sf::Vector2f{data1["scale"][0], data1["scale"][1]};
+                    text = data1["name"];
+                    fontSize = data1["fontSize"];
+                    std::vector<MenuState> state = data1["state"];
+                    BtnFunc btnFnc = data1["fnc"];
+                    std::uint8_t textureID = data1["textureID"];
+                    fontID = data1["fontID"];
+                    sf::Texture *texture;
+
+                    for (const auto &data3 : textures)
+                    {
+                        auto texID = data3->GetID();
+                        if (texID == textureID)
+                        {
+                            texture = data3->GetTexture();
+                        }
+                    }
+
+                    for (const auto &data4 : fonts)
+                    {
+                        auto fonID = data4->GetID();
+                        if (fonID == fontID)
+                        {
+                            font = data4->GetFont();
+                        }
+                    }
+
                     btn.setTexture(*texture);
-                    btn.setTextureRect({data1["textureCoords"][0],
-                                        data1["textureCoords"][1],
-                                        data1["textureCoords"][2],
-                                        data1["textureCoords"][3]});
-                    btn.setScale({data1["scale"][0], data1["scale"][1]});
+                    btn.setTextureRect(textureRect);
+                    btn.setScale(scale);
 
                     btnText.setFont(*font);
-                    btnText.setCharacterSize(data1["fontSize"]);
-                    btnText.setString(static_cast<std::string>(data1["name"]));
+                    btnText.setCharacterSize(fontSize);
+                    btnText.setString(text);
 
                     if (firstButton)
                         SetBtnAndTextPos(width, btn, titleText, btnText);
@@ -200,7 +238,7 @@ void Menu::Init(const Game &game,
                     prevBtn = btn;
                     firstButton = false;
 
-                    buttons.push_back(std::make_unique<Button>(data1["state"], data1["fnc"], btnText, btn));
+                    buttons.push_back(std::make_unique<Button>(state, btnFnc, btnText, btn));
                 }
             }
         }

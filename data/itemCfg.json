@@ -2,9 +2,7 @@
     {
         "id": 1,
         "name": "Black Wood",
-        "icon": "",
-        "iconCoords": [],
-        "texture": "ressources/textures/NatureLoot.png",
+        "textureID": 3,
         "textureCoords": [
             230,
             8,
@@ -15,9 +13,7 @@
     {
         "id": 2,
         "name": "White Wood",
-        "icon": "",
-        "iconCoords": [],
-        "texture": "ressources/textures/NatureLoot.png",
+        "textureID": 3,
         "textureCoords": [
             70,
             8,
