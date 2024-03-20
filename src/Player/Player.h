@@ -26,10 +26,13 @@ enum class PlayerMove
 class Player
 {
 public:
-    Player(sf::Sprite *sprite, const std::string name, const PlayerSurvivalStats survivalStats, const float baseSpeed);
+    Player(sf::Sprite *sprite,
+           const std::string_view name,
+           const PlayerSurvivalStats survivalStats,
+           const float baseSpeed);
     ~Player() = default;
 
-    std::string GetName() const;
+    std::string_view GetName() const;
     float GetHealth() const;
     float GetWater() const;
     float GetFood() const;

@@ -1,6 +1,18 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 
+struct Collision
+{
+    std::uint8_t x;
+    std::uint8_t y;
+};
+
+struct TextureProgData
+{
+    sf::IntRect rect;
+    Collision collision;
+};
+
 class Texture
 {
 

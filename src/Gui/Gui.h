@@ -26,7 +26,7 @@ class Title
 {
 
 public:
-    Title(const MenuState menuState, const sf::Text text);
+    Title(const MenuState menuState, const sf::Text &text);
     ~Title() = default;
 
     sf::Text GetText() const;

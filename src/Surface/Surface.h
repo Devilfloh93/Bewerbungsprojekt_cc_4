@@ -19,7 +19,7 @@ class Surface
 {
 
 public:
-    Surface(const sf::Sprite sprite, const float speed);
+    Surface(const sf::Sprite &sprite, const float speed);
     ~Surface() = default;
 
     sf::Sprite GetSprite() const;
@@ -34,7 +34,7 @@ class Water : public Surface
 {
 
 public:
-    Water(const sf::Sprite sprite, const float speed);
+    Water(const sf::Sprite &sprite, const float speed);
     ~Water() = default;
 
 private:
@@ -44,7 +44,7 @@ class Grass : public Surface
 {
 
 public:
-    Grass(const sf::Sprite sprite, const float speed);
+    Grass(const sf::Sprite &sprite, const float speed);
     ~Grass() = default;
 
 private:

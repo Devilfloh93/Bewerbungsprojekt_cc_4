@@ -4,7 +4,7 @@
 
 using json = nlohmann::json;
 
-Title::Title(const MenuState menuState, const sf::Text text) : m_menuState(menuState), m_text(text)
+Title::Title(const MenuState menuState, const sf::Text &text) : m_menuState(menuState), m_text(text)
 {
 }
 
