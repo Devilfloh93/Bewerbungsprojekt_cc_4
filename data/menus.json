@@ -3,21 +3,25 @@
         {
             "state": 1,
             "name": "Main Menu",
+            "fontID": 0,
             "fontSize": 40
         },
         {
             "state": 2,
             "name": "Paused",
+            "fontID": 0,
             "fontSize": 40
         },
         {
             "state": 3,
             "name": "Options",
+            "fontID": 0,
             "fontSize": 40
         },
         {
             "state": 4,
             "name": "Inventory",
+            "fontID": 0,
             "fontSize": 40
         }
     ],
@@ -27,8 +31,10 @@
                 1
             ],
             "name": "Play",
+            "fontID": 0,
             "fontSize": 20,
             "fnc": 1,
+            "textureID": 0,
             "textureCoords": [
                 191,
                 146,
@@ -46,8 +52,10 @@
                 4
             ],
             "name": "Resume",
+            "fontID": 0,
             "fontSize": 20,
             "fnc": 5,
+            "textureID": 0,
             "textureCoords": [
                 191,
                 146,
@@ -65,8 +73,10 @@
                 2
             ],
             "name": "Options",
+            "fontID": 0,
             "fontSize": 20,
             "fnc": 3,
+            "textureID": 0,
             "textureCoords": [
                 191,
                 146,
@@ -83,8 +93,10 @@
                 3
             ],
             "name": "Resolution",
+            "fontID": 0,
             "fontSize": 20,
             "fnc": 0,
+            "textureID": 0,
             "textureCoords": [
                 191,
                 146,
@@ -102,8 +114,10 @@
                 2
             ],
             "name": "Quit",
+            "fontID": 0,
             "fontSize": 20,
             "fnc": 2,
+            "textureID": 0,
             "textureCoords": [
                 191,
                 146,
@@ -120,8 +134,10 @@
                 3
             ],
             "name": "Back",
+            "fontID": 0,
             "fontSize": 20,
             "fnc": 4,
+            "textureID": 0,
             "textureCoords": [
                 191,
                 146,

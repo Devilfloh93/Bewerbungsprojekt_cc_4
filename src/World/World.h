@@ -1,4 +1,5 @@
 #pragma once
+#include "Texture.h"
 #include <SFML/Graphics.hpp>
 #include <cstdint>
 #include <memory>
@@ -32,6 +33,6 @@ private:
     sf::IntRect m_textureProg;
 };
 
-void InitWorld(std::vector<std::unique_ptr<World>> &world);
+void InitWorld(std::vector<std::unique_ptr<World>> &world, const std::vector<std::unique_ptr<Texture>> &textures);
 
 void DrawWorld(sf::RenderWindow &window, const std::vector<std::unique_ptr<World>> &world);

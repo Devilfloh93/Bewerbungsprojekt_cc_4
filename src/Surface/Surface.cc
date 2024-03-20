@@ -24,10 +24,19 @@ float Surface::GetSpeed() const
     return this->m_speed;
 }
 
-void InitSurface(std::vector<std::unique_ptr<Surface>> &surfaces, const Game &game)
+void InitSurface(std::vector<std::unique_ptr<Surface>> &surfaces,
+                 const Game &game,
+                 const std::vector<std::unique_ptr<Texture>> &textures)
 {
-    auto texture = new sf::Texture();
-    texture->loadFromFile("ressources/textures/TileSet_V2.png");
+    sf::Texture *texture;
+    for (const auto &data : textures)
+    {
+        auto texID = data->GetID();
+        if (texID == 5)
+        {
+            texture = data->GetTexture();
+        }
+    }
 
     const static SurfaceSpeed surfaceSpeed = {.grass = 1.5F, .water = 0.8F};
     auto maxTiles = game.GetMaxTiles();

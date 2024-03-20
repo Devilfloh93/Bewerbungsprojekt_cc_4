@@ -1,6 +1,8 @@
 #pragma once
+#include "Font.h"
 #include "Game.h"
 #include "Player.h"
+#include "Texture.h"
 #include "nlohmann/json.hpp"
 #include <SFML/Graphics.hpp>
 #include <array>
@@ -69,7 +71,11 @@ void SetTextBeforeIcon(const std::uint16_t x, const std::uint16_t y, sf::Sprite 
 
 void SetTextBeforeIcon(sf::Sprite &icon, sf::Text &text, sf::Sprite &prevIcon);
 
-void Init(const Game &game, std::vector<std::unique_ptr<Title>> &titles, std::vector<std::unique_ptr<Button>> &buttons);
+void Init(const Game &game,
+          std::vector<std::unique_ptr<Title>> &titles,
+          std::vector<std::unique_ptr<Button>> &buttons,
+          const std::vector<std::unique_ptr<Texture>> &textures,
+          const std::vector<std::unique_ptr<Font>> &fonts);
 
 void Draw(sf::RenderWindow &window,
           sf::View &view,

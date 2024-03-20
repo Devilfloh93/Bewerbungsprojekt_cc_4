@@ -422,12 +422,19 @@ void Player::UseItem(const std::vector<std::unique_ptr<World>> &world,
     }
 }
 
-Player InitPlayer()
+Player InitPlayer(const std::vector<std::unique_ptr<Texture>> &textures)
 {
     auto sprite = new sf::Sprite();
+    sf::Texture *texture;
 
-    auto texture = new sf::Texture();
-    texture->loadFromFile("ressources/textures/Human-Worker-Red.png");
+    for (const auto &data : textures)
+    {
+        auto texID = data->GetID();
+        if (texID == 2)
+        {
+            texture = data->GetTexture();
+        }
+    }
 
     sprite->setTexture(*texture);
     sprite->setTextureRect(sf::IntRect(8U, 8U, 16U, 16U));
