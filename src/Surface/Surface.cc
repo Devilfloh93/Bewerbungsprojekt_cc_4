@@ -1,16 +1,11 @@
 #include "Surface.h"
-
+#include "nlohmann/json.hpp"
+#include <fstream>
 #include <random>
 
+using json = nlohmann::json;
+
 Surface::Surface(const sf::Sprite &sprite, const float speed) : m_sprite(sprite), m_speed(speed)
-{
-}
-
-Grass::Grass(const sf::Sprite &sprite, const float speed) : Surface(sprite, speed)
-{
-}
-
-Water::Water(const sf::Sprite &sprite, const float speed) : Surface(sprite, speed)
 {
 }
 
@@ -28,17 +23,6 @@ void InitSurface(std::vector<std::unique_ptr<Surface>> &surfaces,
                  const Game &game,
                  const std::vector<std::unique_ptr<Texture>> &textures)
 {
-    sf::Texture *texture;
-    for (const auto &data : textures)
-    {
-        auto texID = data->GetID();
-        if (texID == 5)
-        {
-            texture = data->GetTexture();
-        }
-    }
-
-    const static SurfaceSpeed surfaceSpeed = {.grass = 1.5F, .water = 0.8F};
     auto maxTiles = game.GetMaxTiles();
     auto tileSize = game.GetTileSize();
     auto width = game.GetGameWidth();
@@ -48,94 +32,110 @@ void InitSurface(std::vector<std::unique_ptr<Surface>> &surfaces,
     std::mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
 
     // Random Grass Texture Selector
-    std::uniform_int_distribution<> dist(0U, 2U);
+    std::uniform_int_distribution<> dist(0U, 3U);
 
     size_t j = 0;
     size_t k = 0;
-    sf::Sprite tileSprite;
 
-    for (size_t i = 0; i < maxTiles; ++i)
+    std::ifstream file("./data/surfaceCfg.json");
+
+    if (file.is_open())
     {
-        auto surfaceType = SurfaceType::Grass;
-        if (j * tileSize >= width)
-        {
-            j = 0;
-            ++k;
-        }
+        auto jsonData = json::parse(file);
 
-        tileSprite.setTexture(*texture);
+        for (size_t i = 0; i < maxTiles; ++i)
+        {
+            sf::Sprite tileSprite;
+            sf::Texture *texture;
+            std::uint8_t id;
+            std::uint8_t textureID;
+            sf::IntRect textureData;
+            float speed;
+            auto rnd = dist(gen);
+            bool canCreate = false;
 
-        if (j == 0 && k == 0 || (j * tileSize == (width - tileSize) && k == 0) ||
-            (k * tileSize == (height - tileSize) && j == 0) ||
-            (j * tileSize == (width - tileSize) && k * tileSize == (height - tileSize)))
-        {
-            // FULL WATER
-            tileSprite.setTextureRect(sf::IntRect(0U, 416U, tileSize, tileSize));
-            surfaceType = SurfaceType::Water;
-        }
-        else if (j == 0)
-        {
-            // LEFT WATER
-            tileSprite.setTextureRect(sf::IntRect(0U, 320U, tileSize, tileSize));
-            surfaceType = SurfaceType::Water;
-        }
-        else if (j * tileSize == (width - tileSize))
-        {
-            // RIGHT WATER
-            tileSprite.setTextureRect(sf::IntRect(0U, 288U, tileSize, tileSize));
-            surfaceType = SurfaceType::Water;
-        }
-        else if (k == 0)
-        {
-            // TOP WATER
-            tileSprite.setTextureRect(sf::IntRect(183U, 320U, tileSize, tileSize));
-            surfaceType = SurfaceType::Water;
-        }
-        else if (k * tileSize == (height - tileSize))
-        {
-            // BOT WATER
-            tileSprite.setTextureRect(sf::IntRect(128U, 288U, tileSize, tileSize));
-            surfaceType = SurfaceType::Water;
-        }
-        else
-        {
-            switch (dist(gen))
+            if (j * tileSize >= width)
             {
-            case 0:
-                tileSprite.setTextureRect(sf::IntRect(0U, 192U, tileSize, tileSize));
-                break;
-            case 1:
-                tileSprite.setTextureRect(sf::IntRect(30U, 192U, tileSize, tileSize));
-                break;
-            case 2:
-                tileSprite.setTextureRect(sf::IntRect(63U, 192U, tileSize, tileSize));
-                break;
-            case 3:
-                tileSprite.setTextureRect(sf::IntRect(96U, 192U, tileSize, tileSize));
-                break;
-
-            default:
-                break;
+                j = 0;
+                ++k;
             }
-            surfaceType = SurfaceType::Grass;
+
+            for (const auto &data : jsonData)
+            {
+                id = data["id"];
+                textureID = data["textureID"];
+                textureData = sf::IntRect(data["textureData"][0], data["textureData"][1], tileSize, tileSize);
+                speed = data["speed"];
+
+                for (const auto &data1 : textures)
+                {
+                    auto texID = data1->GetID();
+                    if (texID == textureID)
+                    {
+                        texture = data1->GetTexture();
+                    }
+                }
+
+                if (id == 0 && j == 0 && k == 0 || (j * tileSize == (width - tileSize) && k == 0) ||
+                    (k * tileSize == (height - tileSize) && j == 0) ||
+                    (j * tileSize == (width - tileSize) && k * tileSize == (height - tileSize)))
+                {
+                    // FULL WATER
+                    canCreate = true;
+                }
+                else if (id == 1 && j == 0)
+                {
+                    // LEFT WATER
+                    canCreate = true;
+                }
+                else if (id == 2 && j * tileSize == (width - tileSize))
+                {
+                    // RIGHT WATER
+                    canCreate = true;
+                }
+                else if (id == 3 && k == 0)
+                {
+                    // TOP WATER
+                    canCreate = true;
+                }
+                else if (id == 4 && k * tileSize == (height - tileSize))
+                {
+                    // BOT WATER
+                    canCreate = true;
+                }
+                else if (id == 5 && rnd == 0)
+                {
+                    // RND GRASS
+                    canCreate = true;
+                }
+                else if (id == 6 && rnd == 1)
+                {
+                    // RND GRASS
+                    canCreate = true;
+                }
+                else if (id == 7 && rnd == 2)
+                {
+                    // RND GRASS
+                    canCreate = true;
+                }
+                else if (id == 8 && rnd == 3)
+                {
+                    // RND GRASS
+                    canCreate = true;
+                }
+
+                if (canCreate)
+                {
+                    tileSprite.setTextureRect(textureData);
+                    tileSprite.setTexture(*texture);
+                    tileSprite.setPosition(j * tileSize, k * tileSize);
+                    surfaces.push_back(std::make_unique<Surface>(tileSprite, speed));
+                    ++j;
+                    break;
+                }
+            }
         }
-
-        tileSprite.setPosition(j * tileSize, k * tileSize);
-
-        switch (surfaceType)
-        {
-        case SurfaceType::Grass:
-            surfaces.push_back(std::make_unique<Grass>(tileSprite, surfaceSpeed.grass));
-            break;
-        case SurfaceType::Water:
-            surfaces.push_back(std::make_unique<Water>(tileSprite, surfaceSpeed.water));
-            break;
-
-        default:
-            break;
-        }
-
-        ++j;
+        file.close();
     }
 }
 

@@ -6,11 +6,11 @@
 using json = nlohmann::json;
 
 ItemCfg::ItemCfg(sf::Texture *texture,
-                 const sf::IntRect textureCoords,
+                 const sf::IntRect textureData,
                  const std::uint8_t ID,
                  const std::string_view name,
                  const std::uint8_t maxDrop)
-    : m_texture(texture), m_textureCoords(textureCoords), m_ID(ID), m_name(name), m_maxDrop(maxDrop)
+    : m_texture(texture), m_textureData(textureData), m_ID(ID), m_name(name), m_maxDrop(maxDrop)
 {
 }
 
@@ -29,9 +29,9 @@ sf::Texture *ItemCfg::GetTexture() const
     return this->m_texture;
 }
 
-sf::IntRect ItemCfg::GetTextureCoords() const
+sf::IntRect ItemCfg::GetTextureData() const
 {
-    return this->m_textureCoords;
+    return this->m_textureData;
 }
 
 std::uint8_t ItemCfg::GetMaxDrop() const
@@ -77,10 +77,10 @@ void InitItemCfg(std::vector<std::unique_ptr<ItemCfg>> &items, const std::vector
             std::uint8_t maxDrop = data["maxDrop"];
             sf::Texture *texture;
             std::uint8_t textureID = data["textureID"];
-            auto textureCoords = sf::IntRect(data["textureCoords"][0],
-                                             data["textureCoords"][1],
-                                             data["textureCoords"][2],
-                                             data["textureCoords"][3]);
+            auto textureData = sf::IntRect(data["textureData"][0],
+                                           data["textureData"][1],
+                                           data["textureData"][2],
+                                           data["textureData"][3]);
 
             for (const auto &data1 : textures)
             {
@@ -91,7 +91,7 @@ void InitItemCfg(std::vector<std::unique_ptr<ItemCfg>> &items, const std::vector
                 }
             }
 
-            items.push_back(std::make_unique<ItemCfg>(texture, textureCoords, ID, name, maxDrop));
+            items.push_back(std::make_unique<ItemCfg>(texture, textureData, ID, name, maxDrop));
         }
         file.close();
     }

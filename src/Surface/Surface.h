@@ -30,26 +30,6 @@ private:
     float m_speed;
 };
 
-class Water : public Surface
-{
-
-public:
-    Water(const sf::Sprite &sprite, const float speed);
-    ~Water() = default;
-
-private:
-};
-
-class Grass : public Surface
-{
-
-public:
-    Grass(const sf::Sprite &sprite, const float speed);
-    ~Grass() = default;
-
-private:
-};
-
 void InitSurface(std::vector<std::unique_ptr<Surface>> &surfaces,
                  const Game &game,
                  const std::vector<std::unique_ptr<Texture>> &textures);

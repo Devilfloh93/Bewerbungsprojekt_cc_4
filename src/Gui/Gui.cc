@@ -191,10 +191,10 @@ void Menu::Init(const Game &game,
 
                 if (addBtn)
                 {
-                    auto textureRect = sf::IntRect{data1["textureCoords"][0],
-                                                   data1["textureCoords"][1],
-                                                   data1["textureCoords"][2],
-                                                   data1["textureCoords"][3]};
+                    auto textureRect = sf::IntRect{data1["textureData"][0],
+                                                   data1["textureData"][1],
+                                                   data1["textureData"][2],
+                                                   data1["textureData"][3]};
                     auto scale = sf::Vector2f{data1["scale"][0], data1["scale"][1]};
                     text = data1["name"];
                     fontSize = data1["fontSize"];
