@@ -1,6 +1,4 @@
 #pragma once
-#include "Game.h"
-#include "Player.h"
 #include <SFML/Graphics.hpp>
 
 struct SurfaceSpeed
@@ -29,12 +27,3 @@ private:
     sf::Sprite m_sprite;
     float m_speed;
 };
-
-void InitSurface(std::vector<std::unique_ptr<Surface>> &surfaces,
-                 const Game &game,
-                 const std::vector<std::unique_ptr<Texture>> &textures);
-
-void DrawSurface(sf::RenderWindow &window,
-                 const std::vector<std::unique_ptr<Surface>> &surfaces,
-                 Player &player,
-                 const Game &game);

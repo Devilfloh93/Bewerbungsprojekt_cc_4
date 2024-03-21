@@ -1,17 +1,8 @@
-#include "Font.h"
+
 #include "Game.h"
-#include "Gui.h"
-#include "Item.h"
-#include "Player.h"
-#include "Surface.h"
-#include "Texture.h"
-#include "World.h"
 #include <SFML/Graphics.hpp>
-#include <array>
 #include <cstdint>
 #include <iostream>
-#include <memory>
-#include <vector>
 
 int main()
 {
@@ -22,17 +13,6 @@ int main()
 
     // Init Game
     auto game = Game(windowWidth, windowHeight);
-    auto gameWidth = game.GetGameWidth();
-    auto gameHeight = game.GetGameHeight();
-
-    //Init Views
-    auto defaultCenter = sf::Vector2f(windowWidth / 2U, windowHeight / 2U);
-
-    sf::View menuView;
-    menuView.setSize(sf::Vector2f(windowWidth, windowHeight));
-    menuView.setCenter(defaultCenter);
-
-    auto view = sf::View(defaultCenter, sf::Vector2f(windowWidth, windowHeight));
 
     // Init Window
     sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), "Good Game",
@@ -44,47 +24,38 @@ int main()
     // Clocks
     sf::Clock clock;
 
-    // Vector
-    std::vector<std::unique_ptr<ItemCfg>> itemCfg;
-    std::vector<std::unique_ptr<World>> world;
-    std::vector<std::unique_ptr<Surface>> surfaces;
-    std::vector<std::unique_ptr<Title>> titles;
-    std::vector<std::unique_ptr<Button>> buttons;
-    std::vector<std::unique_ptr<Item>> items;
-    std::vector<std::unique_ptr<Texture>> textures;
-    std::vector<std::unique_ptr<Font>> fonts;
+    // View Init
+    game.InitViews();
+    std::cout << "View Init Done!" << std::endl;
 
     // Texture Init
-    InitTexture(textures);
+    game.InitTexture();
     std::cout << "Texture Init Done!" << std::endl;
 
     // Font Init
-    InitFont(fonts);
+    game.InitFont();
     std::cout << "Font Init Done!" << std::endl;
 
     // Player Init
-    auto player = InitPlayer(textures);
+    auto player = game.InitPlayer();
     std::cout << "Player Init Done!" << std::endl;
 
     // Menu Init
-    Menu::Init(game, titles, buttons, textures, fonts);
+    game.InitMenu();
     std::cout << "Menu Init Done!" << std::endl;
 
     // Surface Init
-    InitSurface(surfaces, game, textures);
+    game.InitSurface();
     std::cout << "Surface Init Done!" << std::endl;
 
     // World Init
-    InitWorld(world, textures);
+    game.InitWorld();
     std::cout << "World Init Done!" << std::endl;
 
     // Item Init
-    InitItemCfg(itemCfg, textures);
+    game.InitItemCfg();
     std::cout << "Item Init Done!" << std::endl;
 
-    // View Init
-    game.InitView(view);
-    std::cout << "View Init Done!" << std::endl;
 
     while (window.isOpen())
     {
@@ -100,9 +71,9 @@ int main()
                 break;
             case sf::Event::MouseButtonPressed:
                 if (state != MenuState::Playing)
-                    breakLoop = Menu::HandleBtnClicked(window, buttons, state, game);
+                    breakLoop = game.HandleBtnClicked(window);
                 else if (game.GetPlaying() && state == MenuState::Playing)
-                    game.HandleViewPosition(window, view);
+                    game.HandleViewPosition(window);
                 break;
             case sf::Event::KeyPressed:
                 if (game.GetPlaying())
@@ -133,7 +104,7 @@ int main()
                             player.SetMove(PlayerMove::Down);
                             break;
                         case sf::Keyboard::Key::P:
-                            player.UseItem(world, itemCfg, items);
+                            player.UseItem(game);
                             break;
                         default:
                             break;
@@ -196,20 +167,18 @@ int main()
                     {
                         if (game.GetZoom() < game.GetMaxZoom())
                         {
-                            view.zoom(0.5F);
-                            game.SetZoom(1U);
+                            game.SetZoom(1U, 0.5F);
                         }
                     }
                     else
                     {
                         if (game.GetZoom() > 0U)
                         {
-                            view.zoom(2.0F);
-                            game.SetZoom(-1);
+                            game.SetZoom(1U, 2.0F);
                         }
                     }
 
-                    game.UpdateView(view);
+                    game.UpdateView();
                 }
                 break;
             default:
@@ -225,30 +194,30 @@ int main()
 
         if (game.GetPlaying() && menuState == MenuState::Playing)
         {
-            window.setView(view);
+            window.setView(game.GetView());
 
-            DrawSurface(window, surfaces, player, game);
+            game.DrawSurface(window, player);
 
-            player.HandleMove(clock, game, world, items);
+            player.HandleMove(clock, game);
 
-            DrawItems(window, items);
+            game.DrawItems(window);
             window.draw(*(player.GetSprite()));
-            DrawWorld(window, world);
+            game.DrawWorld(window);
         }
 
         switch (menuState)
         {
         case MenuState::Pause:
-            Menu::Draw(window, menuView, titles, buttons, menuState);
+            game.DrawMenu(window);
             break;
         case MenuState::Options:
-            Menu::Draw(window, menuView, titles, buttons, menuState);
+            game.DrawMenu(window);
             break;
         case MenuState::Main:
-            Menu::Draw(window, menuView, titles, buttons, menuState);
+            game.DrawMenu(window);
             break;
         case MenuState::Inventory:
-            Menu::Draw(window, menuView, titles, buttons, menuState, player, itemCfg);
+            game.DrawMenu(window, player);
             break;
 
         default:
