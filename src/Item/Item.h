@@ -51,5 +51,3 @@ private:
 };
 
 void InitItemCfg(std::vector<std::unique_ptr<ItemCfg>> &items, const std::vector<std::unique_ptr<Texture>> &textures);
-
-void DrawItems(sf::RenderWindow &window, const std::vector<std::unique_ptr<Item>> &items);

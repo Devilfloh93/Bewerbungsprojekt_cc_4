@@ -27,5 +27,3 @@ private:
     std::uint8_t m_ID;
     sf::Texture *m_texture;
 };
-
-void InitTexture(std::vector<std::unique_ptr<Texture>> &textures);

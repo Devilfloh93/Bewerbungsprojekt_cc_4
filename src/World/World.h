@@ -2,7 +2,6 @@
 #include "Texture.h"
 #include <SFML/Graphics.hpp>
 #include <cstdint>
-#include <memory>
 
 class World
 {
@@ -30,7 +29,3 @@ private:
     TextureProgData m_textureProgData;
     bool m_useable;
 };
-
-void InitWorld(std::vector<std::unique_ptr<World>> &world, const std::vector<std::unique_ptr<Texture>> &textures);
-
-void DrawWorld(sf::RenderWindow &window, const std::vector<std::unique_ptr<World>> &world);
