@@ -11,14 +11,14 @@ class ItemCfg
 
 public:
     ItemCfg(sf::Texture *texture,
-            const sf::IntRect textureCoords,
+            const sf::IntRect textureData,
             const std::uint8_t ID,
             const std::string_view name,
             const std::uint8_t maxDrop);
     ~ItemCfg() = default;
 
     sf::Texture *GetTexture() const;
-    sf::IntRect GetTextureCoords() const;
+    sf::IntRect GetTextureData() const;
 
     std::uint8_t GetID() const;
     std::string GetName() const;
@@ -26,7 +26,7 @@ public:
 
 private:
     sf::Texture *m_texture;
-    sf::IntRect m_textureCoords;
+    sf::IntRect m_textureData;
     std::uint16_t m_ID;
     std::string m_name;
     std::uint8_t m_maxDrop;

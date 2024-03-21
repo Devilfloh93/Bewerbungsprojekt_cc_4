@@ -4,7 +4,7 @@
         "name": "Black Wood",
         "maxDrop": 3,
         "textureID": 3,
-        "textureCoords": [
+        "textureData": [
             230,
             8,
             19,
@@ -16,7 +16,7 @@
         "name": "White Wood",
         "maxDrop": 2,
         "textureID": 3,
-        "textureCoords": [
+        "textureData": [
             70,
             8,
             19,

@@ -89,7 +89,7 @@ void Player::DrawInventoryItems(sf::RenderWindow &window, const std::vector<std:
         for (const auto &data : itemCfg)
         {
             auto texture = data->GetTexture();
-            auto textureCoords = data->GetTextureCoords();
+            auto textureData = data->GetTextureData();
             auto ID = data->GetID();
             if (key == ID)
             {
@@ -98,7 +98,7 @@ void Player::DrawInventoryItems(sf::RenderWindow &window, const std::vector<std:
                 itemText.setString(std::format("{}", value));
 
                 itemSprite.setTexture(*texture);
-                itemSprite.setTextureRect(textureCoords);
+                itemSprite.setTextureRect(textureData);
 
                 if (firstIcon)
                 {
@@ -157,7 +157,6 @@ void Player::HandleMove(sf::Clock &clock,
 
         if (objCollision.x != 0 && objCollision.y != 0)
         {
-
             if (playerPos.x >= objPos.x && playerPos.x <= objPos.x + objCollision.x &&
                 playerPos.y - speed <= objPos.y + objSize.y && playerPos.y >= objPos.y + objCollision.y)
                 canMoveUP = false;
@@ -331,74 +330,82 @@ void Player::UseItem(const std::vector<std::unique_ptr<World>> &world,
         auto objPos = objSprite.getPosition();
         auto objCollision = data->GetCollision();
         auto objSize = objSprite.getLocalBounds().getSize();
+        auto useable = data->GetUseable();
         itemOutputID = data->GetItemOutputID();
 
-        if (objCollision.x != 0U && objCollision.y != 0U)
+        if (useable)
         {
-            if (playerPos.x >= objPos.x && playerPos.x <= objPos.x + objCollision.x &&
-                playerPos.y - speed <= objPos.y + objSize.y && playerPos.y >= objPos.y + objCollision.y)
+            /**
+            * TODO: Check Range to Object / Rework Object Collision
+            */
+            if (objCollision.x != 0U && objCollision.y != 0U)
             {
-                itemPos = {playerPos.x, playerPos.y + 20};
-                useItem = true;
+                if (playerPos.x >= objPos.x && playerPos.x <= objPos.x + objCollision.x &&
+                    playerPos.y - speed <= objPos.y + objSize.y && playerPos.y >= objPos.y + objCollision.y)
+                {
+                    itemPos = {playerPos.x, playerPos.y + 20};
+                    useItem = true;
+                }
+
+                if (playerPos.x >= objPos.x && playerPos.x <= objPos.x + objCollision.x &&
+                    playerPos.y <= objPos.y + objCollision.y && playerPos.y + speed >= objPos.y + objCollision.y)
+                {
+                    itemPos = {playerPos.x, playerPos.y - 20};
+                    useItem = true;
+                }
+
+                if (playerPos.x >= objPos.x && playerPos.x - speed <= objPos.x + objCollision.x &&
+                    playerPos.y <= objPos.y + objSize.y && playerPos.y >= objPos.y + objCollision.y)
+                {
+                    itemPos = {playerPos.x + 20, playerPos.y};
+                    useItem = true;
+                }
+
+                if (playerPos.x + speed >= objPos.x && playerPos.x <= objPos.x && playerPos.y <= objPos.y + objSize.y &&
+                    playerPos.y >= objPos.y + objCollision.y)
+                {
+                    itemPos = {playerPos.x - 20, playerPos.y};
+                    useItem = true;
+                }
+            }
+            else
+            {
+                if ((playerPos.x + playerSize.x) >= objPos.x && playerPos.x <= objPos.x + objSize.x &&
+                    playerPos.y - speed <= objPos.y + objSize.y && playerPos.y + playerSize.y >= objPos.y)
+                {
+                    itemPos = {playerPos.x, playerPos.y + 20};
+                    useItem = true;
+                }
+
+                if ((playerPos.x + playerSize.x) >= objPos.x && playerPos.x <= objPos.x + objSize.x &&
+                    playerPos.y <= objPos.y + objSize.y && (playerPos.y + playerSize.y) + speed >= objPos.y)
+                {
+                    itemPos = {playerPos.x, playerPos.y - 20};
+                    useItem = true;
+                }
+
+                if (playerPos.x >= objPos.x && playerPos.x - speed <= objPos.x + objSize.x &&
+                    playerPos.y <= objPos.y + objSize.y && playerPos.y + playerSize.y >= objPos.y)
+                {
+                    itemPos = {playerPos.x + 20, playerPos.y};
+                    useItem = true;
+                }
+
+                if ((playerPos.x + playerSize.x) + speed >= objPos.x && playerPos.x <= objPos.x &&
+                    playerPos.y <= objPos.y + objSize.y && playerPos.y + playerSize.y >= objPos.y)
+                {
+                    itemPos = {playerPos.x - 20, playerPos.y};
+                    useItem = true;
+                }
             }
 
-            if (playerPos.x >= objPos.x && playerPos.x <= objPos.x + objCollision.x &&
-                playerPos.y <= objPos.y + objCollision.y && playerPos.y + speed >= objPos.y + objCollision.y)
+            if (useItem)
             {
-                itemPos = {playerPos.x, playerPos.y - 20};
-                useItem = true;
+                data->UpdatePosition();
+                data->UpdateTextureRect();
+                data->SetUseable(false);
+                break;
             }
-
-            if (playerPos.x >= objPos.x && playerPos.x - speed <= objPos.x + objCollision.x &&
-                playerPos.y <= objPos.y + objSize.y && playerPos.y >= objPos.y + objCollision.y)
-            {
-                itemPos = {playerPos.x + 20, playerPos.y};
-                useItem = true;
-            }
-
-            if (playerPos.x + speed >= objPos.x && playerPos.x <= objPos.x && playerPos.y <= objPos.y + objSize.y &&
-                playerPos.y >= objPos.y + objCollision.y)
-            {
-                itemPos = {playerPos.x - 20, playerPos.y};
-                useItem = true;
-            }
-        }
-        else
-        {
-            if ((playerPos.x + playerSize.x) >= objPos.x && playerPos.x <= objPos.x + objSize.x &&
-                playerPos.y - speed <= objPos.y + objSize.y && playerPos.y + playerSize.y >= objPos.y)
-            {
-                itemPos = {playerPos.x, playerPos.y + 20};
-                useItem = true;
-            }
-
-            if ((playerPos.x + playerSize.x) >= objPos.x && playerPos.x <= objPos.x + objSize.x &&
-                playerPos.y <= objPos.y + objSize.y && (playerPos.y + playerSize.y) + speed >= objPos.y)
-            {
-                itemPos = {playerPos.x, playerPos.y - 20};
-                useItem = true;
-            }
-
-            if (playerPos.x >= objPos.x && playerPos.x - speed <= objPos.x + objSize.x &&
-                playerPos.y <= objPos.y + objSize.y && playerPos.y + playerSize.y >= objPos.y)
-            {
-                itemPos = {playerPos.x + 20, playerPos.y};
-                useItem = true;
-            }
-
-            if ((playerPos.x + playerSize.x) + speed >= objPos.x && playerPos.x <= objPos.x &&
-                playerPos.y <= objPos.y + objSize.y && playerPos.y + playerSize.y >= objPos.y)
-            {
-                itemPos = {playerPos.x - 20, playerPos.y};
-                useItem = true;
-            }
-        }
-
-        if (useItem)
-        {
-            data->UpdatePosition();
-            data->UpdateTextureRect();
-            break;
         }
     }
 
@@ -411,7 +418,7 @@ void Player::UseItem(const std::vector<std::unique_ptr<World>> &world,
         {
             sf::Sprite itemSprite;
             auto texture = data->GetTexture();
-            auto textureCoords = data->GetTextureCoords();
+            auto textureData = data->GetTextureData();
             auto itemID = data->GetID();
             auto maxDrop = data->GetMaxDrop();
 
@@ -421,7 +428,7 @@ void Player::UseItem(const std::vector<std::unique_ptr<World>> &world,
             if (itemOutputID == itemID)
             {
                 itemSprite.setTexture(*texture);
-                itemSprite.setTextureRect(textureCoords);
+                itemSprite.setTextureRect(textureData);
                 itemSprite.setPosition(itemPos.x, itemPos.y);
                 items.push_back(std::make_unique<Item>(itemSprite, itemID, dist(gen)));
                 break;

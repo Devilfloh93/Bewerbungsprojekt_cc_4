@@ -2,11 +2,82 @@
     {
         "id": 0,
         "textureID": 5,
-        "textureCoords": [
-            391,
-            144,
-            48,
-            65
+        "speed": 0.8,
+        "textureData": [
+            0,
+            416
+        ]
+    },
+    {
+        "id": 1,
+        "textureID": 5,
+        "speed": 0.8,
+        "textureData": [
+            0,
+            320
+        ]
+    },
+    {
+        "id": 2,
+        "textureID": 5,
+        "speed": 0.8,
+        "textureData": [
+            0,
+            288
+        ]
+    },
+    {
+        "id": 3,
+        "textureID": 5,
+        "speed": 0.8,
+        "textureData": [
+            183,
+            320
+        ]
+    },
+    {
+        "id": 4,
+        "textureID": 5,
+        "speed": 0.8,
+        "textureData": [
+            128,
+            288
+        ]
+    },
+    {
+        "id": 5,
+        "textureID": 5,
+        "speed": 1.5,
+        "textureData": [
+            0,
+            192
+        ]
+    },
+    {
+        "id": 6,
+        "textureID": 5,
+        "speed": 1.5,
+        "textureData": [
+            30,
+            192
+        ]
+    },
+    {
+        "id": 7,
+        "textureID": 5,
+        "speed": 1.5,
+        "textureData": [
+            63,
+            192
+        ]
+    },
+    {
+        "id": 8,
+        "textureID": 5,
+        "speed": 1.5,
+        "textureData": [
+            96,
+            192
         ]
     }
 ]
