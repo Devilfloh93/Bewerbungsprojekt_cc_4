@@ -45,11 +45,11 @@ public:
     void SetMove(const PlayerMove move);
     void SetSpeed(const float speed);
 
-    void HandleMove(sf::Clock &clock, const Game &game);
+    void HandleMove(sf::Clock &clock, Game &game);
 
-    void UseItem(const Game &game);
+    void UseItem(Game &game);
 
-    void DrawInventoryItems(sf::RenderWindow &window, const std::vector<ItemCfg> &itemCfg);
+    void DrawInventoryItems(sf::RenderWindow &window, const std::vector<ItemCfg *> &itemCfg);
 
 private:
     sf::Sprite *m_sprite;

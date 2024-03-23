@@ -1,6 +1,7 @@
 #include "Game.h"
 #include "nlohmann/json.hpp"
 #include <fstream>
+#include <iostream>
 #include <random>
 
 using json = nlohmann::json;
@@ -98,19 +99,33 @@ std::uint16_t Game::GetGameHeight() const
     return m_gameHeight;
 }
 
-std::vector<World> Game::GetWorld() const
+std::vector<World *> Game::GetWorld() const
 {
     return m_world;
 }
 
-std::vector<ItemCfg> Game::GetItemCfg() const
+std::vector<ItemCfg *> Game::GetItemCfg() const
 {
     return m_itemCfg;
 }
 
-std::vector<Item> Game::GetItem() const
+std::vector<Item *> Game::GetItem() const
 {
     return m_items;
+}
+
+void Game::SetItems(Item *item)
+{
+    m_items.push_back(item);
+}
+
+void Game::RemoveItems(const size_t i)
+{
+    auto item = m_items.begin() + i;
+
+    delete *item;
+    *item = nullptr;
+    m_items.erase(item);
 }
 
 void Game::SetWindowHeight(const std::uint16_t height)
@@ -238,15 +253,15 @@ void Game::InitItemCfg()
 
             for (const auto &data1 : m_textures)
             {
-                auto texID = data1.GetID();
+                auto texID = data1->GetID();
                 if (texID == textureID)
                 {
-                    texture = data1.GetTexture();
+                    texture = data1->GetTexture();
                 }
             }
 
             auto itemCfg = new ItemCfg(texture, textureData, ID, name, maxDrop);
-            m_itemCfg.push_back(*itemCfg);
+            m_itemCfg.push_back(itemCfg);
         }
         file.close();
     }
@@ -254,11 +269,11 @@ void Game::InitItemCfg()
 
 void Game::DrawItems(sf::RenderWindow &window)
 {
-    for (auto &data : m_items)
+    for (const auto &data : m_items)
     {
-        auto tileSprite = data.GetSprite();
+        auto sprite = data->GetSprite();
 
-        window.draw(tileSprite);
+        window.draw(sprite);
     }
 }
 
@@ -280,7 +295,7 @@ void Game::InitTexture()
             texture->loadFromFile(path);
 
             auto textures = new Texture(ID, texture);
-            m_textures.push_back(*textures);
+            m_textures.push_back(textures);
         }
         file.close();
     }
@@ -303,7 +318,7 @@ void Game::InitFont()
             font->loadFromFile(path);
 
             auto fonts = new Font(ID, font);
-            m_fonts.push_back(*fonts);
+            m_fonts.push_back(fonts);
         }
         file.close();
     }
@@ -316,10 +331,10 @@ Player Game::InitPlayer()
 
     for (const auto &data : m_textures)
     {
-        auto texID = data.GetID();
+        auto texID = data->GetID();
         if (texID == 2)
         {
-            texture = data.GetTexture();
+            texture = data->GetTexture();
         }
     }
 
@@ -368,10 +383,10 @@ void Game::InitMenu()
 
             for (const auto &data5 : m_fonts)
             {
-                auto fonID = data5.GetID();
+                auto fonID = data5->GetID();
                 if (fonID == fontID)
                 {
-                    font = data5.GetFont();
+                    font = data5->GetFont();
                 }
             }
 
@@ -382,7 +397,7 @@ void Game::InitMenu()
             Menu::SetTitlePos(m_windowWidth, titleText);
 
             auto titles = new Title(state, titleText);
-            m_titles.push_back(*titles);
+            m_titles.push_back(titles);
 
             for (const auto &data1 : menuButtons)
             {
@@ -413,19 +428,19 @@ void Game::InitMenu()
 
                     for (const auto &data3 : m_textures)
                     {
-                        auto texID = data3.GetID();
+                        auto texID = data3->GetID();
                         if (texID == textureID)
                         {
-                            texture = data3.GetTexture();
+                            texture = data3->GetTexture();
                         }
                     }
 
                     for (const auto &data4 : m_fonts)
                     {
-                        auto fonID = data4.GetID();
+                        auto fonID = data4->GetID();
                         if (fonID == fontID)
                         {
-                            font = data4.GetFont();
+                            font = data4->GetFont();
                         }
                     }
 
@@ -446,7 +461,7 @@ void Game::InitMenu()
                     firstButton = false;
 
                     auto buttons = new Button(state, btnFnc, btnText, btn);
-                    m_buttons.push_back(*buttons);
+                    m_buttons.push_back(buttons);
                 }
             }
         }
@@ -501,10 +516,10 @@ void Game::InitSurface()
 
                 for (const auto &data1 : m_textures)
                 {
-                    auto texID = data1.GetID();
+                    auto texID = data1->GetID();
                     if (texID == textureID)
                     {
-                        texture = data1.GetTexture();
+                        texture = data1->GetTexture();
                     }
                 }
 
@@ -563,7 +578,7 @@ void Game::InitSurface()
                     tileSprite.setPosition(j * m_tileSize, k * m_tileSize);
 
                     auto surfaces = new Surface(tileSprite, speed);
-                    m_surfaces.push_back(*surfaces);
+                    m_surfaces.push_back(surfaces);
                     ++j;
                     break;
                 }
@@ -604,10 +619,10 @@ void Game::InitWorld()
 
             for (const auto &data2 : m_textures)
             {
-                auto texID = data2.GetID();
+                auto texID = data2->GetID();
                 if (texID == textureID)
                 {
-                    texture = data2.GetTexture();
+                    texture = data2->GetTexture();
                 }
             }
 
@@ -619,7 +634,7 @@ void Game::InitWorld()
                 tileSprite.setPosition(data1[0], data1[1]);
 
                 auto world = new World(tileSprite, collision, itemOutputID, textureProgData);
-                m_world.push_back(*world);
+                m_world.push_back(world);
             }
         }
         file.close();
@@ -636,10 +651,10 @@ bool Game::HandleBtnClicked(sf::RenderWindow &window)
 
     for (const auto &data : m_buttons)
     {
-        auto btnPos = data.GetSprite().getPosition();
-        auto btnLSize = data.GetSprite().getLocalBounds().getSize();
-        auto btnScale = data.GetSprite().getScale();
-        auto data1 = data.GetMenuState();
+        auto btnPos = data->GetSprite().getPosition();
+        auto btnLSize = data->GetSprite().getLocalBounds().getSize();
+        auto btnScale = data->GetSprite().getScale();
+        auto data1 = data->GetMenuState();
 
         bool clickBtn = false;
         for (const auto &data2 : data1)
@@ -654,7 +669,7 @@ bool Game::HandleBtnClicked(sf::RenderWindow &window)
         if (worldPos.x > btnPos.x && worldPos.x < btnPos.x + (btnLSize.x * btnScale.x) && worldPos.y > btnPos.y &&
             worldPos.y < btnPos.y + (btnLSize.y * btnScale.y) && clickBtn)
         {
-            switch (data.GetBtnFnc())
+            switch (data->GetBtnFnc())
             {
             case BtnFunc::Play:
                 m_playing = true;
@@ -709,14 +724,14 @@ void Game::DrawSurface(sf::RenderWindow &window, Player &player)
 
     for (auto &data : m_surfaces)
     {
-        auto sprite = data.GetSprite();
+        auto sprite = data->GetSprite();
         auto spritePos = sprite.getPosition();
         auto tileSize = m_tileSize / 2;
 
         if (playerPos.x >= spritePos.x - tileSize && playerPos.x <= spritePos.x + tileSize &&
             playerPos.y >= spritePos.y - tileSize && playerPos.y <= spritePos.y + tileSize)
         {
-            auto speed = data.GetSpeed();
+            auto speed = data->GetSpeed();
             player.SetSpeed(speed);
         }
 
@@ -728,7 +743,7 @@ void Game::DrawWorld(sf::RenderWindow &window)
 {
     for (auto &data : m_world)
     {
-        auto sprite = data.GetSprite();
+        auto sprite = data->GetSprite();
 
         window.draw(sprite);
     }
@@ -740,13 +755,13 @@ void Game::DrawMenu(sf::RenderWindow &window)
 
     for (const auto &data : m_titles)
     {
-        if (m_menuState == data.GetMenuState())
-            window.draw(data.GetText());
+        if (m_menuState == data->GetMenuState())
+            window.draw(data->GetText());
 
         for (const auto &data1 : m_buttons)
         {
             bool showBtn = false;
-            auto menuStates = data1.GetMenuState();
+            auto menuStates = data1->GetMenuState();
             for (const auto &data3 : menuStates)
             {
                 if (m_menuState == data3)
@@ -758,8 +773,8 @@ void Game::DrawMenu(sf::RenderWindow &window)
 
             if (showBtn)
             {
-                window.draw(data1.GetSprite());
-                window.draw(data1.GetText());
+                window.draw(data1->GetSprite());
+                window.draw(data1->GetText());
             }
         }
     }
@@ -771,8 +786,8 @@ void Game::DrawMenu(sf::RenderWindow &window, Player &player)
 
     for (const auto &data : m_titles)
     {
-        if (m_menuState == data.GetMenuState())
-            window.draw(data.GetText());
+        if (m_menuState == data->GetMenuState())
+            window.draw(data->GetText());
 
         if (m_menuState == MenuState::Inventory)
             player.DrawInventoryItems(window, m_itemCfg);
@@ -780,7 +795,7 @@ void Game::DrawMenu(sf::RenderWindow &window, Player &player)
         for (const auto &data1 : m_buttons)
         {
             bool showBtn = false;
-            auto menuStates = data1.GetMenuState();
+            auto menuStates = data1->GetMenuState();
             for (const auto &data3 : menuStates)
             {
                 if (m_menuState == data3)
@@ -792,8 +807,8 @@ void Game::DrawMenu(sf::RenderWindow &window, Player &player)
 
             if (showBtn)
             {
-                window.draw(data1.GetSprite());
-                window.draw(data1.GetText());
+                window.draw(data1->GetSprite());
+                window.draw(data1->GetText());
             }
         }
     }
