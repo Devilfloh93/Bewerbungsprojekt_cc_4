@@ -1,5 +1,6 @@
 #include "Player.h"
 #include <format>
+#include <iostream>
 #include <memory>
 #include <random>
 
@@ -70,8 +71,7 @@ sf::Sprite *Player::GetSprite() const
     return m_sprite;
 }
 
-
-void Player::DrawInventoryItems(sf::RenderWindow &window, const std::vector<ItemCfg> &itemCfg)
+void Player::DrawInventoryItems(sf::RenderWindow &window, const std::vector<ItemCfg *> &itemCfg)
 {
     bool firstIcon = true;
 
@@ -86,9 +86,9 @@ void Player::DrawInventoryItems(sf::RenderWindow &window, const std::vector<Item
         sf::Text itemText;
         for (const auto &data : itemCfg)
         {
-            auto texture = data.GetTexture();
-            auto textureData = data.GetTextureData();
-            auto ID = data.GetID();
+            auto texture = data->GetTexture();
+            auto textureData = data->GetTextureData();
+            auto ID = data->GetID();
             if (key == ID)
             {
                 itemText.setFont(font);
@@ -117,10 +117,10 @@ void Player::DrawInventoryItems(sf::RenderWindow &window, const std::vector<Item
     }
 }
 
-void Player::HandleMove(sf::Clock &clock, const Game &game)
+void Player::HandleMove(sf::Clock &clock, Game &game)
 {
-    auto world = (game.GetWorld());
-    auto items = (game.GetItem());
+    auto world = game.GetWorld();
+    auto items = game.GetItem();
     auto elapsed = clock.getElapsedTime();
     auto playerPos = m_sprite->getPosition();
     auto playerSize = m_sprite->getLocalBounds().getSize();
@@ -146,9 +146,9 @@ void Player::HandleMove(sf::Clock &clock, const Game &game)
 
     for (const auto &data : world)
     {
-        auto objPos = data.GetSprite().getPosition();
-        auto objCollision = data.GetCollision();
-        auto objSize = data.GetSprite().getLocalBounds().getSize();
+        auto objPos = data->GetSprite().getPosition();
+        auto objCollision = data->GetCollision();
+        auto objSize = data->GetSprite().getLocalBounds().getSize();
 
         if (objCollision.x != 0 && objCollision.y != 0)
         {
@@ -188,43 +188,46 @@ void Player::HandleMove(sf::Clock &clock, const Game &game)
         }
     }
 
-    for (auto it = items.begin(); it != items.end();)
+    if (!items.empty())
     {
-        auto ID = it->GetID();
-        auto count = it->GetCount();
-        auto itemPos = it->GetSprite().getPosition();
-        auto itemSize = it->GetSprite().getLocalBounds().getSize();
-        bool remove = false;
-        bool newItem = true;
-
-        if ((playerPos.x + (playerSize.x / 2)) >= itemPos.x && playerPos.x <= itemPos.x + (itemSize.x / 2) &&
-            playerPos.y + (playerSize.y / 2) >= itemPos.y && playerPos.y <= itemPos.y + (itemSize.y / 2))
+        for (size_t i = 0; i < items.size(); ++i)
         {
-            for (const auto &[key, value] : m_items)
+            auto sprite = items[i]->GetSprite();
+            auto ID = items[i]->GetID();
+            auto count = items[i]->GetCount();
+            auto itemPos = sprite.getPosition();
+            auto itemSize = sprite.getLocalBounds().getSize();
+
+            bool remove = false;
+            bool newItem = true;
+
+            if ((playerPos.x + (playerSize.x / 2)) >= itemPos.x && playerPos.x <= itemPos.x + (itemSize.x / 2) &&
+                playerPos.y + (playerSize.y / 2) >= itemPos.y && playerPos.y <= itemPos.y + (itemSize.y / 2))
             {
-                if (key == ID)
+                for (const auto &[key, value] : m_items)
                 {
-                    m_items[key] = value + count;
-                    newItem = false;
+                    if (key == ID)
+                    {
+                        m_items[key] = value + count;
+                        newItem = false;
+                    }
                 }
+
+                if (newItem)
+                {
+                    m_items[ID] = count;
+                }
+                remove = true;
             }
 
-            if (newItem)
+            if (remove)
             {
-                m_items[ID] = count;
+                game.RemoveItems(i);
+                break;
             }
-            remove = true;
-        }
-
-        if (remove)
-        {
-            items.erase(it);
-        }
-        else
-        {
-            ++it;
         }
     }
+
 
     switch (m_move)
     {
@@ -307,7 +310,7 @@ void Player::HandleMove(sf::Clock &clock, const Game &game)
     }
 }
 
-void Player::UseItem(const Game &game)
+void Player::UseItem(Game &game)
 {
     auto world = (game.GetWorld());
     auto itemCfg = (game.GetItemCfg());
@@ -319,12 +322,12 @@ void Player::UseItem(const Game &game)
     sf::Vector2f itemPos = {0.0F, 0.0F};
     for (auto &data : world)
     {
-        auto objSprite = data.GetSprite();
+        auto objSprite = data->GetSprite();
         auto objPos = objSprite.getPosition();
-        auto objCollision = data.GetCollision();
+        auto objCollision = data->GetCollision();
         auto objSize = objSprite.getLocalBounds().getSize();
-        auto useable = data.GetUseable();
-        itemOutputID = data.GetItemOutputID();
+        auto useable = data->GetUseable();
+        itemOutputID = data->GetItemOutputID();
 
         if (useable)
         {
@@ -394,9 +397,9 @@ void Player::UseItem(const Game &game)
 
             if (useItem)
             {
-                data.UpdatePosition();
-                data.UpdateTextureRect();
-                data.SetUseable(false);
+                data->UpdatePosition();
+                data->UpdateTextureRect();
+                data->SetUseable(false);
                 break;
             }
         }
@@ -406,14 +409,13 @@ void Player::UseItem(const Game &game)
     {
         std::random_device rd;  // a seed source for the random number engine
         std::mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
-        auto items = (game.GetItem());
         for (const auto &data : itemCfg)
         {
             sf::Sprite itemSprite;
-            auto texture = data.GetTexture();
-            auto textureData = data.GetTextureData();
-            auto itemID = data.GetID();
-            auto maxDrop = data.GetMaxDrop();
+            auto texture = data->GetTexture();
+            auto textureData = data->GetTextureData();
+            auto itemID = data->GetID();
+            auto maxDrop = data->GetMaxDrop();
 
             // Random Drop Count
             std::uniform_int_distribution<> dist(1U, maxDrop);
@@ -425,7 +427,7 @@ void Player::UseItem(const Game &game)
                 itemSprite.setPosition(itemPos.x, itemPos.y);
 
                 auto item = new Item(itemSprite, itemID, dist(gen));
-                items.push_back(*item);
+                game.SetItems(item);
                 break;
             }
         }

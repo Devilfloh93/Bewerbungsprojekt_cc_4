@@ -62,9 +62,12 @@ public:
     sf::View GetView() const;
     sf::View GetMenuView() const;
 
-    std::vector<World> GetWorld() const;
-    std::vector<ItemCfg> GetItemCfg() const;
-    std::vector<Item> GetItem() const;
+    std::vector<World *> GetWorld() const;
+    std::vector<ItemCfg *> GetItemCfg() const;
+    std::vector<Item *> GetItem() const;
+
+    void SetItems(Item *item);
+    void RemoveItems(const size_t i);
 
     void SetPlaying(const bool playing);
     void SetMenuState(const MenuState menuState);
@@ -112,14 +115,14 @@ private:
     std::uint16_t m_gameHeight;
     std::uint8_t m_tileSize;
     std::uint32_t m_maxTiles;
-    std::vector<ItemCfg> m_itemCfg;
-    std::vector<World> m_world;
-    std::vector<Surface> m_surfaces;
-    std::vector<Title> m_titles;
-    std::vector<Button> m_buttons;
-    std::vector<Item> m_items;
-    std::vector<Texture> m_textures;
-    std::vector<Font> m_fonts;
+    std::vector<ItemCfg *> m_itemCfg;
+    std::vector<World *> m_world;
+    std::vector<Surface *> m_surfaces;
+    std::vector<Title *> m_titles;
+    std::vector<Button *> m_buttons;
+    std::vector<Item *> m_items;
+    std::vector<Texture *> m_textures;
+    std::vector<Font *> m_fonts;
     sf::View m_view;
     sf::View m_menuView;
     sf::Vector2f m_defaultCenter;

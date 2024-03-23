@@ -56,7 +56,6 @@ int main()
     game.InitItemCfg();
     std::cout << "Item Init Done!" << std::endl;
 
-
     while (window.isOpen())
     {
         for (auto event = sf::Event{}; window.pollEvent(event);)
@@ -105,6 +104,7 @@ int main()
                             break;
                         case sf::Keyboard::Key::P:
                             player.UseItem(game);
+                            breakLoop = true;
                             break;
                         default:
                             break;
@@ -174,7 +174,7 @@ int main()
                     {
                         if (game.GetZoom() > 0U)
                         {
-                            game.SetZoom(1U, 2.0F);
+                            game.SetZoom(-1, 2.0F);
                         }
                     }
 
