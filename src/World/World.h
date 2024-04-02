@@ -9,13 +9,13 @@ class World
 public:
     World(const sf::Sprite &sprite,
           const Collision collision,
-          const std::uint8_t itemOutputID,
+          const uint8_t itemOutputID,
           const TextureProgData textureProgData);
     ~World() = default;
 
     sf::Sprite GetSprite() const;
     Collision GetCollision() const;
-    std::uint8_t GetItemOutputID() const;
+    uint8_t GetItemOutputID() const;
     bool GetUseable() const;
 
     void UpdateTextureRect();
@@ -25,7 +25,7 @@ public:
 private:
     sf::Sprite m_sprite;
     Collision m_collision;
-    std::uint8_t m_itemOutputID;
+    uint8_t m_itemOutputID;
     TextureProgData m_textureProgData;
     bool m_useable;
 };

@@ -1,11 +1,12 @@
 #include "Player.h"
+#include "Utilities.h"
 #include <format>
 #include <iostream>
 #include <memory>
 #include <random>
 
 Player::Player(sf::Sprite *sprite,
-               const std::string_view name,
+               const string_view name,
                const PlayerSurvivalStats survivalStats,
                const float baseSpeed)
     : m_sprite(sprite), m_name(name), m_survivalStats(survivalStats), m_baseSpeed(baseSpeed)
@@ -15,7 +16,7 @@ Player::Player(sf::Sprite *sprite,
     m_lastMove = m_move;
 }
 
-std::string_view Player::GetName() const
+string_view Player::GetName() const
 {
     return m_name;
 }
@@ -71,10 +72,11 @@ sf::Sprite *Player::GetSprite() const
     return m_sprite;
 }
 
-void Player::DrawInventoryItems(sf::RenderWindow &window, const std::vector<ItemCfg *> &itemCfg)
+void Player::DrawInventoryItems(sf::RenderWindow &window, const vector<ItemCfg *> &itemCfg)
 {
     bool firstIcon = true;
 
+    Utilities utilities;
     sf::Sprite prevSprite;
 
     sf::Font font;
@@ -93,20 +95,20 @@ void Player::DrawInventoryItems(sf::RenderWindow &window, const std::vector<Item
             {
                 itemText.setFont(font);
                 itemText.setCharacterSize(15);
-                itemText.setString(std::format("{}", value));
+                itemText.setString(format("{}", value));
 
                 itemSprite.setTexture(*texture);
                 itemSprite.setTextureRect(textureData);
 
                 if (firstIcon)
                 {
-                    Menu::SetTextBeforeIcon(300, 200, itemSprite, itemText);
+                    utilities.SetTextBeforeIcon(300, 200, itemSprite, itemText);
                     prevSprite = itemSprite;
                     firstIcon = false;
                 }
                 else
                 {
-                    Menu::SetTextBeforeIcon(itemSprite, itemText, prevSprite);
+                    utilities.SetTextBeforeIcon(itemSprite, itemText, prevSprite);
                 }
 
                 break;
@@ -318,7 +320,7 @@ void Player::UseItem(Game &game)
     auto playerSize = m_sprite->getLocalBounds().getSize();
 
     bool useItem = false;
-    std::uint8_t itemOutputID = 0U;
+    uint8_t itemOutputID = 0U;
     sf::Vector2f itemPos = {0.0F, 0.0F};
     for (auto &data : world)
     {
@@ -407,8 +409,8 @@ void Player::UseItem(Game &game)
 
     if (useItem)
     {
-        std::random_device rd;  // a seed source for the random number engine
-        std::mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
+        random_device rd;  // a seed source for the random number engine
+        mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
         for (const auto &data : itemCfg)
         {
             sf::Sprite itemSprite;
@@ -418,7 +420,7 @@ void Player::UseItem(Game &game)
             auto maxDrop = data->GetMaxDrop();
 
             // Random Drop Count
-            std::uniform_int_distribution<> dist(1U, maxDrop);
+            uniform_int_distribution<> dist(1U, maxDrop);
 
             if (itemOutputID == itemID)
             {

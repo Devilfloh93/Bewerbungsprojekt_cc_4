@@ -1,12 +1,14 @@
 #include "Game.h"
+#include "Utilities.h"
 #include "nlohmann/json.hpp"
 #include <fstream>
 #include <iostream>
 #include <random>
 
 using json = nlohmann::json;
+using namespace std;
 
-Game::Game(const std::uint16_t windowWidth, const std::uint16_t windowHeight)
+Game::Game(const uint16_t windowWidth, const uint16_t windowHeight)
     : m_windowWidth(windowWidth), m_windowHeight(windowHeight)
 {
     m_menuState = MenuState::Main;
@@ -39,22 +41,22 @@ void Game::SetMenuState(const MenuState menuState)
     m_menuState = menuState;
 }
 
-std::uint8_t Game::GetMaxZoom() const
+uint8_t Game::GetMaxZoom() const
 {
     return m_maxZoom;
 }
 
-std::uint8_t Game::GetZoom() const
+uint8_t Game::GetZoom() const
 {
     return m_zoom;
 }
 
-void Game::SetZoom(const std::uint8_t zoom)
+void Game::SetZoom(const uint8_t zoom)
 {
     m_zoom += zoom;
 }
 
-void Game::SetZoom(const std::uint8_t zoom, const float zoomLevel)
+void Game::SetZoom(const uint8_t zoom, const float zoomLevel)
 {
     m_view.zoom(zoomLevel);
     m_zoom += zoom;
@@ -70,46 +72,46 @@ sf::View Game::GetMenuView() const
     return m_menuView;
 }
 
-std::uint16_t Game::GetWindowWidth() const
+uint16_t Game::GetWindowWidth() const
 {
     return m_windowWidth;
 }
 
-std::uint16_t Game::GetWindowHeight() const
+uint16_t Game::GetWindowHeight() const
 {
     return m_windowHeight;
 }
 
-std::uint32_t Game::GetMaxTiles() const
+uint32_t Game::GetMaxTiles() const
 {
     return m_maxTiles;
 }
 
-std::uint8_t Game::GetTileSize() const
+uint8_t Game::GetTileSize() const
 {
     return m_tileSize;
 }
 
-std::uint16_t Game::GetGameWidth() const
+uint16_t Game::GetGameWidth() const
 {
     return m_gameWidth;
 }
-std::uint16_t Game::GetGameHeight() const
+uint16_t Game::GetGameHeight() const
 {
     return m_gameHeight;
 }
 
-std::vector<World *> Game::GetWorld() const
+vector<World *> Game::GetWorld() const
 {
     return m_world;
 }
 
-std::vector<ItemCfg *> Game::GetItemCfg() const
+vector<ItemCfg *> Game::GetItemCfg() const
 {
     return m_itemCfg;
 }
 
-std::vector<Item *> Game::GetItem() const
+vector<Item *> Game::GetItem() const
 {
     return m_items;
 }
@@ -128,11 +130,11 @@ void Game::RemoveItems(const size_t i)
     m_items.erase(item);
 }
 
-void Game::SetWindowHeight(const std::uint16_t height)
+void Game::SetWindowHeight(const uint16_t height)
 {
     m_windowHeight = height;
 }
-void Game::SetWindowWidth(const std::uint16_t width)
+void Game::SetWindowWidth(const uint16_t width)
 {
     m_windowWidth = width;
 }
@@ -231,9 +233,9 @@ void Game::HandleViewPosition(const sf::RenderWindow &window)
 
 void Game::InitItemCfg()
 {
-    std::ifstream file("./data/itemCfg.json");
+    ifstream file("./data/itemCfg.json");
 
-    std::vector<nlohmann::json_abi_v3_11_2::ordered_json> jsonItems;
+    vector<nlohmann::json_abi_v3_11_2::ordered_json> jsonItems;
 
     if (file.is_open())
     {
@@ -241,11 +243,11 @@ void Game::InitItemCfg()
 
         for (const auto &data : jsonData)
         {
-            std::uint8_t ID = data["id"];
-            std::string name = data["name"];
-            std::uint8_t maxDrop = data["maxDrop"];
+            uint8_t ID = data["id"];
+            string name = data["name"];
+            uint8_t maxDrop = data["maxDrop"];
             sf::Texture *texture;
-            std::uint8_t textureID = data["textureID"];
+            uint8_t textureID = data["textureID"];
             auto textureData = sf::IntRect(data["textureData"][0],
                                            data["textureData"][1],
                                            data["textureData"][2],
@@ -280,7 +282,7 @@ void Game::DrawItems(sf::RenderWindow &window)
 
 void Game::InitTexture()
 {
-    std::ifstream file("./data/textureCfg.json");
+    ifstream file("./data/textureCfg.json");
 
     if (file.is_open())
     {
@@ -289,8 +291,8 @@ void Game::InitTexture()
         for (const auto &data : jsonData)
         {
             auto texture = new sf::Texture();
-            std::uint8_t ID = data["id"];
-            std::string path = data["path"];
+            uint8_t ID = data["id"];
+            string path = data["path"];
 
             texture->loadFromFile(path);
 
@@ -303,7 +305,7 @@ void Game::InitTexture()
 
 void Game::InitFont()
 {
-    std::ifstream file("./data/fontCfg.json");
+    ifstream file("./data/fontCfg.json");
 
     if (file.is_open())
     {
@@ -312,8 +314,8 @@ void Game::InitFont()
         for (const auto &data : jsonData)
         {
             auto font = new sf::Font();
-            std::uint8_t ID = data["id"];
-            std::string path = data["path"];
+            uint8_t ID = data["id"];
+            string path = data["path"];
 
             font->loadFromFile(path);
 
@@ -348,12 +350,13 @@ Player Game::InitPlayer()
 
 void Game::InitMenu()
 {
+    Utilities utilities;
     sf::Sprite prevBtn;
 
-    std::ifstream file("./data/menus.json");
+    ifstream file("./data/menus.json");
 
-    std::vector<nlohmann::json_abi_v3_11_2::ordered_json> menuTitles;
-    std::vector<nlohmann::json_abi_v3_11_2::ordered_json> menuButtons;
+    vector<nlohmann::json_abi_v3_11_2::ordered_json> menuTitles;
+    vector<nlohmann::json_abi_v3_11_2::ordered_json> menuButtons;
 
     if (file.is_open())
     {
@@ -362,10 +365,10 @@ void Game::InitMenu()
         for (auto it = jsonData.begin(); it != jsonData.end(); ++it)
         {
             if (it.key() == "Titles")
-                ProcessJSON(*it, menuTitles);
+                utilities.ProcessJSON(*it, menuTitles);
 
             if (it.key() == "Buttons")
-                ProcessJSON(*it, menuButtons);
+                utilities.ProcessJSON(*it, menuButtons);
         }
 
         for (const auto &data : menuTitles)
@@ -376,9 +379,9 @@ void Game::InitMenu()
 
             bool firstButton = true;
             MenuState state = data["state"];
-            std::uint8_t fontSize = data["fontSize"];
-            std::string text = data["name"];
-            std::uint8_t fontID = data["fontID"];
+            uint8_t fontSize = data["fontSize"];
+            string text = data["name"];
+            uint8_t fontID = data["fontID"];
             sf::Font *font;
 
             for (const auto &data5 : m_fonts)
@@ -394,7 +397,7 @@ void Game::InitMenu()
             titleText.setCharacterSize(fontSize);
             titleText.setString(text);
 
-            Menu::SetTitlePos(m_windowWidth, titleText);
+            utilities.SetTitlePos(m_windowWidth, titleText);
 
             auto titles = new Title(state, titleText);
             m_titles.push_back(titles);
@@ -420,9 +423,9 @@ void Game::InitMenu()
                     auto scale = sf::Vector2f{data1["scale"][0], data1["scale"][1]};
                     text = data1["name"];
                     fontSize = data1["fontSize"];
-                    std::vector<MenuState> state = data1["state"];
+                    vector<MenuState> state = data1["state"];
                     BtnFunc btnFnc = data1["fnc"];
-                    std::uint8_t textureID = data1["textureID"];
+                    uint8_t textureID = data1["textureID"];
                     fontID = data1["fontID"];
                     sf::Texture *texture;
 
@@ -453,9 +456,9 @@ void Game::InitMenu()
                     btnText.setString(text);
 
                     if (firstButton)
-                        Menu::SetBtnAndTextPos(m_windowWidth, btn, titleText, btnText);
+                        utilities.SetBtnAndTextPos(m_windowWidth, btn, titleText, btnText);
                     else
-                        Menu::SetBtnAndTextPos(m_windowWidth, btn, prevBtn, btnText);
+                        utilities.SetBtnAndTextPos(m_windowWidth, btn, prevBtn, btnText);
 
                     prevBtn = btn;
                     firstButton = false;
@@ -475,16 +478,16 @@ void Game::InitMenu()
 
 void Game::InitSurface()
 {
-    std::random_device rd;  // a seed source for the random number engine
-    std::mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
+    random_device rd;  // a seed source for the random number engine
+    mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
 
     // Random Grass Texture Selector
-    std::uniform_int_distribution<> dist(0U, 3U);
+    uniform_int_distribution<> dist(0U, 3U);
 
     size_t j = 0;
     size_t k = 0;
 
-    std::ifstream file("./data/surfaceCfg.json");
+    ifstream file("./data/surfaceCfg.json");
 
     if (file.is_open())
     {
@@ -494,8 +497,8 @@ void Game::InitSurface()
         {
             sf::Sprite tileSprite;
             sf::Texture *texture;
-            std::uint8_t id;
-            std::uint8_t textureID;
+            uint8_t id;
+            uint8_t textureID;
             sf::IntRect textureData;
             float speed;
             auto rnd = dist(gen);
@@ -593,7 +596,7 @@ void Game::InitWorld()
 
     sf::Sprite tileSprite;
 
-    std::ifstream file("./data/worldCfg.json");
+    ifstream file("./data/worldCfg.json");
 
     if (file.is_open())
     {
@@ -603,7 +606,7 @@ void Game::InitWorld()
         for (const auto &data : jsonData)
         {
             auto collision = Collision{.x = data["textureData"][4], .y = data["textureData"][5]};
-            std::uint8_t itemOutputID = data["itemOutputID"];
+            uint8_t itemOutputID = data["itemOutputID"];
             auto textureData = sf::IntRect(data["textureData"][0],
                                            data["textureData"][1],
                                            data["textureData"][2],
@@ -615,7 +618,7 @@ void Game::InitWorld()
                                     data["textureProgData"][3]},
                 .collision = Collision{.x = data["textureProgData"][4], .y = data["textureProgData"][5]}};
 
-            std::uint8_t textureID = data["textureID"];
+            uint8_t textureID = data["textureID"];
 
             for (const auto &data2 : m_textures)
             {

@@ -1,18 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 
-struct SurfaceSpeed
-{
-    float grass;
-    float water;
-};
-
-enum class SurfaceType
-{
-    Grass = 0,
-    Water
-};
-
 class Surface
 {
 

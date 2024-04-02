@@ -4,12 +4,14 @@
 #include <cstdint>
 #include <iostream>
 
+using namespace std;
+
 int main()
 {
-    std::uint16_t windowWidth = 1280U;
-    std::uint16_t windowHeight = 720U;
-    //  std::uint16_t windowWidth = sf::VideoMode::getDesktopMode().width;
-    //  std::uint16_t windowHeight = sf::VideoMode::getDesktopMode().height;
+    uint16_t windowWidth = 1280U;
+    uint16_t windowHeight = 720U;
+    //  uint16_t windowWidth = sf::VideoMode::getDesktopMode().width;
+    //  uint16_t windowHeight = sf::VideoMode::getDesktopMode().height;
 
     // Init Game
     auto game = Game(windowWidth, windowHeight);
@@ -26,35 +28,35 @@ int main()
 
     // View Init
     game.InitViews();
-    std::cout << "View Init Done!" << std::endl;
+    cout << "View Init Done!" << endl;
 
     // Texture Init
     game.InitTexture();
-    std::cout << "Texture Init Done!" << std::endl;
+    cout << "Texture Init Done!" << endl;
 
     // Font Init
     game.InitFont();
-    std::cout << "Font Init Done!" << std::endl;
+    cout << "Font Init Done!" << endl;
 
     // Player Init
     auto player = game.InitPlayer();
-    std::cout << "Player Init Done!" << std::endl;
+    cout << "Player Init Done!" << endl;
 
     // Menu Init
     game.InitMenu();
-    std::cout << "Menu Init Done!" << std::endl;
+    cout << "Menu Init Done!" << endl;
 
     // Surface Init
     game.InitSurface();
-    std::cout << "Surface Init Done!" << std::endl;
+    cout << "Surface Init Done!" << endl;
 
     // World Init
     game.InitWorld();
-    std::cout << "World Init Done!" << std::endl;
+    cout << "World Init Done!" << endl;
 
     // Item Init
     game.InitItemCfg();
-    std::cout << "Item Init Done!" << std::endl;
+    cout << "Item Init Done!" << endl;
 
     while (window.isOpen())
     {
