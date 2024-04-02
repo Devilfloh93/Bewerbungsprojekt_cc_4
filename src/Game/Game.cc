@@ -14,6 +14,7 @@ Game::Game(const uint16_t windowWidth, const uint16_t windowHeight)
     m_menuState = MenuState::Main;
     m_maxZoom = 3U;
     m_playing = false;
+    m_defaultPlayerTextureID = 2U;
 
     m_gameWidth = 8800U;
     m_gameHeight = 4800U;
@@ -114,6 +115,11 @@ vector<ItemCfg *> Game::GetItemCfg() const
 vector<Item *> Game::GetItem() const
 {
     return m_items;
+}
+
+vector<Anim *> Game::GetAnim() const
+{
+    return m_anim;
 }
 
 void Game::SetItems(Item *item)
@@ -334,17 +340,27 @@ Player Game::InitPlayer()
     for (const auto &data : m_textures)
     {
         auto texID = data->GetID();
-        if (texID == 2)
+        if (texID == m_defaultPlayerTextureID)
         {
             texture = data->GetTexture();
         }
     }
 
     sprite->setTexture(*texture);
-    sprite->setTextureRect(sf::IntRect(8U, 8U, 16U, 16U));
+
+    for (const auto &data : m_anim)
+    {
+        if (data->GetTextureID() == m_defaultPlayerTextureID)
+        {
+            sprite->setTextureRect(data->GetMoveAnim().down00);
+            break;
+        }
+    }
+
     sprite->setPosition(80.0F, 80.0F);
 
-    auto player = Player(sprite, "PlayerName", PlayerSurvivalStats{100.0F, 100.0F, 100.0F}, 1.0F);
+    auto player =
+        Player(sprite, "PlayerName", PlayerSurvivalStats{100.0F, 100.0F, 100.0F}, 1.0F, m_defaultPlayerTextureID);
     return player;
 }
 
@@ -586,6 +602,39 @@ void Game::InitSurface()
                     break;
                 }
             }
+        }
+        file.close();
+    }
+}
+
+void Game::InitAnim()
+{
+    ifstream file("./data/animCfg.json");
+
+    if (file.is_open())
+    {
+        auto jsonData = json::parse(file);
+
+        for (const auto &data : jsonData)
+        {
+            uint8_t id = data["id"];
+            uint8_t textureId = data["textureID"];
+
+            MovementTexture animTexture = {.up00 = {data["textureUp"][0][0], data["textureUp"][0][1], 16, 16},
+                                           .up01 = {data["textureUp"][1][0], data["textureUp"][1][1], 16, 16},
+                                           .up02 = {data["textureUp"][2][0], data["textureUp"][2][1], 16, 16},
+                                           .down00 = {data["textureDown"][0][0], data["textureDown"][0][1], 16, 16},
+                                           .down01 = {data["textureDown"][1][0], data["textureDown"][1][1], 16, 16},
+                                           .down02 = {data["textureDown"][2][0], data["textureDown"][2][1], 16, 16},
+                                           .left00 = {data["textureLeft"][0][0], data["textureLeft"][0][1], 16, 16},
+                                           .left01 = {data["textureLeft"][1][0], data["textureLeft"][1][1], 16, 16},
+                                           .left02 = {data["textureLeft"][2][0], data["textureLeft"][2][1], 16, 16},
+                                           .right00 = {data["textureRight"][0][0], data["textureRight"][0][1], 16, 16},
+                                           .right01 = {data["textureRight"][1][0], data["textureRight"][1][1], 16, 16},
+                                           .right02 = {data["textureRight"][2][0], data["textureRight"][2][1], 16, 16}};
+
+            auto anim = new Anim(id, textureId, animTexture);
+            m_anim.push_back(anim);
         }
         file.close();
     }

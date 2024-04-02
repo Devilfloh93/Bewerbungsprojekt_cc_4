@@ -8,8 +8,9 @@
 Player::Player(sf::Sprite *sprite,
                const string_view name,
                const PlayerSurvivalStats survivalStats,
-               const float baseSpeed)
-    : m_sprite(sprite), m_name(name), m_survivalStats(survivalStats), m_baseSpeed(baseSpeed)
+               const float baseSpeed,
+               const uint8_t animID)
+    : m_sprite(sprite), m_name(name), m_survivalStats(survivalStats), m_baseSpeed(baseSpeed), m_animID(animID)
 {
     m_speed = m_baseSpeed;
     m_move = PlayerMove::NotMoving;
@@ -123,23 +124,23 @@ void Player::HandleMove(sf::Clock &clock, Game &game)
 {
     auto world = game.GetWorld();
     auto items = game.GetItem();
+    auto anim = game.GetAnim();
     auto elapsed = clock.getElapsedTime();
     auto playerPos = m_sprite->getPosition();
     auto playerSize = m_sprite->getLocalBounds().getSize();
     auto tileSize = game.GetTileSize();
     auto width = game.GetGameWidth();
     auto height = game.GetGameHeight();
+    MovementTexture moveAnim;
 
-    const static auto moveTexture = MovementTexture{.up00{8U, 136U, 16U, 16U},
-                                                    .up01{72U, 136U, 16U, 16U},
-                                                    .up02{136U, 136U, 16U, 16U},
-                                                    .down00{8U, 8U, 16U, 16U},
-                                                    .down01{72U, 8U, 16U, 16U},
-                                                    .down02{136U, 8U, 16U, 16U},
-                                                    .left00{8U, 200U, 16U, 16U},
-                                                    .left01{72U, 200U, 16U, 16U},
-                                                    .right00{8U, 72U, 16U, 16U},
-                                                    .right01{72U, 72U, 16U, 16U}};
+    for (const auto &data : anim)
+    {
+        if (data->GetTextureID() == m_animID)
+        {
+            moveAnim = data->GetMoveAnim();
+            break;
+        }
+    }
 
     bool canMoveUP = true;
     bool canMoveDOWN = true;
@@ -235,72 +236,72 @@ void Player::HandleMove(sf::Clock &clock, Game &game)
     {
     case PlayerMove::Left:
         if (elapsed.asMilliseconds() >= 0 && elapsed.asMilliseconds() < 200)
-            m_sprite->setTextureRect(moveTexture.left01);
+            m_sprite->setTextureRect(moveAnim.left01);
         else if (elapsed.asMilliseconds() >= 200 && elapsed.asMilliseconds() < 400)
-            m_sprite->setTextureRect(moveTexture.left00);
+            m_sprite->setTextureRect(moveAnim.left00);
         else
             clock.restart();
 
         if (playerPos.x - m_speed > 0 + (tileSize / 2) && canMoveLEFT)
             m_sprite->setPosition(playerPos.x - m_speed, playerPos.y);
         else
-            m_sprite->setTextureRect(moveTexture.left00);
+            m_sprite->setTextureRect(moveAnim.left00);
         break;
     case PlayerMove::Right:
         if (elapsed.asMilliseconds() >= 0 && elapsed.asMilliseconds() < 200)
-            m_sprite->setTextureRect(moveTexture.right01);
+            m_sprite->setTextureRect(moveAnim.right01);
         else if (elapsed.asMilliseconds() >= 200 && elapsed.asMilliseconds() < 400)
-            m_sprite->setTextureRect(moveTexture.right00);
+            m_sprite->setTextureRect(moveAnim.right00);
         else
             clock.restart();
 
         if (playerPos.x + m_speed < width - tileSize && canMoveRIGHT)
             m_sprite->setPosition(playerPos.x + m_speed, playerPos.y);
         else
-            m_sprite->setTextureRect(moveTexture.right00);
+            m_sprite->setTextureRect(moveAnim.right00);
         break;
     case PlayerMove::Down:
         if (elapsed.asMilliseconds() >= 0 && elapsed.asMilliseconds() < 200)
-            m_sprite->setTextureRect(moveTexture.down01);
+            m_sprite->setTextureRect(moveAnim.down01);
         else if (elapsed.asMilliseconds() >= 200 && elapsed.asMilliseconds() < 400)
-            m_sprite->setTextureRect(moveTexture.down02);
+            m_sprite->setTextureRect(moveAnim.down02);
         else
             clock.restart();
 
         if (playerPos.y + m_speed < height - tileSize && canMoveDOWN)
             m_sprite->setPosition(playerPos.x, playerPos.y + m_speed);
         else
-            m_sprite->setTextureRect(moveTexture.down00);
+            m_sprite->setTextureRect(moveAnim.down00);
 
         break;
     case PlayerMove::Up:
         if (elapsed.asMilliseconds() >= 0 && elapsed.asMilliseconds() < 200)
-            m_sprite->setTextureRect(moveTexture.up01);
+            m_sprite->setTextureRect(moveAnim.up01);
         else if (elapsed.asMilliseconds() >= 200 && elapsed.asMilliseconds() < 400)
-            m_sprite->setTextureRect(moveTexture.up02);
+            m_sprite->setTextureRect(moveAnim.up02);
         else
             clock.restart();
 
         if (playerPos.y - m_speed > 0 + (tileSize / 2) && canMoveUP)
             m_sprite->setPosition(playerPos.x, playerPos.y - m_speed);
         else
-            m_sprite->setTextureRect(moveTexture.up00);
+            m_sprite->setTextureRect(moveAnim.up00);
 
         break;
     case PlayerMove::NotMoving:
         switch (m_lastMove)
         {
         case PlayerMove::Down:
-            m_sprite->setTextureRect(moveTexture.down00);
+            m_sprite->setTextureRect(moveAnim.down00);
             break;
         case PlayerMove::Up:
-            m_sprite->setTextureRect(moveTexture.up00);
+            m_sprite->setTextureRect(moveAnim.up00);
             break;
         case PlayerMove::Left:
-            m_sprite->setTextureRect(moveTexture.left00);
+            m_sprite->setTextureRect(moveAnim.left00);
             break;
         case PlayerMove::Right:
-            m_sprite->setTextureRect(moveTexture.right00);
+            m_sprite->setTextureRect(moveAnim.right00);
             break;
         default:
             break;
