@@ -26,6 +26,10 @@ int main()
     // Clocks
     sf::Clock clock;
 
+    // Anim Init
+    game.InitAnim();
+    cout << "Anim Init Done!" << endl;
+
     // View Init
     game.InitViews();
     cout << "View Init Done!" << endl;

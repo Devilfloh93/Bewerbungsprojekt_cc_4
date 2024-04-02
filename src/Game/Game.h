@@ -1,4 +1,5 @@
 #pragma once
+#include "Anim.h"
 #include "Font.h"
 #include "Gui.h"
 #include "Item.h"
@@ -16,19 +17,6 @@ struct ReturnView
     sf::Vector2f viewSize;
 };
 
-struct MovementTexture
-{
-    sf::IntRect up00; // Not Moving
-    sf::IntRect up01; // Left Moving Feet
-    sf::IntRect up02; // Right Moving Feet
-    sf::IntRect down00;
-    sf::IntRect down01;
-    sf::IntRect down02;
-    sf::IntRect left00;
-    sf::IntRect left01;
-    sf::IntRect right00;
-    sf::IntRect right01;
-};
 
 enum class MenuState
 {
@@ -65,6 +53,7 @@ public:
     vector<World *> GetWorld() const;
     vector<ItemCfg *> GetItemCfg() const;
     vector<Item *> GetItem() const;
+    vector<Anim *> GetAnim() const;
 
     void SetItems(Item *item);
     void RemoveItems(const size_t i);
@@ -75,6 +64,8 @@ public:
     void SetZoom(const uint8_t zoom, const float zoomLevel);
     void SetWindowHeight(const uint16_t height);
     void SetWindowWidth(const uint16_t width);
+
+    void InitAnim();
 
     void InitViews();
     void UpdateView();
@@ -123,7 +114,9 @@ private:
     vector<Item *> m_items;
     vector<Texture *> m_textures;
     vector<Font *> m_fonts;
+    vector<Anim *> m_anim;
     sf::View m_view;
     sf::View m_menuView;
     sf::Vector2f m_defaultCenter;
+    uint8_t m_defaultPlayerTextureID;
 };

@@ -25,7 +25,11 @@ enum class PlayerMove
 class Player
 {
 public:
-    Player(sf::Sprite *sprite, const string_view name, const PlayerSurvivalStats survivalStats, const float baseSpeed);
+    Player(sf::Sprite *sprite,
+           const string_view name,
+           const PlayerSurvivalStats survivalStats,
+           const float baseSpeed,
+           const uint8_t animID);
     ~Player() = default;
 
     string_view GetName() const;
@@ -57,4 +61,5 @@ private:
     PlayerMove m_move;
     PlayerMove m_lastMove;
     map<uint32_t, uint16_t> m_items;
+    uint8_t m_animID;
 };
