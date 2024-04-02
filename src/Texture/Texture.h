@@ -3,8 +3,8 @@
 
 struct Collision
 {
-    std::uint8_t x;
-    std::uint8_t y;
+    uint8_t x;
+    uint8_t y;
 };
 
 struct TextureProgData
@@ -17,13 +17,13 @@ class Texture
 {
 
 public:
-    Texture(const std::uint8_t ID, sf::Texture *texture);
+    Texture(const uint8_t ID, sf::Texture *texture);
     ~Texture() = default;
 
-    std::uint8_t GetID() const;
+    uint8_t GetID() const;
     sf::Texture *GetTexture() const;
 
 private:
-    std::uint8_t m_ID;
+    uint8_t m_ID;
     sf::Texture *m_texture;
 };

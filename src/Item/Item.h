@@ -6,48 +6,48 @@
 #include <string>
 #include <vector>
 
+using namespace std;
+
 class ItemCfg
 {
 
 public:
     ItemCfg(sf::Texture *texture,
             const sf::IntRect textureData,
-            const std::uint8_t ID,
-            const std::string_view name,
-            const std::uint8_t maxDrop);
+            const uint8_t ID,
+            const string_view name,
+            const uint8_t maxDrop);
     ~ItemCfg() = default;
 
     sf::Texture *GetTexture() const;
     sf::IntRect GetTextureData() const;
 
-    std::uint8_t GetID() const;
-    std::string GetName() const;
-    std::uint8_t GetMaxDrop() const;
+    uint8_t GetID() const;
+    string GetName() const;
+    uint8_t GetMaxDrop() const;
 
 private:
     sf::Texture *m_texture;
     sf::IntRect m_textureData;
-    std::uint16_t m_ID;
-    std::string m_name;
-    std::uint8_t m_maxDrop;
+    uint16_t m_ID;
+    string m_name;
+    uint8_t m_maxDrop;
 };
 
 class Item
 {
 
 public:
-    Item(const sf::Sprite &sprite, const std::uint16_t ID, const std::uint16_t count);
+    Item(const sf::Sprite &sprite, const uint16_t ID, const uint16_t count);
     ~Item() = default;
 
     sf::Sprite GetSprite() const;
 
-    std::uint16_t GetID() const;
-    std::uint16_t GetCount() const;
+    uint16_t GetID() const;
+    uint16_t GetCount() const;
 
 private:
     sf::Sprite m_sprite;
-    std::uint16_t m_ID;
-    std::uint16_t m_count;
+    uint16_t m_ID;
+    uint16_t m_count;
 };
-
-void InitItemCfg(std::vector<std::unique_ptr<ItemCfg>> &items, const std::vector<std::unique_ptr<Texture>> &textures);

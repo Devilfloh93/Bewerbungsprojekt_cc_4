@@ -2,7 +2,7 @@
 
 World::World(const sf::Sprite &sprite,
              const Collision collision,
-             const std::uint8_t itemOutputID,
+             const uint8_t itemOutputID,
              const TextureProgData textureProgData)
     : m_sprite(sprite), m_collision(collision), m_itemOutputID(itemOutputID), m_textureProgData(textureProgData)
 {
@@ -26,7 +26,7 @@ Collision World::GetCollision() const
     return m_collision;
 }
 
-std::uint8_t World::GetItemOutputID() const
+uint8_t World::GetItemOutputID() const
 {
     return m_itemOutputID;
 }

@@ -5,11 +5,11 @@
 
 using json = nlohmann::json;
 
-Font::Font(const std::uint8_t ID, sf::Font *font) : m_ID(ID), m_font(font)
+Font::Font(const uint8_t ID, sf::Font *font) : m_ID(ID), m_font(font)
 {
 }
 
-std::uint8_t Font::GetID() const
+uint8_t Font::GetID() const
 {
     return m_ID;
 }

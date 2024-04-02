@@ -25,13 +25,10 @@ enum class PlayerMove
 class Player
 {
 public:
-    Player(sf::Sprite *sprite,
-           const std::string_view name,
-           const PlayerSurvivalStats survivalStats,
-           const float baseSpeed);
+    Player(sf::Sprite *sprite, const string_view name, const PlayerSurvivalStats survivalStats, const float baseSpeed);
     ~Player() = default;
 
-    std::string_view GetName() const;
+    string_view GetName() const;
     float GetHealth() const;
     float GetWater() const;
     float GetFood() const;
@@ -49,15 +46,15 @@ public:
 
     void UseItem(Game &game);
 
-    void DrawInventoryItems(sf::RenderWindow &window, const std::vector<ItemCfg *> &itemCfg);
+    void DrawInventoryItems(sf::RenderWindow &window, const vector<ItemCfg *> &itemCfg);
 
 private:
     sf::Sprite *m_sprite;
-    std::string m_name;
+    string m_name;
     PlayerSurvivalStats m_survivalStats;
     float m_baseSpeed;
     float m_speed;
     PlayerMove m_move;
     PlayerMove m_lastMove;
-    std::map<std::uint32_t, std::uint16_t> m_items;
+    map<uint32_t, uint16_t> m_items;
 };
