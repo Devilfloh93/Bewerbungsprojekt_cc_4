@@ -95,6 +95,9 @@ public:
     void DrawMenu(sf::RenderWindow &window);
     void DrawMenu(sf::RenderWindow &window, Player &player);
 
+    void ResizeWindow(sf::RenderWindow &window);
+    void ResizeMenu();
+
 private:
     bool m_playing;
     MenuState m_menuState;

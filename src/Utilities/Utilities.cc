@@ -13,46 +13,46 @@ void Utilities::ProcessJSON(const json &j, vector<nlohmann::json_abi_v3_11_2::or
     }
 }
 
-void Utilities::SetTitlePos(const uint32_t width, sf::Text &text)
+void Utilities::SetTitlePos(const uint32_t width, sf::Text *text)
 {
-    auto textLSize = text.getLocalBounds().getSize();
-    text.setPosition(sf::Vector2f((width / 2U) - (textLSize.x / 2U), 0.0F));
+    auto textLSize = text->getLocalBounds().getSize();
+    text->setPosition(sf::Vector2f((width / 2U) - (textLSize.x / 2U), 0.0F));
 }
 
-void Utilities::SetBtnAndTextPos(const uint32_t width, sf::Sprite &btnObj, sf::Text &title, sf::Text &btntext)
+void Utilities::SetBtnAndTextPos(const uint32_t width, sf::Sprite *btnObj, sf::Text *title, sf::Text *btntext)
 {
-    auto btnObjLSize = btnObj.getLocalBounds().getSize();
-    auto btnObjScale = btnObj.getScale();
-    auto titleLSize = title.getLocalBounds().getSize();
-    auto titlePos = title.getGlobalBounds().getPosition();
-    auto btnTextLSize = btntext.getLocalBounds().getSize();
+    auto btnObjLSize = btnObj->getLocalBounds().getSize();
+    auto btnObjScale = btnObj->getScale();
+    auto titleLSize = title->getLocalBounds().getSize();
+    auto titlePos = title->getGlobalBounds().getPosition();
+    auto btnTextLSize = btntext->getLocalBounds().getSize();
 
-    btnObj.setPosition(
+    btnObj->setPosition(
         sf::Vector2f((width / 2U) - ((btnObjLSize.x * btnObjScale.x) / 2U), (titlePos.y + titleLSize.y) + 50.0F));
 
-    auto btnObjPos = btnObj.getGlobalBounds().getPosition();
-    auto btnObjSize = btnObj.getGlobalBounds().getSize();
+    auto btnObjPos = btnObj->getGlobalBounds().getPosition();
+    auto btnObjSize = btnObj->getGlobalBounds().getSize();
 
-    btntext.setPosition(sf::Vector2f(btnObjPos.x + ((btnObjSize.x / 2U) - (btnTextLSize.x / 2U)),
-                                     btnObjPos.y + ((btnObjSize.y / 2U) - (btnTextLSize.y / 2U))));
+    btntext->setPosition(sf::Vector2f(btnObjPos.x + ((btnObjSize.x / 2U) - (btnTextLSize.x / 2U)),
+                                      btnObjPos.y + ((btnObjSize.y / 2U) - (btnTextLSize.y / 2U))));
 }
 
-void Utilities::SetBtnAndTextPos(const uint32_t width, sf::Sprite &btnObj, sf::Sprite &btn, sf::Text &btntext)
+void Utilities::SetBtnAndTextPos(const uint32_t width, sf::Sprite *btnObj, sf::Sprite *btn, sf::Text *btntext)
 {
-    auto btnObjLSize = btnObj.getLocalBounds().getSize();
-    auto btnObjScale = btnObj.getScale();
-    auto btnLSize = btn.getLocalBounds().getSize();
-    auto btnPos = btn.getGlobalBounds().getPosition();
-    auto btnTextLSize = btntext.getLocalBounds().getSize();
+    auto btnObjLSize = btnObj->getLocalBounds().getSize();
+    auto btnObjScale = btnObj->getScale();
+    auto btnLSize = btn->getLocalBounds().getSize();
+    auto btnPos = btn->getGlobalBounds().getPosition();
+    auto btnTextLSize = btntext->getLocalBounds().getSize();
 
-    btnObj.setPosition(
+    btnObj->setPosition(
         sf::Vector2f((width / 2U) - ((btnObjLSize.x * btnObjScale.x) / 2U), (btnPos.y + btnLSize.y) + 50.0F));
 
-    auto btnObjPos = btnObj.getGlobalBounds().getPosition();
-    auto btnObjSize = btnObj.getGlobalBounds().getSize();
+    auto btnObjPos = btnObj->getGlobalBounds().getPosition();
+    auto btnObjSize = btnObj->getGlobalBounds().getSize();
 
-    btntext.setPosition(sf::Vector2f(btnObjPos.x + ((btnObjSize.x / 2U) - (btnTextLSize.x / 2U)),
-                                     btnObjPos.y + ((btnObjSize.y / 2U) - (btnTextLSize.y / 2U))));
+    btntext->setPosition(sf::Vector2f(btnObjPos.x + ((btnObjSize.x / 2U) - (btnTextLSize.x / 2U)),
+                                      btnObjPos.y + ((btnObjSize.y / 2U) - (btnTextLSize.y / 2U))));
 }
 
 void Utilities::SetTextBeforeIcon(sf::Sprite &icon, sf::Text &text, sf::Sprite &prevIcon)
