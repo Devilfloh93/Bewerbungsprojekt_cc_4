@@ -163,6 +163,55 @@ void Game::InitViews()
     m_view.move({-(center.x / 2), -(center.y / 2)});
 }
 
+void Game::ResizeWindow(sf::RenderWindow &window)
+{
+    window.setSize(sf::Vector2u(m_windowWidth, m_windowHeight));
+
+    m_defaultCenter = sf::Vector2f(m_windowWidth / 2U, m_windowHeight / 2U);
+
+    m_menuView.setSize(sf::Vector2f(m_windowWidth, m_windowHeight));
+    m_menuView.setCenter(m_defaultCenter);
+
+    ResizeMenu();
+}
+
+void Game::ResizeMenu()
+{
+    Utilities utilities;
+    sf::Sprite *prevBtn;
+
+    for (const auto &data : m_titles)
+    {
+        auto titleState = data->GetMenuState();
+        bool firstBtn = true;
+
+        auto text = data->GetText();
+        utilities.SetTitlePos(m_windowWidth, text);
+
+        cout << "ButtonSize: " << m_buttons.size() << endl;
+
+        for (const auto &data2 : m_buttons)
+        {
+            cout << "Button: " << data2 << endl;
+            auto btnState = data2->GetMenuState();
+
+            if (titleState == btnState)
+            {
+                cout << "Resize Button" << endl;
+                auto sprite = data2->GetSprite();
+                auto btnText = data2->GetText();
+                if (firstBtn)
+                    utilities.SetBtnAndTextPos(m_windowWidth, sprite, text, btnText);
+                else
+                    utilities.SetBtnAndTextPos(m_windowWidth, sprite, prevBtn, btnText);
+
+                prevBtn = sprite;
+                firstBtn = false;
+            }
+        }
+    }
+}
+
 void Game::UpdateView()
 {
     auto size = m_view.getSize();
@@ -367,7 +416,7 @@ Player Game::InitPlayer()
 void Game::InitMenu()
 {
     Utilities utilities;
-    sf::Sprite prevBtn;
+    sf::Sprite *prevBtn;
 
     ifstream file("./data/menus.json");
 
@@ -389,11 +438,9 @@ void Game::InitMenu()
 
         for (const auto &data : menuTitles)
         {
-            sf::Text titleText;
-            sf::Text btnText;
-            sf::Sprite btn;
+            auto titleText = new sf::Text();
 
-            bool firstButton = true;
+            bool firstBtn = true;
             MenuState state = data["state"];
             uint8_t fontSize = data["fontSize"];
             string text = data["name"];
@@ -409,9 +456,9 @@ void Game::InitMenu()
                 }
             }
 
-            titleText.setFont(*font);
-            titleText.setCharacterSize(fontSize);
-            titleText.setString(text);
+            titleText->setFont(*font);
+            titleText->setCharacterSize(fontSize);
+            titleText->setString(text);
 
             utilities.SetTitlePos(m_windowWidth, titleText);
 
@@ -421,7 +468,8 @@ void Game::InitMenu()
             for (const auto &data1 : menuButtons)
             {
                 bool addBtn = false;
-                for (const auto &data2 : data1["state"])
+                vector<MenuState> btnState = data1["state"];
+                for (const auto &data2 : btnState)
                 {
                     if (state == data2)
                     {
@@ -432,6 +480,9 @@ void Game::InitMenu()
 
                 if (addBtn)
                 {
+                    auto btnText = new sf::Text();
+                    auto btn = new sf::Sprite();
+
                     auto textureRect = sf::IntRect{data1["textureData"][0],
                                                    data1["textureData"][1],
                                                    data1["textureData"][2],
@@ -439,7 +490,6 @@ void Game::InitMenu()
                     auto scale = sf::Vector2f{data1["scale"][0], data1["scale"][1]};
                     text = data1["name"];
                     fontSize = data1["fontSize"];
-                    vector<MenuState> state = data1["state"];
                     BtnFunc btnFnc = data1["fnc"];
                     uint8_t textureID = data1["textureID"];
                     fontID = data1["fontID"];
@@ -463,21 +513,21 @@ void Game::InitMenu()
                         }
                     }
 
-                    btn.setTexture(*texture);
-                    btn.setTextureRect(textureRect);
-                    btn.setScale(scale);
+                    btn->setTexture(*texture);
+                    btn->setTextureRect(textureRect);
+                    btn->setScale(scale);
 
-                    btnText.setFont(*font);
-                    btnText.setCharacterSize(fontSize);
-                    btnText.setString(text);
+                    btnText->setFont(*font);
+                    btnText->setCharacterSize(fontSize);
+                    btnText->setString(text);
 
-                    if (firstButton)
+                    if (firstBtn)
                         utilities.SetBtnAndTextPos(m_windowWidth, btn, titleText, btnText);
                     else
                         utilities.SetBtnAndTextPos(m_windowWidth, btn, prevBtn, btnText);
 
                     prevBtn = btn;
-                    firstButton = false;
+                    firstBtn = false;
 
                     auto buttons = new Button(state, btnFnc, btnText, btn);
                     m_buttons.push_back(buttons);
@@ -486,9 +536,6 @@ void Game::InitMenu()
         }
 
         file.close();
-    }
-    else
-    {
     }
 }
 
@@ -545,50 +592,23 @@ void Game::InitSurface()
                 if (id == 0 && j == 0 && k == 0 || (j * m_tileSize == (m_gameWidth - m_tileSize) && k == 0) ||
                     (k * m_tileSize == (m_gameHeight - m_tileSize) && j == 0) ||
                     (j * m_tileSize == (m_gameWidth - m_tileSize) && k * m_tileSize == (m_gameHeight - m_tileSize)))
-                {
-                    // FULL WATER
                     canCreate = true;
-                }
                 else if (id == 1 && j == 0)
-                {
-                    // LEFT WATER
                     canCreate = true;
-                }
                 else if (id == 2 && j * m_tileSize == (m_gameWidth - m_tileSize))
-                {
-                    // RIGHT WATER
                     canCreate = true;
-                }
                 else if (id == 3 && k == 0)
-                {
-                    // TOP WATER
                     canCreate = true;
-                }
                 else if (id == 4 && k * m_tileSize == (m_gameHeight - m_tileSize))
-                {
-                    // BOT WATER
                     canCreate = true;
-                }
                 else if (id == 5 && rnd == 0)
-                {
-                    // RND GRASS
                     canCreate = true;
-                }
                 else if (id == 6 && rnd == 1)
-                {
-                    // RND GRASS
                     canCreate = true;
-                }
                 else if (id == 7 && rnd == 2)
-                {
-                    // RND GRASS
                     canCreate = true;
-                }
                 else if (id == 8 && rnd == 3)
-                {
-                    // RND GRASS
                     canCreate = true;
-                }
 
                 if (canCreate)
                 {
@@ -654,13 +674,13 @@ void Game::InitWorld()
         sf::Texture *texture;
         for (const auto &data : jsonData)
         {
-            auto collision = Collision{.x = data["textureData"][4], .y = data["textureData"][5]};
+            Collision collision = {.x = data["textureData"][4], .y = data["textureData"][5]};
             uint8_t itemOutputID = data["itemOutputID"];
-            auto textureData = sf::IntRect(data["textureData"][0],
-                                           data["textureData"][1],
-                                           data["textureData"][2],
-                                           data["textureData"][3]);
-            auto textureProgData = TextureProgData{
+            sf::IntRect textureData = {data["textureData"][0],
+                                       data["textureData"][1],
+                                       data["textureData"][2],
+                                       data["textureData"][3]};
+            TextureProgData textureProgData = {
                 .rect = sf::IntRect{data["textureProgData"][0],
                                     data["textureProgData"][1],
                                     data["textureProgData"][2],
@@ -703,23 +723,13 @@ bool Game::HandleBtnClicked(sf::RenderWindow &window)
 
     for (const auto &data : m_buttons)
     {
-        auto btnPos = data->GetSprite().getPosition();
-        auto btnLSize = data->GetSprite().getLocalBounds().getSize();
-        auto btnScale = data->GetSprite().getScale();
-        auto data1 = data->GetMenuState();
-
-        bool clickBtn = false;
-        for (const auto &data2 : data1)
-        {
-            if (m_menuState == data2)
-            {
-                clickBtn = true;
-                break;
-            }
-        }
+        auto btnPos = data->GetSprite()->getPosition();
+        auto btnLSize = data->GetSprite()->getLocalBounds().getSize();
+        auto btnScale = data->GetSprite()->getScale();
+        auto state = data->GetMenuState();
 
         if (worldPos.x > btnPos.x && worldPos.x < btnPos.x + (btnLSize.x * btnScale.x) && worldPos.y > btnPos.y &&
-            worldPos.y < btnPos.y + (btnLSize.y * btnScale.y) && clickBtn)
+            worldPos.y < btnPos.y + (btnLSize.y * btnScale.y) && m_menuState == state)
         {
             switch (data->GetBtnFnc())
             {
@@ -738,14 +748,7 @@ bool Game::HandleBtnClicked(sf::RenderWindow &window)
                 break;
             case BtnFunc::Options:
                 m_menuState = MenuState::Options;
-                /*
-                    TODO: ADD OPTIONS TO OPTION MENU
-                */
-                // game.SetWindowWidth(1920U);
-                // game.SetWindowHeight(1080U);
-                // windowWidth = game.GetWindowWidth();
-                // windowHeight = game.GetWindowHeight();
-                // window.setSize(sf::Vector2u(windowWidth, windowHeight));
+                breakLoop = true;
                 break;
             case BtnFunc::Back:
                 if (m_playing)
@@ -757,6 +760,16 @@ bool Game::HandleBtnClicked(sf::RenderWindow &window)
                 }
                 else
                     m_menuState = MenuState::Main;
+
+                breakLoop = true;
+                break;
+            case BtnFunc::Resolution:
+                m_windowWidth = 1920U;
+                m_windowHeight = 1080U;
+                ResizeWindow(window);
+                breakLoop = true;
+                break;
+            case BtnFunc::Fullscreen:
 
                 breakLoop = true;
                 break;
@@ -808,25 +821,17 @@ void Game::DrawMenu(sf::RenderWindow &window)
     for (const auto &data : m_titles)
     {
         if (m_menuState == data->GetMenuState())
-            window.draw(data->GetText());
+            window.draw(*(data->GetText()));
 
         for (const auto &data1 : m_buttons)
         {
             bool showBtn = false;
             auto menuStates = data1->GetMenuState();
-            for (const auto &data3 : menuStates)
-            {
-                if (m_menuState == data3)
-                {
-                    showBtn = true;
-                    break;
-                }
-            }
 
-            if (showBtn)
+            if (m_menuState == menuStates)
             {
-                window.draw(data1->GetSprite());
-                window.draw(data1->GetText());
+                window.draw(*(data1->GetSprite()));
+                window.draw(*(data1->GetText()));
             }
         }
     }
@@ -839,7 +844,7 @@ void Game::DrawMenu(sf::RenderWindow &window, Player &player)
     for (const auto &data : m_titles)
     {
         if (m_menuState == data->GetMenuState())
-            window.draw(data->GetText());
+            window.draw(*(data->GetText()));
 
         if (m_menuState == MenuState::Inventory)
             player.DrawInventoryItems(window, m_itemCfg);
@@ -848,19 +853,11 @@ void Game::DrawMenu(sf::RenderWindow &window, Player &player)
         {
             bool showBtn = false;
             auto menuStates = data1->GetMenuState();
-            for (const auto &data3 : menuStates)
-            {
-                if (m_menuState == data3)
-                {
-                    showBtn = true;
-                    break;
-                }
-            }
 
-            if (showBtn)
+            if (m_menuState == menuStates)
             {
-                window.draw(data1->GetSprite());
-                window.draw(data1->GetText());
+                window.draw(*(data1->GetSprite()));
+                window.draw(*(data1->GetText()));
             }
         }
     }

@@ -10,7 +10,9 @@ enum class BtnFunc
     Quit,
     Options,
     Back,
-    Resume
+    Resume,
+    Resolution,
+    Fullscreen
 };
 
 enum class MenuState;
@@ -18,33 +20,33 @@ class Title
 {
 
 public:
-    Title(const MenuState menuState, const sf::Text &text);
+    Title(const MenuState menuState, sf::Text *text);
     ~Title() = default;
 
-    sf::Text GetText() const;
+    sf::Text *GetText() const;
 
     MenuState GetMenuState() const;
 
 private:
     MenuState m_menuState;
-    sf::Text m_text;
+    sf::Text *m_text;
 };
 
 class Button
 {
 public:
-    Button(const vector<MenuState> menuState, const BtnFunc btnfnc, const sf::Text text, const sf::Sprite sprite);
+    Button(const MenuState menuState, const BtnFunc btnfnc, sf::Text *text, sf::Sprite *sprite);
     ~Button() = default;
 
-    sf::Text GetText() const;
-    sf::Sprite GetSprite() const;
+    sf::Text *GetText() const;
+    sf::Sprite *GetSprite() const;
 
-    vector<MenuState> GetMenuState() const;
+    MenuState GetMenuState() const;
     BtnFunc GetBtnFnc() const;
 
 private:
-    vector<MenuState> m_menuState;
-    sf::Text m_text;
-    sf::Sprite m_sprite;
+    MenuState m_menuState;
+    sf::Text *m_text;
+    sf::Sprite *m_sprite;
     BtnFunc m_btnfnc;
 };
