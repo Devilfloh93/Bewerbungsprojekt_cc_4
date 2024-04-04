@@ -1,6 +1,8 @@
 #pragma once
 #include "Game.h"
 #include <SFML/Graphics.hpp>
+#include <World.h>
+#include <array>
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -11,6 +13,14 @@ struct PlayerSurvivalStats
     float health;
     float water;
     float food;
+};
+
+struct MoveAllowed
+{
+    bool up;
+    bool down;
+    bool left;
+    bool right;
 };
 
 enum class PlayerMove
@@ -42,6 +52,7 @@ public:
 
     PlayerMove GetMove() const;
     PlayerMove GetLastMove() const;
+    void CheckCollision(Game &game);
 
     void SetMove(const PlayerMove move);
     void SetSpeed(const float speed);
@@ -62,4 +73,6 @@ private:
     PlayerMove m_lastMove;
     map<uint32_t, uint16_t> m_items;
     uint8_t m_animID;
+    MoveAllowed m_moveAllowed;
+    World *m_objectInFront;
 };
