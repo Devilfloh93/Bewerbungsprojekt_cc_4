@@ -98,6 +98,8 @@ public:
     void ResizeWindow(sf::RenderWindow &window);
     void ResizeMenu();
 
+    void Quit(sf::RenderWindow &window);
+
 private:
     bool m_playing;
     MenuState m_menuState;

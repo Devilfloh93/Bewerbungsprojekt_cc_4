@@ -136,6 +136,12 @@ void Game::RemoveItems(const size_t i)
     m_items.erase(item);
 }
 
+void Game::Quit(sf::RenderWindow &window)
+{
+    window.close();
+}
+
+
 void Game::SetWindowHeight(const uint16_t height)
 {
     m_windowHeight = height;
@@ -743,8 +749,7 @@ bool Game::HandleBtnClicked(sf::RenderWindow &window)
                 breakLoop = true;
                 break;
             case BtnFunc::Quit:
-                window.close();
-                breakLoop = true;
+                Quit(window);
                 break;
             case BtnFunc::Options:
                 m_menuState = MenuState::Options;
