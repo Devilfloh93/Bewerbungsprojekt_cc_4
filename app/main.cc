@@ -17,9 +17,8 @@ int main()
     auto game = Game(windowWidth, windowHeight);
 
     // Init Window
-    sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight),
-                            "Good Game",
-                            sf::Style::Fullscreen); // Create window
+    sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), "Good Game",
+                            sf::Style::Close); // Create window
     window.setVerticalSyncEnabled(true);
     window.setFramerateLimit(60U);
     window.setKeyRepeatEnabled(false);
@@ -72,7 +71,7 @@ int main()
             switch (event.type)
             {
             case sf::Event::Closed:
-                window.close();
+                game.Quit(window);
                 break;
             case sf::Event::MouseButtonPressed:
                 if (state != MenuState::Playing)
