@@ -3,8 +3,20 @@
 #include <SFML/Graphics.hpp>
 #include <cstdint>
 #include <iostream>
+#include <thread>
 
 using namespace std;
+
+void InitThread(sf::RenderWindow &window, Player &player, Game &game)
+{
+    while (window.isOpen())
+    {
+        if (game.GetPlaying() && game.GetMenuState() == MenuState::Playing)
+        {
+            player.CheckCollision(game);
+        }
+    }
+}
 
 int main()
 {
@@ -23,7 +35,6 @@ int main()
     window.setFramerateLimit(60U);
     window.setKeyRepeatEnabled(false);
 
-    // Clocks
     sf::Clock clock;
 
     // Anim Init
@@ -61,6 +72,10 @@ int main()
     // Item Init
     game.InitItemCfg();
     cout << "Item Init Done!" << endl;
+
+
+    // Threads
+    auto t1 = thread(InitThread, ref(window), ref(player), ref(game));
 
     while (window.isOpen())
     {
@@ -202,7 +217,6 @@ int main()
             window.setView(game.GetView());
 
             game.DrawSurface(window, player);
-
             player.HandleMove(clock, game);
 
             game.DrawItems(window);
@@ -232,5 +246,6 @@ int main()
         window.display();
     }
 
+    t1.join();
     return 0;
 }

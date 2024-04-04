@@ -424,7 +424,7 @@ void Game::InitMenu()
     Utilities utilities;
     sf::Sprite *prevBtn;
 
-    ifstream file("./data/menus.json");
+    ifstream file("./data/menuCfg.json");
 
     vector<nlohmann::json_abi_v3_11_2::ordered_json> menuTitles;
     vector<nlohmann::json_abi_v3_11_2::ordered_json> menuButtons;
@@ -635,7 +635,7 @@ void Game::InitSurface()
 
 void Game::InitAnim()
 {
-    ifstream file("./data/animCfg.json");
+    ifstream file("./data/characterAnimCfg.json");
 
     if (file.is_open())
     {

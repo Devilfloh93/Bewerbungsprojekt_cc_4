@@ -15,6 +15,7 @@ Player::Player(sf::Sprite *sprite,
     m_speed = m_baseSpeed;
     m_move = PlayerMove::NotMoving;
     m_lastMove = m_move;
+    m_objectInFront = nullptr;
 }
 
 string_view Player::GetName() const
@@ -73,6 +74,107 @@ sf::Sprite *Player::GetSprite() const
     return m_sprite;
 }
 
+void Player::CheckCollision(Game &game)
+{
+    auto world = game.GetWorld();
+    auto playerPos = m_sprite->getPosition();
+    auto playerSize = m_sprite->getLocalBounds().getSize();
+
+    for (const auto &data : world)
+    {
+        auto objPos = data->GetSprite().getPosition();
+        auto objCollision = data->GetCollision();
+        auto objSize = data->GetSprite().getLocalBounds().getSize();
+        auto isUsable = data->GetUseable();
+
+        if (objCollision.x != 0 && objCollision.y != 0)
+        {
+            if (playerPos.x >= objPos.x && playerPos.x <= objPos.x + objCollision.x &&
+                playerPos.y - m_speed <= objPos.y + objSize.y && playerPos.y >= objPos.y + objCollision.y)
+            {
+                m_moveAllowed.up = false;
+                if (isUsable && m_move == PlayerMove::Up)
+                {
+                    m_objectInFront = data;
+                }
+            }
+
+            if (playerPos.x >= objPos.x && playerPos.x <= objPos.x + objCollision.x &&
+                playerPos.y <= objPos.y + objCollision.y && playerPos.y + m_speed >= objPos.y + objCollision.y)
+            {
+                m_moveAllowed.down = false;
+                if (isUsable && m_move == PlayerMove::Down)
+                {
+                    m_objectInFront = data;
+                }
+            }
+
+            if (playerPos.x >= objPos.x && playerPos.x - m_speed <= objPos.x + objCollision.x &&
+                playerPos.y <= objPos.y + objSize.y && playerPos.y >= objPos.y + objCollision.y)
+            {
+                m_moveAllowed.left = false;
+                if (isUsable && m_move == PlayerMove::Left)
+                {
+                    m_objectInFront = data;
+                }
+            }
+
+
+            if (playerPos.x + m_speed >= objPos.x && playerPos.x <= objPos.x && playerPos.y <= objPos.y + objSize.y &&
+                playerPos.y >= objPos.y + objCollision.y)
+            {
+                m_moveAllowed.right = false;
+                if (isUsable && m_move == PlayerMove::Right)
+                {
+                    m_objectInFront = data;
+                }
+            }
+        }
+        else
+        {
+            if ((playerPos.x + playerSize.x) >= objPos.x && playerPos.x <= objPos.x + objSize.x &&
+                playerPos.y - m_speed <= objPos.y + objSize.y && playerPos.y + playerSize.y >= objPos.y)
+            {
+                m_moveAllowed.up = false;
+                if (isUsable && m_move == PlayerMove::Up)
+                {
+                    m_objectInFront = data;
+                }
+            }
+
+            if ((playerPos.x + playerSize.x) >= objPos.x && playerPos.x <= objPos.x + objSize.x &&
+                playerPos.y <= objPos.y + objSize.y && (playerPos.y + playerSize.y) + m_speed >= objPos.y)
+            {
+                m_moveAllowed.down = false;
+                if (isUsable && m_move == PlayerMove::Down)
+                {
+                    m_objectInFront = data;
+                }
+            }
+
+            if (playerPos.x >= objPos.x && playerPos.x - m_speed <= objPos.x + objSize.x &&
+                playerPos.y <= objPos.y + objSize.y && playerPos.y + playerSize.y >= objPos.y)
+            {
+                m_moveAllowed.left = false;
+                if (isUsable && m_move == PlayerMove::Left)
+                {
+                    m_objectInFront = data;
+                }
+            }
+
+            if ((playerPos.x + playerSize.x) + m_speed >= objPos.x && playerPos.x <= objPos.x &&
+                playerPos.y <= objPos.y + objSize.y && playerPos.y + playerSize.y >= objPos.y)
+            {
+                m_moveAllowed.right = false;
+                if (isUsable && m_move == PlayerMove::Right)
+                {
+                    m_objectInFront = data;
+                }
+            }
+        }
+    }
+}
+
 void Player::DrawInventoryItems(sf::RenderWindow &window, const vector<ItemCfg *> &itemCfg)
 {
     bool firstIcon = true;
@@ -122,7 +224,6 @@ void Player::DrawInventoryItems(sf::RenderWindow &window, const vector<ItemCfg *
 
 void Player::HandleMove(sf::Clock &clock, Game &game)
 {
-    auto world = game.GetWorld();
     auto items = game.GetItem();
     auto anim = game.GetAnim();
     auto elapsed = clock.getElapsedTime();
@@ -139,55 +240,6 @@ void Player::HandleMove(sf::Clock &clock, Game &game)
         {
             moveAnim = data->GetMoveAnim();
             break;
-        }
-    }
-
-    bool canMoveUP = true;
-    bool canMoveDOWN = true;
-    bool canMoveLEFT = true;
-    bool canMoveRIGHT = true;
-
-    for (const auto &data : world)
-    {
-        auto objPos = data->GetSprite().getPosition();
-        auto objCollision = data->GetCollision();
-        auto objSize = data->GetSprite().getLocalBounds().getSize();
-
-        if (objCollision.x != 0 && objCollision.y != 0)
-        {
-            if (playerPos.x >= objPos.x && playerPos.x <= objPos.x + objCollision.x &&
-                playerPos.y - m_speed <= objPos.y + objSize.y && playerPos.y >= objPos.y + objCollision.y)
-                canMoveUP = false;
-
-            if (playerPos.x >= objPos.x && playerPos.x <= objPos.x + objCollision.x &&
-                playerPos.y <= objPos.y + objCollision.y && playerPos.y + m_speed >= objPos.y + objCollision.y)
-                canMoveDOWN = false;
-
-            if (playerPos.x >= objPos.x && playerPos.x - m_speed <= objPos.x + objCollision.x &&
-                playerPos.y <= objPos.y + objSize.y && playerPos.y >= objPos.y + objCollision.y)
-                canMoveLEFT = false;
-
-            if (playerPos.x + m_speed >= objPos.x && playerPos.x <= objPos.x && playerPos.y <= objPos.y + objSize.y &&
-                playerPos.y >= objPos.y + objCollision.y)
-                canMoveRIGHT = false;
-        }
-        else
-        {
-            if ((playerPos.x + playerSize.x) >= objPos.x && playerPos.x <= objPos.x + objSize.x &&
-                playerPos.y - m_speed <= objPos.y + objSize.y && playerPos.y + playerSize.y >= objPos.y)
-                canMoveUP = false;
-
-            if ((playerPos.x + playerSize.x) >= objPos.x && playerPos.x <= objPos.x + objSize.x &&
-                playerPos.y <= objPos.y + objSize.y && (playerPos.y + playerSize.y) + m_speed >= objPos.y)
-                canMoveDOWN = false;
-
-            if (playerPos.x >= objPos.x && playerPos.x - m_speed <= objPos.x + objSize.x &&
-                playerPos.y <= objPos.y + objSize.y && playerPos.y + playerSize.y >= objPos.y)
-                canMoveLEFT = false;
-
-            if ((playerPos.x + playerSize.x) + m_speed >= objPos.x && playerPos.x <= objPos.x &&
-                playerPos.y <= objPos.y + objSize.y && playerPos.y + playerSize.y >= objPos.y)
-                canMoveRIGHT = false;
         }
     }
 
@@ -242,7 +294,7 @@ void Player::HandleMove(sf::Clock &clock, Game &game)
         else
             clock.restart();
 
-        if (playerPos.x - m_speed > 0 + (tileSize / 2) && canMoveLEFT)
+        if (playerPos.x - m_speed > 0 + (tileSize / 2) && m_moveAllowed.left)
             m_sprite->setPosition(playerPos.x - m_speed, playerPos.y);
         else
             m_sprite->setTextureRect(moveAnim.left00);
@@ -255,7 +307,7 @@ void Player::HandleMove(sf::Clock &clock, Game &game)
         else
             clock.restart();
 
-        if (playerPos.x + m_speed < width - tileSize && canMoveRIGHT)
+        if (playerPos.x + m_speed < width - tileSize && m_moveAllowed.right)
             m_sprite->setPosition(playerPos.x + m_speed, playerPos.y);
         else
             m_sprite->setTextureRect(moveAnim.right00);
@@ -268,7 +320,7 @@ void Player::HandleMove(sf::Clock &clock, Game &game)
         else
             clock.restart();
 
-        if (playerPos.y + m_speed < height - tileSize && canMoveDOWN)
+        if (playerPos.y + m_speed < height - tileSize && m_moveAllowed.down)
             m_sprite->setPosition(playerPos.x, playerPos.y + m_speed);
         else
             m_sprite->setTextureRect(moveAnim.down00);
@@ -282,7 +334,7 @@ void Player::HandleMove(sf::Clock &clock, Game &game)
         else
             clock.restart();
 
-        if (playerPos.y - m_speed > 0 + (tileSize / 2) && canMoveUP)
+        if (playerPos.y - m_speed > 0 + (tileSize / 2) && m_moveAllowed.up)
             m_sprite->setPosition(playerPos.x, playerPos.y - m_speed);
         else
             m_sprite->setTextureRect(moveAnim.up00);
@@ -311,127 +363,92 @@ void Player::HandleMove(sf::Clock &clock, Game &game)
     default:
         break;
     }
+
+    m_moveAllowed.up = true;
+    m_moveAllowed.down = true;
+    m_moveAllowed.left = true;
+    m_moveAllowed.right = true;
 }
 
 void Player::UseItem(Game &game)
 {
-    auto world = (game.GetWorld());
-    auto itemCfg = (game.GetItemCfg());
+    auto itemCfg = game.GetItemCfg();
     auto playerPos = m_sprite->getPosition();
-    auto playerSize = m_sprite->getLocalBounds().getSize();
-
-    bool useItem = false;
-    uint8_t itemOutputID = 0U;
     sf::Vector2f itemPos = {0.0F, 0.0F};
-    for (auto &data : world)
+
+    if (m_objectInFront != nullptr)
     {
-        auto objSprite = data->GetSprite();
-        auto objPos = objSprite.getPosition();
-        auto objCollision = data->GetCollision();
-        auto objSize = objSprite.getLocalBounds().getSize();
-        auto useable = data->GetUseable();
-        itemOutputID = data->GetItemOutputID();
+        auto useable = m_objectInFront->GetUseable();
 
         if (useable)
         {
-            /**
-            * TODO: Check Range to Object / Rework Object Collision
-            */
-            if (objCollision.x != 0U && objCollision.y != 0U)
+            auto itemOutputID = m_objectInFront->GetItemOutputID();
+
+            switch (m_move)
             {
-                if (playerPos.x >= objPos.x && playerPos.x <= objPos.x + objCollision.x &&
-                    playerPos.y - m_speed <= objPos.y + objSize.y && playerPos.y >= objPos.y + objCollision.y)
+            case PlayerMove::Up:
+                itemPos = {playerPos.x, playerPos.y + 20};
+                break;
+            case PlayerMove::Down:
+                itemPos = {playerPos.x, playerPos.y - 20};
+                break;
+            case PlayerMove::Right:
+                itemPos = {playerPos.x - 20, playerPos.y};
+                break;
+            case PlayerMove::Left:
+                itemPos = {playerPos.x + 20, playerPos.y};
+                break;
+            case PlayerMove::NotMoving:
+                switch (m_lastMove)
                 {
+                case PlayerMove::Up:
                     itemPos = {playerPos.x, playerPos.y + 20};
-                    useItem = true;
-                }
-
-                if (playerPos.x >= objPos.x && playerPos.x <= objPos.x + objCollision.x &&
-                    playerPos.y <= objPos.y + objCollision.y && playerPos.y + m_speed >= objPos.y + objCollision.y)
-                {
+                    break;
+                case PlayerMove::Down:
                     itemPos = {playerPos.x, playerPos.y - 20};
-                    useItem = true;
-                }
-
-                if (playerPos.x >= objPos.x && playerPos.x - m_speed <= objPos.x + objCollision.x &&
-                    playerPos.y <= objPos.y + objSize.y && playerPos.y >= objPos.y + objCollision.y)
-                {
-                    itemPos = {playerPos.x + 20, playerPos.y};
-                    useItem = true;
-                }
-
-                if (playerPos.x + m_speed >= objPos.x && playerPos.x <= objPos.x &&
-                    playerPos.y <= objPos.y + objSize.y && playerPos.y >= objPos.y + objCollision.y)
-                {
+                    break;
+                case PlayerMove::Right:
                     itemPos = {playerPos.x - 20, playerPos.y};
-                    useItem = true;
-                }
-            }
-            else
-            {
-                if ((playerPos.x + playerSize.x) >= objPos.x && playerPos.x <= objPos.x + objSize.x &&
-                    playerPos.y - m_speed <= objPos.y + objSize.y && playerPos.y + playerSize.y >= objPos.y)
-                {
-                    itemPos = {playerPos.x, playerPos.y + 20};
-                    useItem = true;
-                }
-
-                if ((playerPos.x + playerSize.x) >= objPos.x && playerPos.x <= objPos.x + objSize.x &&
-                    playerPos.y <= objPos.y + objSize.y && (playerPos.y + playerSize.y) + m_speed >= objPos.y)
-                {
-                    itemPos = {playerPos.x, playerPos.y - 20};
-                    useItem = true;
-                }
-
-                if (playerPos.x >= objPos.x && playerPos.x - m_speed <= objPos.x + objSize.x &&
-                    playerPos.y <= objPos.y + objSize.y && playerPos.y + playerSize.y >= objPos.y)
-                {
+                    break;
+                case PlayerMove::Left:
                     itemPos = {playerPos.x + 20, playerPos.y};
-                    useItem = true;
+                    break;
+                default:
+                    break;
                 }
+                break;
 
-                if ((playerPos.x + playerSize.x) + m_speed >= objPos.x && playerPos.x <= objPos.x &&
-                    playerPos.y <= objPos.y + objSize.y && playerPos.y + playerSize.y >= objPos.y)
-                {
-                    itemPos = {playerPos.x - 20, playerPos.y};
-                    useItem = true;
-                }
-            }
-
-            if (useItem)
-            {
-                data->UpdatePosition();
-                data->UpdateTextureRect();
-                data->SetUseable(false);
+            default:
                 break;
             }
-        }
-    }
 
-    if (useItem)
-    {
-        random_device rd;  // a seed source for the random number engine
-        mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
-        for (const auto &data : itemCfg)
-        {
-            sf::Sprite itemSprite;
-            auto texture = data->GetTexture();
-            auto textureData = data->GetTextureData();
-            auto itemID = data->GetID();
-            auto maxDrop = data->GetMaxDrop();
+            m_objectInFront->UpdatePosition();
+            m_objectInFront->UpdateTextureRect();
+            m_objectInFront->SetUseable(false);
 
-            // Random Drop Count
-            uniform_int_distribution<> dist(1U, maxDrop);
-
-            if (itemOutputID == itemID)
+            random_device rd;  // a seed source for the random number engine
+            mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
+            for (const auto &data : itemCfg)
             {
-                itemSprite.setTexture(*texture);
-                itemSprite.setTextureRect(textureData);
-                itemSprite.setPosition(itemPos.x, itemPos.y);
+                sf::Sprite itemSprite;
+                auto texture = data->GetTexture();
+                auto textureData = data->GetTextureData();
+                auto itemID = data->GetID();
+                auto maxDrop = data->GetMaxDrop();
 
-                auto item = new Item(itemSprite, itemID, dist(gen));
-                game.SetItems(item);
-                break;
+                // Random Drop Count
+                uniform_int_distribution<> dist(1U, maxDrop);
+
+                if (itemOutputID == itemID)
+                {
+                    itemSprite.setTexture(*texture);
+                    itemSprite.setTextureRect(textureData);
+                    itemSprite.setPosition(itemPos.x, itemPos.y);
+
+                    auto item = new Item(itemSprite, itemID, dist(gen));
+                    game.SetItems(item);
+                    break;
+                }
             }
         }
     }
