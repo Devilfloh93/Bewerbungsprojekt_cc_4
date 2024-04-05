@@ -2,6 +2,35 @@
     {
         "pos": [
             [
+                40,
+                40
+            ]
+        ],
+        "itemOutputID": [
+            1,
+            2
+        ],
+        "textureID": 1,
+        "textureData": [
+            1,
+            11,
+            30,
+            22,
+            0,
+            0
+        ],
+        "textureProgData": [
+            49,
+            40,
+            32,
+            25,
+            0,
+            0
+        ]
+    },
+    {
+        "pos": [
+            [
                 100,
                 100
             ],
@@ -66,7 +95,9 @@
                 201
             ]
         ],
-        "itemOutputID": 1,
+        "itemOutputID": [
+            1
+        ],
         "textureID": 4,
         "textureData": [
             391,
@@ -112,7 +143,9 @@
                 190
             ]
         ],
-        "itemOutputID": 2,
+        "itemOutputID": [
+            2
+        ],
         "textureID": 4,
         "textureData": [
             454,
@@ -127,32 +160,6 @@
             44,
             22,
             21,
-            0,
-            0
-        ]
-    },
-    {
-        "pos": [
-            [
-                40,
-                40
-            ]
-        ],
-        "itemOutputID": 0,
-        "textureID": 1,
-        "textureData": [
-            1,
-            11,
-            30,
-            22,
-            0,
-            0
-        ],
-        "textureProgData": [
-            0,
-            0,
-            0,
-            0,
             0,
             0
         ]

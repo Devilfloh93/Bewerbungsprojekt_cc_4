@@ -415,43 +415,6 @@ void Player::UseItem(Game &game)
         {
             auto itemOutputID = m_objectInFront->GetItemOutputID();
 
-            switch (m_move)
-            {
-            case PlayerMove::Up:
-                itemPos = {playerPos.x, playerPos.y + 20};
-                break;
-            case PlayerMove::Down:
-                itemPos = {playerPos.x, playerPos.y - 20};
-                break;
-            case PlayerMove::Right:
-                itemPos = {playerPos.x - 20, playerPos.y};
-                break;
-            case PlayerMove::Left:
-                itemPos = {playerPos.x + 20, playerPos.y};
-                break;
-            case PlayerMove::NotMoving:
-                switch (m_lastMove)
-                {
-                case PlayerMove::Up:
-                    itemPos = {playerPos.x, playerPos.y + 20};
-                    break;
-                case PlayerMove::Down:
-                    itemPos = {playerPos.x, playerPos.y - 20};
-                    break;
-                case PlayerMove::Right:
-                    itemPos = {playerPos.x - 20, playerPos.y};
-                    break;
-                case PlayerMove::Left:
-                    itemPos = {playerPos.x + 20, playerPos.y};
-                    break;
-                default:
-                    break;
-                }
-                break;
-
-            default:
-                break;
-            }
 
             m_objectInFront->UpdatePosition();
             m_objectInFront->UpdateTextureRect();
@@ -459,6 +422,7 @@ void Player::UseItem(Game &game)
 
             random_device rd;  // a seed source for the random number engine
             mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
+            uint16_t posIncrease = 0;
             for (const auto &data : itemCfg)
             {
                 sf::Sprite itemSprite;
@@ -470,15 +434,56 @@ void Player::UseItem(Game &game)
                 // Random Drop Count
                 uniform_int_distribution<> dist(1U, maxDrop);
 
-                if (itemOutputID == itemID)
+                for (const auto &data1 : itemOutputID)
                 {
-                    itemSprite.setTexture(*texture);
-                    itemSprite.setTextureRect(textureData);
-                    itemSprite.setPosition(itemPos.x, itemPos.y);
+                    if (data1 == itemID)
+                    {
+                        posIncrease += 20;
+                        switch (m_move)
+                        {
+                        case PlayerMove::Up:
+                            itemPos = {playerPos.x, playerPos.y + posIncrease};
+                            break;
+                        case PlayerMove::Down:
+                            itemPos = {playerPos.x, playerPos.y - posIncrease};
+                            break;
+                        case PlayerMove::Right:
+                            itemPos = {playerPos.x - posIncrease, playerPos.y};
+                            break;
+                        case PlayerMove::Left:
+                            itemPos = {playerPos.x + posIncrease, playerPos.y};
+                            break;
+                        case PlayerMove::NotMoving:
+                            switch (m_lastMove)
+                            {
+                            case PlayerMove::Up:
+                                itemPos = {playerPos.x, playerPos.y + posIncrease};
+                                break;
+                            case PlayerMove::Down:
+                                itemPos = {playerPos.x, playerPos.y - posIncrease};
+                                break;
+                            case PlayerMove::Right:
+                                itemPos = {playerPos.x - posIncrease, playerPos.y};
+                                break;
+                            case PlayerMove::Left:
+                                itemPos = {playerPos.x + posIncrease, playerPos.y};
+                                break;
+                            default:
+                                break;
+                            }
+                            break;
 
-                    auto item = new Item(itemSprite, itemID, dist(gen));
-                    game.SetItems(item);
-                    break;
+                        default:
+                            break;
+                        }
+
+                        itemSprite.setTexture(*texture);
+                        itemSprite.setTextureRect(textureData);
+                        itemSprite.setPosition(itemPos.x, itemPos.y);
+
+                        auto item = new Item(itemSprite, itemID, dist(gen));
+                        game.SetItems(item);
+                    }
                 }
             }
         }

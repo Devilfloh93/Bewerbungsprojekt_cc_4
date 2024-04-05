@@ -418,7 +418,11 @@ Player Game::InitPlayer()
 
     sprite->setPosition(80.0F, 80.0F);
 
-    auto player = Player(sprite, "PlayerName", SurvivalStats{100.0F, 100.0F, 100.0F}, 1.0F, m_defaultPlayerTextureID);
+    auto player = Player(sprite,
+                         "PlayerName",
+                         SurvivalStats{.health = 100.0F, .water = 100.0F, .food = 100.0F},
+                         1.0F,
+                         m_defaultPlayerTextureID);
     return player;
 }
 
@@ -684,7 +688,7 @@ void Game::InitWorld()
         for (const auto &data : jsonData)
         {
             Collision collision = {.x = data["textureData"][4], .y = data["textureData"][5]};
-            uint8_t itemOutputID = data["itemOutputID"];
+            vector<uint8_t> itemOutputID = data["itemOutputID"];
             sf::IntRect textureData = {data["textureData"][0],
                                        data["textureData"][1],
                                        data["textureData"][2],
