@@ -1,26 +1,26 @@
 [
     {
         "id": 0,
-        "path": "./ressources/textures/Buttons_all_01.png"
+        "path": "./ressources/textures/gui/Buttons_all_01.png"
     },
     {
         "id": 1,
-        "path": "./ressources/textures/Chests.png"
+        "path": "./ressources/textures/objects/Chests.png"
     },
     {
         "id": 2,
-        "path": "./ressources/textures/Human-Worker-Red.png"
+        "path": "./ressources/textures/character/Human-Worker-Red.png"
     },
     {
         "id": 3,
-        "path": "./ressources/textures/NatureLoot.png"
+        "path": "./ressources/textures/loot/NatureLoot.png"
     },
     {
         "id": 4,
-        "path": "./ressources/textures/Premium_TreesUpdated_No_Outline.png"
+        "path": "./ressources/textures/objects/Premium_TreesUpdated_No_Outline.png"
     },
     {
         "id": 5,
-        "path": "./ressources/textures/TileSet_V2.png"
+        "path": "./ressources/textures/tiles/TileSet_V2.png"
     }
 ]

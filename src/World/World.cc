@@ -2,11 +2,11 @@
 
 World::World(const sf::Sprite &sprite,
              const Collision collision,
-             const uint8_t itemOutputID,
+             const vector<uint8_t> itemOutputID,
              const TextureProgData textureProgData)
     : m_sprite(sprite), m_collision(collision), m_itemOutputID(itemOutputID), m_textureProgData(textureProgData)
 {
-    if (itemOutputID > 0)
+    if (itemOutputID.size() > 0)
     {
         m_useable = true;
     }
@@ -26,7 +26,7 @@ Collision World::GetCollision() const
     return m_collision;
 }
 
-uint8_t World::GetItemOutputID() const
+vector<uint8_t> World::GetItemOutputID() const
 {
     return m_itemOutputID;
 }

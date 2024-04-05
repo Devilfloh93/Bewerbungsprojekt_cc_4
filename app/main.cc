@@ -175,16 +175,12 @@ int main()
                     if (event.mouseWheelScroll.delta > 0U)
                     {
                         if (game.GetZoom() < game.GetMaxZoom())
-                        {
                             game.SetZoom(1U, 0.5F);
-                        }
                     }
                     else
                     {
                         if (game.GetZoom() > 0U)
-                        {
                             game.SetZoom(-1, 2.0F);
-                        }
                     }
 
                     game.UpdateView();
