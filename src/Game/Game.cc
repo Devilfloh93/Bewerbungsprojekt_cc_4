@@ -15,7 +15,7 @@ Game::Game(const uint16_t windowWidth, const uint16_t windowHeight)
     m_maxZoom = 3U;
     m_playing = false;
     m_defaultPlayerTextureID = 2U;
-
+    m_statDecay = {.food = 1.2F, .water = 1.7F};
     m_gameWidth = 8800U;
     m_gameHeight = 4800U;
     m_tileSize = 32U;
@@ -30,6 +30,11 @@ MenuState Game::GetMenuState() const
 void Game::SetPlaying(const bool playing)
 {
     m_playing = playing;
+}
+
+StatDecay Game::GetStatDecay() const
+{
+    return m_statDecay;
 }
 
 bool Game::GetPlaying() const
@@ -140,7 +145,6 @@ void Game::Quit(sf::RenderWindow &window)
 {
     window.close();
 }
-
 
 void Game::SetWindowHeight(const uint16_t height)
 {
@@ -414,8 +418,7 @@ Player Game::InitPlayer()
 
     sprite->setPosition(80.0F, 80.0F);
 
-    auto player =
-        Player(sprite, "PlayerName", PlayerSurvivalStats{100.0F, 100.0F, 100.0F}, 1.0F, m_defaultPlayerTextureID);
+    auto player = Player(sprite, "PlayerName", SurvivalStats{100.0F, 100.0F, 100.0F}, 1.0F, m_defaultPlayerTextureID);
     return player;
 }
 
