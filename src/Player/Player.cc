@@ -7,7 +7,7 @@
 
 Player::Player(sf::Sprite *sprite,
                const string_view name,
-               const PlayerSurvivalStats survivalStats,
+               const SurvivalStats survivalStats,
                const float baseSpeed,
                const uint8_t animID)
     : m_sprite(sprite), m_name(name), m_survivalStats(survivalStats), m_baseSpeed(baseSpeed), m_animID(animID)
@@ -170,6 +170,37 @@ void Player::CheckCollision(Game &game)
                 {
                     m_objectInFront = data;
                 }
+            }
+        }
+    }
+}
+
+void Player::UpdateStats(const sf::RenderWindow &window, const Game &game)
+{
+    sf::Clock clock;
+    auto statDecay = game.GetStatDecay();
+    while (window.isOpen())
+    {
+        if (game.GetPlaying() && game.GetMenuState() == MenuState::Playing)
+        {
+            auto elapsed = clock.getElapsedTime();
+            if (elapsed.asSeconds() >= 1)
+            {
+                if (m_survivalStats.food - statDecay.food >= 0U)
+                {
+                    m_survivalStats.food -= statDecay.food;
+                }
+                if (m_survivalStats.water - statDecay.water >= 0U)
+                {
+                    m_survivalStats.water -= statDecay.water;
+                }
+
+                cout << format("Food: {} Water: {} Health: {}",
+                               m_survivalStats.food,
+                               m_survivalStats.water,
+                               m_survivalStats.health)
+                     << endl;
+                clock.restart();
             }
         }
     }

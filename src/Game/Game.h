@@ -11,12 +11,17 @@
 #include <cstdint>
 #include <memory>
 
+struct StatDecay
+{
+    float food;
+    float water;
+};
+
 struct ReturnView
 {
     sf::Vector2f viewCenter;
     sf::Vector2f viewSize;
 };
-
 
 enum class MenuState
 {
@@ -27,9 +32,11 @@ enum class MenuState
     Inventory
 };
 
+
 class Player;
 class Title;
 class Button;
+
 class Game
 {
 
@@ -54,6 +61,8 @@ public:
     vector<ItemCfg *> GetItemCfg() const;
     vector<Item *> GetItem() const;
     vector<Anim *> GetAnim() const;
+
+    StatDecay GetStatDecay() const;
 
     void SetItems(Item *item);
     void RemoveItems(const size_t i);
@@ -124,4 +133,5 @@ private:
     sf::View m_menuView;
     sf::Vector2f m_defaultCenter;
     uint8_t m_defaultPlayerTextureID;
+    StatDecay m_statDecay;
 };

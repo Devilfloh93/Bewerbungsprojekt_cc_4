@@ -2,13 +2,12 @@
 #include "Game.h"
 #include <SFML/Graphics.hpp>
 #include <World.h>
-#include <array>
 #include <cstdint>
 #include <memory>
 #include <string>
 
 class Game;
-struct PlayerSurvivalStats
+struct SurvivalStats
 {
     float health;
     float water;
@@ -37,7 +36,7 @@ class Player
 public:
     Player(sf::Sprite *sprite,
            const string_view name,
-           const PlayerSurvivalStats survivalStats,
+           const SurvivalStats survivalStats,
            const float baseSpeed,
            const uint8_t animID);
     ~Player() = default;
@@ -54,6 +53,7 @@ public:
     PlayerMove GetLastMove() const;
     void CheckCollision(Game &game);
 
+    void UpdateStats(const sf::RenderWindow &window, const Game &game);
     void SetMove(const PlayerMove move);
     void SetSpeed(const float speed);
 
@@ -66,7 +66,7 @@ public:
 private:
     sf::Sprite *m_sprite;
     string m_name;
-    PlayerSurvivalStats m_survivalStats;
+    SurvivalStats m_survivalStats;
     float m_baseSpeed;
     float m_speed;
     PlayerMove m_move;

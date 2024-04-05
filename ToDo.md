@@ -22,7 +22,7 @@
 
 ## Multithreading
 
-* Swap Texture Handling to new Thread for better performance?
+* New Threads for better performance?
 
 ## Rework
 
