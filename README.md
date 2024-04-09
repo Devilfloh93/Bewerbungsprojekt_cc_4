@@ -27,6 +27,11 @@
 * Datein und Ordner die erstellt werden erfolgen in dem selben Ordner für schnelle und Problemlose Löschung
 * Alle erstellten Datein und Texturen sind einsehbar
 
+## ToDo und Ideen
+
+* <https://github.com/Devilfloh93/Bewerbungsprojekt_cc_4/blob/main/Ideas.md>
+* <https://github.com/Devilfloh93/Bewerbungsprojekt_cc_4/blob/main/ToDo.md>
+
 ## Genutzte Texturen / Animationen / Fonts
 
 * <https://heraldod.itch.io/bitmap-fonts>
