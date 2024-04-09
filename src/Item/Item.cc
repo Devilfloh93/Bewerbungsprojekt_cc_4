@@ -14,11 +14,6 @@ uint8_t ItemCfg::GetID() const
     return m_ID;
 }
 
-string ItemCfg::GetName() const
-{
-    return m_name;
-}
-
 sf::Texture *ItemCfg::GetTexture() const
 {
     return m_texture;

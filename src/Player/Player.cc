@@ -18,26 +18,6 @@ Player::Player(sf::Sprite *sprite, const uint8_t animID) : m_sprite(sprite), m_a
     m_objectInFront = nullptr;
 }
 
-string_view Player::GetName() const
-{
-    return m_name;
-}
-
-float Player::GetHealth() const
-{
-    return m_survivalStats.health;
-}
-
-float Player::GetWater() const
-{
-    return m_survivalStats.water;
-}
-
-float Player::GetFood() const
-{
-    return m_survivalStats.food;
-}
-
 PlayerMove Player::GetMove() const
 {
     return m_move;
@@ -46,16 +26,6 @@ PlayerMove Player::GetMove() const
 PlayerMove Player::GetLastMove() const
 {
     return m_lastMove;
-}
-
-float Player::GetBaseSpeed() const
-{
-    return m_baseSpeed;
-}
-
-float Player::GetSpeed() const
-{
-    return m_speed;
 }
 
 void Player::SetMove(const PlayerMove move)
@@ -72,11 +42,6 @@ void Player::SetSpeed(const float speed)
 sf::Sprite *Player::GetSprite() const
 {
     return m_sprite;
-}
-
-map<uint32_t, uint16_t> Player::GetItems() const
-{
-    return m_items;
 }
 
 void Player::Load()

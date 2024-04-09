@@ -28,11 +28,6 @@ MenuState Game::GetMenuState() const
     return m_menuState;
 }
 
-void Game::SetPlaying(const bool playing)
-{
-    m_playing = playing;
-}
-
 StatDecay Game::GetStatDecay() const
 {
     return m_statDecay;
@@ -46,16 +41,6 @@ bool Game::GetPlaying() const
 void Game::SetMenuState(const MenuState menuState)
 {
     m_menuState = menuState;
-}
-
-uint8_t Game::GetMaxZoom() const
-{
-    return m_maxZoom;
-}
-
-uint8_t Game::GetZoom() const
-{
-    return m_zoom;
 }
 
 void Game::SetZoom(const uint8_t zoom)
@@ -72,26 +57,6 @@ void Game::SetZoom(const uint8_t zoom, const float zoomLevel)
 sf::View Game::GetView() const
 {
     return m_view;
-}
-
-sf::View Game::GetMenuView() const
-{
-    return m_menuView;
-}
-
-uint16_t Game::GetWindowWidth() const
-{
-    return m_windowWidth;
-}
-
-uint16_t Game::GetWindowHeight() const
-{
-    return m_windowHeight;
-}
-
-uint32_t Game::GetMaxTiles() const
-{
-    return m_maxTiles;
 }
 
 uint8_t Game::GetTileSize() const
@@ -145,15 +110,6 @@ void Game::RemoveItems(const size_t i)
 void Game::Quit(sf::RenderWindow &window)
 {
     window.close();
-}
-
-void Game::SetWindowHeight(const uint16_t height)
-{
-    m_windowHeight = height;
-}
-void Game::SetWindowWidth(const uint16_t width)
-{
-    m_windowWidth = width;
 }
 
 void Game::UpdateZoom(const float delta)

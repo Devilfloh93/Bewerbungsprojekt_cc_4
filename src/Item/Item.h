@@ -23,7 +23,6 @@ public:
     sf::IntRect GetTextureData() const;
 
     uint8_t GetID() const;
-    string GetName() const;
     uint8_t GetMaxDrop() const;
 
 private:

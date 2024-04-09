@@ -46,16 +46,10 @@ public:
 
     bool GetPlaying() const;
     MenuState GetMenuState() const;
-    uint8_t GetMaxZoom() const;
-    uint8_t GetZoom() const;
-    uint16_t GetWindowWidth() const;
-    uint16_t GetWindowHeight() const;
-    uint32_t GetMaxTiles() const;
     uint8_t GetTileSize() const;
     uint16_t GetGameWidth() const;
     uint16_t GetGameHeight() const;
     sf::View GetView() const;
-    sf::View GetMenuView() const;
 
     vector<World *> GetWorld() const;
     vector<ItemCfg *> GetItemCfg() const;
@@ -67,12 +61,9 @@ public:
     void SetItems(Item *item);
     void RemoveItems(const size_t i);
 
-    void SetPlaying(const bool playing);
     void SetMenuState(const MenuState menuState);
     void SetZoom(const uint8_t zoom);
     void SetZoom(const uint8_t zoom, const float zoomLevel);
-    void SetWindowHeight(const uint16_t height);
-    void SetWindowWidth(const uint16_t width);
 
     void InitAnim();
 
