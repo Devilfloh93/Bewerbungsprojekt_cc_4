@@ -24,7 +24,7 @@
 
 * Laden Sie die Zip Datei runter und entpacken diese. <https://github.com/Devilfloh93/Bewerbungsprojekt_cc_4/releases/tag/%23Game>
 * Gehen Sie in den Entpackten Ordner und starten Sie die GoodGame.exe
-* Datein und Ordner die erstellt werden erfolgen in dem selben Ordner für schnelle und Problemlose Löschung
+* Datein und Ordner die vom Program erstellt werden, sind in dem selben Ordner, für schnelle und Problemlose Löschung, abgelegt
 * Alle erstellten Datein und Texturen sind einsehbar
 
 ## ToDo und Ideen
