@@ -22,5 +22,9 @@
     {
         "id": 5,
         "path": "./ressources/textures/tiles/TileSet_V2.png"
+    },
+    {
+        "id": 6,
+        "path": "./ressources/textures/gui/statbar.png"
     }
 ]
