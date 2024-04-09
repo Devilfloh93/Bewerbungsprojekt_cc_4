@@ -37,14 +37,7 @@ public:
     Player(sf::Sprite *sprite, const uint8_t animID);
     ~Player() = default;
 
-    string_view GetName() const;
-    float GetHealth() const;
-    float GetWater() const;
-    float GetFood() const;
-    float GetBaseSpeed() const;
-    float GetSpeed() const;
     sf::Sprite *GetSprite() const;
-    map<uint32_t, uint16_t> GetItems() const;
 
     PlayerMove GetMove() const;
     PlayerMove GetLastMove() const;
