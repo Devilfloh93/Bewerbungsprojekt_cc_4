@@ -34,11 +34,7 @@ enum class PlayerMove
 class Player
 {
 public:
-    Player(sf::Sprite *sprite,
-           const string_view name,
-           const SurvivalStats survivalStats,
-           const float baseSpeed,
-           const uint8_t animID);
+    Player(sf::Sprite *sprite, const uint8_t animID);
     ~Player() = default;
 
     string_view GetName() const;
@@ -48,6 +44,7 @@ public:
     float GetBaseSpeed() const;
     float GetSpeed() const;
     sf::Sprite *GetSprite() const;
+    map<uint32_t, uint16_t> GetItems() const;
 
     PlayerMove GetMove() const;
     PlayerMove GetLastMove() const;
@@ -62,6 +59,10 @@ public:
     void UseItem(Game &game);
 
     void DrawInventoryItems(sf::RenderWindow &window, const vector<ItemCfg *> &itemCfg);
+
+    void Load();
+    void Save();
+    void CreateFolder();
 
 private:
     sf::Sprite *m_sprite;

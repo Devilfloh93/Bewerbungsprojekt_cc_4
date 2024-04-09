@@ -172,18 +172,7 @@ int main()
             case sf::Event::MouseWheelScrolled:
                 if (game.GetPlaying() && state == MenuState::Playing)
                 {
-                    if (event.mouseWheelScroll.delta > 0U)
-                    {
-                        if (game.GetZoom() < game.GetMaxZoom())
-                            game.SetZoom(1U, 0.5F);
-                    }
-                    else
-                    {
-                        if (game.GetZoom() > 0U)
-                            game.SetZoom(-1, 2.0F);
-                    }
-
-                    game.UpdateView();
+                    game.UpdateZoom(event.mouseWheelScroll.delta);
                 }
                 break;
             default:
@@ -199,13 +188,16 @@ int main()
 
         if (game.GetPlaying() && menuState == MenuState::Playing)
         {
-            window.setView(game.GetView());
+            auto gameView = game.GetView();
+            auto playerSprite = *(player.GetSprite());
+
+            window.setView(gameView);
 
             game.DrawSurface(window, player);
             player.HandleMove(clock, game);
 
             game.DrawItems(window);
-            window.draw(*(player.GetSprite()));
+            window.draw(playerSprite);
             game.DrawWorld(window);
         }
 
@@ -231,6 +223,7 @@ int main()
         window.display();
     }
 
+    player.Save();
     thread.Join();
     return 0;
 }

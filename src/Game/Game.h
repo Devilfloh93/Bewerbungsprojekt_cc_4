@@ -95,6 +95,8 @@ public:
 
     void InitWorld();
 
+    void UpdateZoom(const float delta);
+
     bool HandleBtnClicked(sf::RenderWindow &window);
 
     void DrawSurface(sf::RenderWindow &window, Player &player);
