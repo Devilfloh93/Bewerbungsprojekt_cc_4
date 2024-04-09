@@ -2,7 +2,7 @@
 
 ## Vorwort
 
-* Dieses Projekt dient zu Übungszwecken und als beigabe für Bewerbungen auf einen Praktikumsplatz zum Fachinformatiker für Anwendungsentwicklung für das 9 monatige Pflichtpraktikum der IHK.
+* Dieses Projekt dient zu Übungszwecken und als beigabe für Bewerbungen auf einen Praktikumsplatz zum Fachinformatiker für Anwendungsentwicklung, für das 9 monatige Pflichtpraktikum der IHK.
 * Dieses Projekt ist in der Entwicklung und noch nicht abgeschlossen.
 
 ## Projektübersicht
