@@ -49,12 +49,16 @@ public:
     uint8_t GetTileSize() const;
     uint16_t GetGameWidth() const;
     uint16_t GetGameHeight() const;
+    uint16_t GetWindowZoomHeight() const;
+    uint16_t GetWindowZoomWidth() const;
+
     sf::View GetView() const;
 
     vector<World *> GetWorld() const;
     vector<ItemCfg *> GetItemCfg() const;
     vector<Item *> GetItem() const;
     vector<Anim *> GetAnim() const;
+    vector<Texture *> GetTexture() const;
 
     StatDecay GetStatDecay() const;
 
@@ -111,6 +115,8 @@ private:
     uint16_t m_windowHeight;
     uint16_t m_gameWidth;
     uint16_t m_gameHeight;
+    uint16_t m_windowZoomWidth;
+    uint16_t m_windowZoomHeight;
     uint8_t m_tileSize;
     uint32_t m_maxTiles;
     vector<ItemCfg *> m_itemCfg;

@@ -47,6 +47,9 @@ int main()
     auto player = game.InitPlayer();
     cout << "Player Init Done!" << endl;
 
+    // Draw Stats Init
+    player.InitDrawStats(game);
+
     // Menu Init
     game.InitMenu();
     cout << "Menu Init Done!" << endl;
@@ -189,7 +192,7 @@ int main()
         if (game.GetPlaying() && menuState == MenuState::Playing)
         {
             auto gameView = game.GetView();
-            auto playerSprite = *(player.GetSprite());
+            auto playerSprite = player.GetSprite();
 
             window.setView(gameView);
 
@@ -197,8 +200,10 @@ int main()
             player.HandleMove(clock, game);
 
             game.DrawItems(window);
-            window.draw(playerSprite);
+            window.draw(*playerSprite);
             game.DrawWorld(window);
+
+            player.DrawStats(window, game);
         }
 
         switch (menuState)

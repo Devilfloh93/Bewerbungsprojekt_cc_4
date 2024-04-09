@@ -255,6 +255,90 @@ void Player::UpdateStats(const sf::RenderWindow &window, const Game &game)
     }
 }
 
+void Player::InitDrawStats(const Game &game)
+{
+    ifstream file("./data/playerStatCfg.json");
+
+    if (file.is_open())
+    {
+        auto jsonData = json::parse(file);
+
+        for (const auto &data : jsonData)
+        {
+            sf::Texture *texture;
+            uint8_t add = data["add"];
+            uint8_t textureID = data["textureID"];
+            auto textureRect = sf::IntRect{data["textureData"][0],
+                                           data["textureData"][1],
+                                           data["textureData"][2],
+                                           data["textureData"][3]};
+            bool background = data["background"];
+
+            for (const auto &data : game.GetTexture())
+            {
+                if (data->GetID() == textureID)
+                {
+                    texture = data->GetTexture();
+                }
+            }
+
+            for (size_t i = 0; i < add; ++i)
+            {
+                auto sprite = new sf::Sprite();
+
+                sprite->setTexture(*texture);
+                sprite->setTextureRect(textureRect);
+
+                if (background)
+                {
+                    m_statBackgroundSprites.push_back(sprite);
+                }
+                else
+                {
+                    m_statSprites.push_back(sprite);
+                }
+            }
+        }
+        file.close();
+    }
+}
+
+void Player::DrawStats(sf::RenderWindow &window, const Game &game)
+{
+    m_stateTextureSize = 66;
+    sf::Sprite sprite;
+    auto height = (game.GetView().getCenter().y + (game.GetWindowZoomHeight() / 2)) - 10.0F;
+    auto width = (game.GetView().getCenter().x - (game.GetWindowZoomWidth() / 2)) + 5.0F;
+
+    for (const auto &data : m_statBackgroundSprites)
+    {
+        data->setPosition(sf::Vector2f{width, height});
+
+        window.draw(*data);
+
+        height -= 10;
+    }
+
+    height = (game.GetView().getCenter().y + (game.GetWindowZoomHeight() / 2)) - 10.0F;
+    for (const auto &data : m_statSprites)
+    {
+        data->setPosition(sf::Vector2f{width, height});
+        auto textureRectSize = data->getTextureRect().getSize();
+        auto textureRectPos = data->getTextureRect().getPosition();
+
+        uint8_t newTextureRectSizeX = (m_survivalStats.food * m_stateTextureSize) / 100;
+        if (textureRectSize.x > 10)
+        {
+            auto textureRect = sf::IntRect{textureRectPos.x, textureRectPos.y, newTextureRectSizeX, textureRectSize.y};
+            data->setTextureRect(textureRect);
+        }
+
+        window.draw(*data);
+
+        height -= 10;
+    }
+}
+
 void Player::DrawInventoryItems(sf::RenderWindow &window, const vector<ItemCfg *> &itemCfg)
 {
     bool firstIcon = true;

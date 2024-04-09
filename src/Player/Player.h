@@ -42,7 +42,9 @@ public:
     PlayerMove GetMove() const;
     PlayerMove GetLastMove() const;
     void CheckCollision(Game &game);
+    void InitDrawStats(const Game &game);
 
+    void DrawStats(sf::RenderWindow &window, const Game &game);
     void UpdateStats(const sf::RenderWindow &window, const Game &game);
     void SetMove(const PlayerMove move);
     void SetSpeed(const float speed);
@@ -66,7 +68,10 @@ private:
     PlayerMove m_move;
     PlayerMove m_lastMove;
     map<uint32_t, uint16_t> m_items;
+    vector<sf::Sprite *> m_statSprites;
+    vector<sf::Sprite *> m_statBackgroundSprites;
     uint8_t m_animID;
     MoveAllowed m_moveAllowed;
     World *m_objectInFront;
+    uint8_t m_stateTextureSize;
 };

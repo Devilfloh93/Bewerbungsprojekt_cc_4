@@ -19,8 +19,15 @@ Game::Game(const uint16_t windowWidth, const uint16_t windowHeight)
     m_statDecay = {.food = 1.2F, .water = 1.7F};
     m_gameWidth = 8800U;
     m_gameHeight = 4800U;
+    m_windowZoomHeight = m_windowHeight;
+    m_windowZoomWidth = m_windowWidth;
     m_tileSize = 32U;
     m_maxTiles = ((m_gameWidth * m_gameHeight) / m_tileSize) / m_tileSize;
+}
+
+vector<Texture *> Game::GetTexture() const
+{
+    return m_textures;
 }
 
 MenuState Game::GetMenuState() const
@@ -31,6 +38,16 @@ MenuState Game::GetMenuState() const
 StatDecay Game::GetStatDecay() const
 {
     return m_statDecay;
+}
+
+uint16_t Game::GetWindowZoomHeight() const
+{
+    return m_windowZoomHeight;
+}
+
+uint16_t Game::GetWindowZoomWidth() const
+{
+    return m_windowZoomWidth;
 }
 
 bool Game::GetPlaying() const
@@ -117,12 +134,20 @@ void Game::UpdateZoom(const float delta)
     if (delta > 0U)
     {
         if (m_zoom < m_maxZoom)
+        {
             SetZoom(1U, 0.5F);
+            m_windowZoomWidth /= 2U;
+            m_windowZoomHeight /= 2U;
+        }
     }
     else
     {
         if (m_zoom > 0U)
+        {
             SetZoom(-1, 2.0F);
+            m_windowZoomWidth *= 2U;
+            m_windowZoomHeight *= 2U;
+        }
     }
 
     UpdateView();
@@ -142,6 +167,8 @@ void Game::InitViews()
 
     m_view.zoom(0.5F);
     m_zoom = 1U;
+    m_windowZoomWidth /= 2U;
+    m_windowZoomHeight /= 2U;
 
     m_view.move({-(center.x / 2), -(center.y / 2)});
 }
@@ -218,7 +245,6 @@ void Game::UpdateView()
     if (center.y >= m_gameHeight - (size.y / 2U))
     {
         m_view.setCenter({center.x, m_gameHeight - (size.y / 2U)});
-        center = m_view.getCenter();
     }
 }
 

@@ -1,0 +1,46 @@
+[
+    {
+        "add": 3,
+        "background": true,
+        "textureID": 6,
+        "textureData": [
+            40,
+            72,
+            66,
+            7
+        ]
+    },
+    {
+        "add": 1,
+        "background": false,
+        "textureID": 6,
+        "textureData": [
+            40,
+            84,
+            66,
+            7
+        ]
+    },
+    {
+        "add": 1,
+        "background": false,
+        "textureID": 6,
+        "textureData": [
+            40,
+            92,
+            66,
+            7
+        ]
+    },
+    {
+        "add": 1,
+        "background": false,
+        "textureID": 6,
+        "textureData": [
+            40,
+            100,
+            66,
+            7
+        ]
+    }
+]
