@@ -1,17 +1,17 @@
 #include "Player.h"
 #include "Utilities.h"
+#include <filesystem>
 #include <format>
+#include <fstream>
 #include <iostream>
 #include <memory>
 #include <random>
 
-Player::Player(sf::Sprite *sprite,
-               const string_view name,
-               const SurvivalStats survivalStats,
-               const float baseSpeed,
-               const uint8_t animID)
-    : m_sprite(sprite), m_name(name), m_survivalStats(survivalStats), m_baseSpeed(baseSpeed), m_animID(animID)
+Player::Player(sf::Sprite *sprite, const uint8_t animID) : m_sprite(sprite), m_animID(animID)
 {
+    m_sprite->setPosition(80.0F, 80.0F);
+    m_survivalStats = {.health = 100.0F, .water = 100.0F, .food = 100.0F};
+    m_baseSpeed = 1.0F;
     m_speed = m_baseSpeed;
     m_move = PlayerMove::NotMoving;
     m_lastMove = m_move;
@@ -73,6 +73,90 @@ sf::Sprite *Player::GetSprite() const
 {
     return m_sprite;
 }
+
+map<uint32_t, uint16_t> Player::GetItems() const
+{
+    return m_items;
+}
+
+void Player::Load()
+{
+    vector<string> saves;
+    map<uint32_t, uint16_t> savedItems;
+
+    string str;
+    ifstream file("./save/save.txt");
+
+    if (file.is_open())
+    {
+        while (getline(file, str))
+        {
+            bool push = true;
+            if (str.find('|') != str.npos)
+            {
+                auto pos = str.find('|');
+                str.replace(pos, 1, "  ");
+
+                istringstream iss(str);
+                uint32_t column1;
+                uint16_t column2;
+                iss >> column1 >> column2;
+                savedItems[column1] = column2;
+                push = false;
+            }
+
+            if (push)
+            {
+                saves.push_back(str);
+            }
+        }
+
+        m_name = saves[0];
+        m_survivalStats.health = stof(saves[1]);
+        m_survivalStats.water = stof(saves[2]);
+        m_survivalStats.food = stof(saves[3]);
+        m_sprite->setPosition(stof(saves[4]), stof(saves[5]));
+        m_items = savedItems;
+
+        file.close();
+    }
+}
+
+void Player::Save()
+{
+    ofstream file("./save/save.txt");
+
+    if (file.is_open())
+    {
+        auto text = format("{}\n{}\n{}\n{}\n{}\n{}\n",
+                           m_name,
+                           m_survivalStats.health,
+                           m_survivalStats.water,
+                           m_survivalStats.food,
+                           m_sprite->getPosition().x,
+                           m_sprite->getPosition().y);
+        file << text;
+
+        for (const auto &data : m_items)
+        {
+            file << data.first << '|' << data.second << '\n';
+        }
+
+        file.close();
+    }
+}
+
+void Player::CreateFolder()
+{
+    auto new_directory_path = filesystem::current_path();
+    new_directory_path /= "save";
+
+    if (!filesystem::exists(new_directory_path))
+    {
+        filesystem::create_directory(new_directory_path);
+    }
+}
+
 
 void Player::CheckCollision(Game &game)
 {

@@ -3,6 +3,7 @@
 #include "nlohmann/json.hpp"
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <random>
 
 using json = nlohmann::json;
@@ -153,6 +154,22 @@ void Game::SetWindowHeight(const uint16_t height)
 void Game::SetWindowWidth(const uint16_t width)
 {
     m_windowWidth = width;
+}
+
+void Game::UpdateZoom(const float delta)
+{
+    if (delta > 0U)
+    {
+        if (m_zoom < m_maxZoom)
+            SetZoom(1U, 0.5F);
+    }
+    else
+    {
+        if (m_zoom > 0U)
+            SetZoom(-1, 2.0F);
+    }
+
+    UpdateView();
 }
 
 void Game::InitViews()
@@ -416,13 +433,9 @@ Player Game::InitPlayer()
         }
     }
 
-    sprite->setPosition(80.0F, 80.0F);
+    auto player = Player(sprite, m_defaultPlayerTextureID);
+    player.Load();
 
-    auto player = Player(sprite,
-                         "PlayerName",
-                         SurvivalStats{.health = 100.0F, .water = 100.0F, .food = 100.0F},
-                         1.0F,
-                         m_defaultPlayerTextureID);
     return player;
 }
 
