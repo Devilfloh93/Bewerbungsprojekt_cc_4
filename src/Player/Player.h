@@ -1,5 +1,6 @@
 #pragma once
 #include "Game.h"
+#include "Stats.h"
 #include <SFML/Graphics.hpp>
 #include <World.h>
 #include <cstdint>
@@ -41,6 +42,7 @@ public:
     PlayerMove GetLastMove() const;
     void CheckCollision(Game &game);
     void InitDrawStats(const Game &game);
+    float GetStatValue(const StatType type);
 
     void DrawStats(sf::RenderWindow &window, const Game &game);
     void UpdateStats(const sf::RenderWindow &window, const Game &game);
@@ -65,10 +67,8 @@ private:
     PlayerMove m_move;
     PlayerMove m_lastMove;
     map<uint32_t, uint16_t> m_items;
-    vector<sf::Sprite *> m_statSprites;
-    vector<sf::Sprite *> m_statBackgroundSprites;
+    vector<Stats *> m_stats;
     uint8_t m_animID;
     MoveAllowed m_moveAllowed;
     World *m_objectInFront;
-    uint8_t m_stateTextureSize;
 };

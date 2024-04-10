@@ -16,7 +16,7 @@ Game::Game(const uint16_t windowWidth, const uint16_t windowHeight)
     m_maxZoom = 3U;
     m_playing = false;
     m_defaultPlayerTextureID = 2U;
-    m_statDecay = {.food = 1.2F, .water = 1.7F};
+    m_statDecay = {.food = 0.2F, .water = 0.5F};
     m_gameWidth = 8800U;
     m_gameHeight = 4800U;
     m_windowZoomHeight = m_windowHeight;
