@@ -1,4 +1,5 @@
 #pragma once
+#include "Sprite.h"
 #include "Texture.h"
 #include <SFML/Graphics.hpp>
 #include <cstdint>
@@ -8,7 +9,7 @@
 
 using namespace std;
 
-class ItemCfg
+class ItemCfg : public Texture
 {
 
 public:
@@ -19,34 +20,29 @@ public:
             const uint8_t maxDrop);
     ~ItemCfg() = default;
 
-    sf::Texture *GetTexture() const;
     sf::IntRect GetTextureData() const;
 
     uint8_t GetID() const;
     uint8_t GetMaxDrop() const;
 
 private:
-    sf::Texture *m_texture;
     sf::IntRect m_textureData;
     uint16_t m_ID;
     string m_name;
     uint8_t m_maxDrop;
 };
 
-class Item
+class Item : public Sprite
 {
 
 public:
-    Item(const sf::Sprite &sprite, const uint16_t ID, const uint16_t count);
+    Item(sf::Sprite *sprite, const uint16_t ID, const uint16_t count);
     ~Item() = default;
-
-    sf::Sprite GetSprite() const;
 
     uint16_t GetID() const;
     uint16_t GetCount() const;
 
 private:
-    sf::Sprite m_sprite;
     uint16_t m_ID;
     uint16_t m_count;
 };

@@ -58,7 +58,7 @@ public:
     vector<ItemCfg *> GetItemCfg() const;
     vector<Item *> GetItem() const;
     vector<Anim *> GetAnim() const;
-    vector<Texture *> GetTexture() const;
+    vector<AllTextures *> GetTexture() const;
 
     StatDecay GetStatDecay() const;
 
@@ -125,7 +125,7 @@ private:
     vector<Title *> m_titles;
     vector<Button *> m_buttons;
     vector<Item *> m_items;
-    vector<Texture *> m_textures;
+    vector<AllTextures *> m_textures;
     vector<Font *> m_fonts;
     vector<Anim *> m_anim;
     sf::View m_view;

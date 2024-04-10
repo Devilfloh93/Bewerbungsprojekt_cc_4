@@ -1,38 +1,23 @@
 #include "Gui.h"
+#include "Sprite.h"
+#include "Text.h"
 
+Gui::Gui(const MenuState menuState) : m_menuState(menuState)
+{
+}
 
-Title::Title(const MenuState menuState, sf::Text *text) : m_menuState(menuState), m_text(text)
+Title::Title(const MenuState menuState, sf::Text *text) : Gui(menuState), Text(text)
 {
 }
 
 Button::Button(const MenuState menuState, const BtnFunc btnfnc, sf::Text *text, sf::Sprite *sprite)
-    : m_menuState(menuState), m_text(text), m_sprite(sprite), m_btnfnc(btnfnc)
+    : Gui(menuState), Text(text), Sprite(sprite), m_btnfnc(btnfnc)
 {
 }
 
-sf::Text *Title::GetText() const
-{
-    return m_text;
-}
-
-MenuState Title::GetMenuState() const
+MenuState Gui::GetMenuState() const
 {
     return m_menuState;
-}
-
-sf::Text *Button::GetText() const
-{
-    return m_text;
-}
-
-MenuState Button::GetMenuState() const
-{
-    return m_menuState;
-}
-
-sf::Sprite *Button::GetSprite() const
-{
-    return m_sprite;
 }
 
 BtnFunc Button::GetBtnFnc() const

@@ -31,13 +31,11 @@ enum class PlayerMove
     Right
 };
 
-class Player
+class Player : public Sprite
 {
 public:
     Player(sf::Sprite *sprite, const uint8_t animID);
     ~Player() = default;
-
-    sf::Sprite *GetSprite() const;
 
     PlayerMove GetMove() const;
     PlayerMove GetLastMove() const;
@@ -60,7 +58,6 @@ public:
     void CreateFolder();
 
 private:
-    sf::Sprite *m_sprite;
     string m_name;
     SurvivalStats m_survivalStats;
     float m_baseSpeed;

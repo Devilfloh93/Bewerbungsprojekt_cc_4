@@ -1,4 +1,5 @@
 #pragma once
+#include "Sprite.h"
 #include "Texture.h"
 #include <SFML/Graphics.hpp>
 #include <cstdint>
@@ -6,17 +7,16 @@
 
 using namespace std;
 
-class World
+class World : public Sprite
 {
 
 public:
-    World(const sf::Sprite &sprite,
+    World(sf::Sprite *sprite,
           const Collision collision,
           const vector<uint8_t> itemOutputID,
           const TextureProgData textureProgData);
     ~World() = default;
 
-    sf::Sprite GetSprite() const;
     Collision GetCollision() const;
     vector<uint8_t> GetItemOutputID() const;
     bool GetUseable() const;
@@ -26,7 +26,6 @@ public:
     void SetUseable(const bool useable);
 
 private:
-    sf::Sprite m_sprite;
     Collision m_collision;
     vector<uint8_t> m_itemOutputID;
     TextureProgData m_textureProgData;

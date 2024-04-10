@@ -1,5 +1,7 @@
 #pragma once
 #include "Game.h"
+#include "Sprite.h"
+#include "Text.h"
 #include <SFML/Graphics.hpp>
 #include <vector>
 
@@ -16,37 +18,34 @@ enum class BtnFunc
 };
 
 enum class MenuState;
-class Title
+
+class Gui
 {
-
 public:
-    Title(const MenuState menuState, sf::Text *text);
-    ~Title() = default;
-
-    sf::Text *GetText() const;
+    Gui(const MenuState menuState);
+    ~Gui() = default;
 
     MenuState GetMenuState() const;
 
 private:
     MenuState m_menuState;
-    sf::Text *m_text;
 };
 
-class Button
+class Title : public Gui, public Text
+{
+public:
+    Title(const MenuState menuState, sf::Text *text);
+    ~Title() = default;
+};
+
+class Button : public Gui, public Text, public Sprite
 {
 public:
     Button(const MenuState menuState, const BtnFunc btnfnc, sf::Text *text, sf::Sprite *sprite);
     ~Button() = default;
 
-    sf::Text *GetText() const;
-    sf::Sprite *GetSprite() const;
-
-    MenuState GetMenuState() const;
     BtnFunc GetBtnFnc() const;
 
 private:
-    MenuState m_menuState;
-    sf::Text *m_text;
-    sf::Sprite *m_sprite;
     BtnFunc m_btnfnc;
 };

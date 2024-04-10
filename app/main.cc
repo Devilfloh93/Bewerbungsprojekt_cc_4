@@ -45,6 +45,7 @@ int main()
 
     // Player Init
     auto player = game.InitPlayer();
+    player.CreateFolder();
     cout << "Player Init Done!" << endl;
 
     // Draw Stats Init

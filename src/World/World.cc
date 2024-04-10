@@ -1,10 +1,10 @@
 #include "World.h"
 
-World::World(const sf::Sprite &sprite,
+World::World(sf::Sprite *sprite,
              const Collision collision,
              const vector<uint8_t> itemOutputID,
              const TextureProgData textureProgData)
-    : m_sprite(sprite), m_collision(collision), m_itemOutputID(itemOutputID), m_textureProgData(textureProgData)
+    : Sprite(sprite), m_collision(collision), m_itemOutputID(itemOutputID), m_textureProgData(textureProgData)
 {
     if (itemOutputID.size() > 0)
     {
@@ -14,11 +14,6 @@ World::World(const sf::Sprite &sprite,
     {
         m_useable = false;
     }
-}
-
-sf::Sprite World::GetSprite() const
-{
-    return m_sprite;
 }
 
 Collision World::GetCollision() const
@@ -34,7 +29,7 @@ vector<uint8_t> World::GetItemOutputID() const
 void World::UpdateTextureRect()
 {
     if (m_textureProgData.rect.getSize().x > 0 && m_textureProgData.rect.getSize().y > 0)
-        m_sprite.setTextureRect(m_textureProgData.rect);
+        m_sprite->setTextureRect(m_textureProgData.rect);
 }
 
 bool World::GetUseable() const
@@ -49,14 +44,14 @@ void World::SetUseable(const bool useable)
 
 void World::UpdatePosition()
 {
-    auto pos = m_sprite.getPosition();
-    auto size = m_sprite.getLocalBounds().getSize();
+    auto pos = m_sprite->getPosition();
+    auto size = m_sprite->getLocalBounds().getSize();
     auto textureSize = m_textureProgData.rect.getSize();
 
     /**
      * TODO: Rework SetPosition calculate when texture gets overridden by other texture
     */
-    m_sprite.setPosition(pos.x + ((size.x / 2) - (textureSize.x / 2)), pos.y + (size.y - textureSize.y));
+    m_sprite->setPosition(pos.x + ((size.x / 2) - (textureSize.x / 2)), pos.y + (size.y - textureSize.y));
     m_collision.x = m_textureProgData.collision.x;
     m_collision.y = m_textureProgData.collision.y;
 }
