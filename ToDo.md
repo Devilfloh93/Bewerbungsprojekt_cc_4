@@ -24,6 +24,18 @@
 
 * New Threads for better performance?
 
+## Soundsystem
+
+* Add Background Music
+* Add Sounds for Interactions like wood chopping
+
+## Menus
+
+* Add Keybindings
+* Add Save/Load
+* Fix Fullscreen and Resize when changing Resolution
+* Add Character Creation
+
 ## Rework
 
 * Collision Detection

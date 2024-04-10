@@ -40,10 +40,10 @@ public:
 
     PlayerMove GetMove() const;
     PlayerMove GetLastMove() const;
-    void CheckCollision(Game &game);
-    void InitDrawStats(const Game &game);
-    float GetStatValue(const StatType type);
+    float GetStatValue(const StatType type) const;
+    uint8_t GetID() const;
 
+    void CheckCollision(Game &game);
     void DrawStats(sf::RenderWindow &window, const Game &game);
     void UpdateStats(const sf::RenderWindow &window, const Game &game);
     void SetMove(const PlayerMove move);
@@ -57,9 +57,9 @@ public:
 
     void Load();
     void Save();
-    void CreateFolder();
 
 private:
+    uint8_t m_ID;
     string m_name;
     SurvivalStats m_survivalStats;
     float m_baseSpeed;
@@ -67,7 +67,6 @@ private:
     PlayerMove m_move;
     PlayerMove m_lastMove;
     map<uint32_t, uint16_t> m_items;
-    vector<Stats *> m_stats;
     uint8_t m_animID;
     MoveAllowed m_moveAllowed;
     World *m_objectInFront;

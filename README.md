@@ -7,7 +7,7 @@
 
 ## Projektübersicht
 
-### Projektstunden: 50h
+### Projektstunden: 80h
 
 ### Warum ein Spiel?
 

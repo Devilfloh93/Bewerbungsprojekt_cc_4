@@ -14,7 +14,10 @@ enum class BtnFunc
     Back,
     Resume,
     Resolution,
-    Fullscreen
+    Fullscreen,
+    Save,
+    Load,
+    Create
 };
 
 enum class MenuState;

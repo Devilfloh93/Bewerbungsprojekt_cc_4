@@ -1,4 +1,5 @@
 #include "Game.h"
+
 #include "Utilities.h"
 #include "nlohmann/json.hpp"
 #include <fstream>
@@ -105,6 +106,11 @@ vector<Item *> Game::GetItem() const
     return m_items;
 }
 
+vector<Stats *> Game::GetStats() const
+{
+    return m_stats;
+}
+
 vector<Anim *> Game::GetAnim() const
 {
     return m_anim;
@@ -113,6 +119,16 @@ vector<Anim *> Game::GetAnim() const
 void Game::SetItems(Item *item)
 {
     m_items.push_back(item);
+}
+
+Player *Game::GetPlayer() const
+{
+    return m_player;
+}
+
+Thread *Game::GetThread() const
+{
+    return m_thread;
 }
 
 void Game::RemoveItems(const size_t i)
@@ -127,6 +143,28 @@ void Game::RemoveItems(const size_t i)
 void Game::Quit(sf::RenderWindow &window)
 {
     window.close();
+}
+
+void Game::CreateFolder()
+{
+    auto new_directory_path = filesystem::current_path();
+    new_directory_path /= "save";
+
+    if (!filesystem::exists(new_directory_path))
+    {
+        filesystem::create_directory(new_directory_path);
+    }
+}
+
+void Game::CreateFolder(const uint8_t id)
+{
+    auto new_directory_path = filesystem::current_path();
+    new_directory_path /= format("save/{}", id);
+
+    if (!filesystem::exists(new_directory_path))
+    {
+        filesystem::create_directory(new_directory_path);
+    }
 }
 
 void Game::UpdateZoom(const float delta)
@@ -390,7 +428,7 @@ void Game::InitFont()
     }
 }
 
-Player Game::InitPlayer()
+void Game::CreatePlayer()
 {
     auto sprite = new sf::Sprite();
     sf::Texture *texture;
@@ -415,10 +453,7 @@ Player Game::InitPlayer()
         }
     }
 
-    auto player = Player(sprite, m_defaultPlayerTextureID);
-    player.Load();
-
-    return player;
+    m_player = new Player(sprite, m_defaultPlayerTextureID);
 }
 
 void Game::InitMenu()
@@ -721,7 +756,7 @@ void Game::InitWorld()
     }
 }
 
-bool Game::HandleBtnClicked(sf::RenderWindow &window)
+bool Game::HandleBtnClicked(sf::RenderWindow &window, Game &game)
 {
     // get the current mouse position in the window
     auto pixelPos = sf::Mouse::getPosition(window);
@@ -742,6 +777,25 @@ bool Game::HandleBtnClicked(sf::RenderWindow &window)
             switch (data->GetBtnFnc())
             {
             case BtnFunc::Play:
+                // Player Init
+                game.CreatePlayer();
+                cout << "Player Init Done!" << endl;
+
+                if (m_menuState == MenuState::Create)
+                {
+                    CreateFolder(m_player->GetID());
+                }
+
+                if (m_menuState == MenuState::Load)
+                {
+                    m_player->Load();
+                    cout << "Player Load Done!" << endl;
+                }
+
+                // Thread Init
+                m_thread = new Thread(window, m_player, game);
+                cout << "Thread Init Done!" << endl;
+
                 m_playing = true;
                 m_menuState = MenuState::Playing;
                 breakLoop = true;
@@ -777,7 +831,20 @@ bool Game::HandleBtnClicked(sf::RenderWindow &window)
                 breakLoop = true;
                 break;
             case BtnFunc::Fullscreen:
+                breakLoop = true;
+                break;
+            case BtnFunc::Save:
+                m_menuState = MenuState::Save;
+                m_player->Save();
+                breakLoop = true;
+                break;
+            case BtnFunc::Load:
+                m_menuState = MenuState::Load;
 
+                breakLoop = true;
+                break;
+            case BtnFunc::Create:
+                m_menuState = MenuState::Create;
                 breakLoop = true;
                 break;
             default:
@@ -789,9 +856,52 @@ bool Game::HandleBtnClicked(sf::RenderWindow &window)
     return breakLoop;
 }
 
-void Game::DrawSurface(sf::RenderWindow &window, Player &player)
+void Game::InitDrawStats()
 {
-    auto playerSprite = player.GetSprite();
+    ifstream file("./data/playerStatCfg.json");
+
+    if (file.is_open())
+    {
+        auto jsonData = json::parse(file);
+
+        for (const auto &data : jsonData)
+        {
+            sf::Texture *texture;
+            uint8_t add = data["add"];
+            uint8_t textureID = data["textureID"];
+            auto textureRect = sf::IntRect{data["textureData"][0],
+                                           data["textureData"][1],
+                                           data["textureData"][2],
+                                           data["textureData"][3]};
+            StatType type = data["type"];
+
+            for (const auto &data : m_textures)
+            {
+                if (data->GetID() == textureID)
+                {
+                    texture = data->GetTexture();
+                }
+            }
+
+            for (size_t i = 0; i < add; ++i)
+            {
+                auto sprite = new sf::Sprite();
+
+                sprite->setTexture(*texture);
+                sprite->setTextureRect(textureRect);
+                auto textureSize = textureRect.getSize();
+
+                auto stats = new Stats(sprite, textureSize, type);
+                m_stats.push_back(stats);
+            }
+        }
+        file.close();
+    }
+}
+
+void Game::DrawSurface(sf::RenderWindow &window, Player *player)
+{
+    auto playerSprite = player->GetSprite();
     auto playerPos = playerSprite->getPosition();
 
     for (auto &data : m_surfaces)
@@ -804,7 +914,7 @@ void Game::DrawSurface(sf::RenderWindow &window, Player &player)
             playerPos.y >= spritePos.y - tileSize && playerPos.y <= spritePos.y + tileSize)
         {
             auto speed = data->GetSpeed();
-            player.SetSpeed(speed);
+            player->SetSpeed(speed);
         }
 
         window.draw(*sprite);
@@ -830,31 +940,8 @@ void Game::DrawMenu(sf::RenderWindow &window)
         if (m_menuState == data->GetMenuState())
             window.draw(*(data->GetText()));
 
-        for (const auto &data1 : m_buttons)
-        {
-            bool showBtn = false;
-            auto menuStates = data1->GetMenuState();
-
-            if (m_menuState == menuStates)
-            {
-                window.draw(*(data1->GetSprite()));
-                window.draw(*(data1->GetText()));
-            }
-        }
-    }
-}
-
-void Game::DrawMenu(sf::RenderWindow &window, Player &player)
-{
-    window.setView(m_menuView);
-
-    for (const auto &data : m_titles)
-    {
-        if (m_menuState == data->GetMenuState())
-            window.draw(*(data->GetText()));
-
         if (m_menuState == MenuState::Inventory)
-            player.DrawInventoryItems(window, m_itemCfg);
+            m_player->DrawInventoryItems(window, m_itemCfg);
 
         for (const auto &data1 : m_buttons)
         {

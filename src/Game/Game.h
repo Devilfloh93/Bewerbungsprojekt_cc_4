@@ -4,8 +4,10 @@
 #include "Gui.h"
 #include "Item.h"
 #include "Player.h"
+#include "Stats.h"
 #include "Surface.h"
 #include "Texture.h"
+#include "Thread.h"
 #include "World.h"
 #include <SFML/Graphics.hpp>
 #include <cstdint>
@@ -29,13 +31,17 @@ enum class MenuState
     Main,
     Pause,
     Options,
-    Inventory
+    Inventory,
+    Load,
+    Save,
+    Create
 };
 
 
 class Player;
 class Title;
 class Button;
+class Thread;
 
 class Game
 {
@@ -59,8 +65,14 @@ public:
     vector<Item *> GetItem() const;
     vector<Anim *> GetAnim() const;
     vector<AllTextures *> GetTexture() const;
+    vector<Stats *> GetStats() const;
 
     StatDecay GetStatDecay() const;
+
+    Player *GetPlayer() const;
+    Thread *GetThread() const;
+
+    void CreatePlayer();
 
     void SetItems(Item *item);
     void RemoveItems(const size_t i);
@@ -82,8 +94,7 @@ public:
 
     void InitFont();
 
-    Player InitPlayer();
-
+    void InitDrawStats();
     void InitMenu();
 
     void InitSurface();
@@ -92,19 +103,20 @@ public:
 
     void UpdateZoom(const float delta);
 
-    bool HandleBtnClicked(sf::RenderWindow &window);
+    bool HandleBtnClicked(sf::RenderWindow &window, Game &game);
 
-    void DrawSurface(sf::RenderWindow &window, Player &player);
+    void DrawSurface(sf::RenderWindow &window, Player *player);
 
     void DrawWorld(sf::RenderWindow &window);
 
     void DrawMenu(sf::RenderWindow &window);
-    void DrawMenu(sf::RenderWindow &window, Player &player);
 
     void ResizeWindow(sf::RenderWindow &window);
     void ResizeMenu();
 
     void Quit(sf::RenderWindow &window);
+    void CreateFolder();
+    void CreateFolder(const uint8_t id);
 
 private:
     bool m_playing;
@@ -133,4 +145,7 @@ private:
     sf::Vector2f m_defaultCenter;
     uint8_t m_defaultPlayerTextureID;
     StatDecay m_statDecay;
+    vector<Stats *> m_stats;
+    Player *m_player;
+    Thread *m_thread;
 };
