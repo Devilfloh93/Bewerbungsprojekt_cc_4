@@ -1,4 +1,5 @@
 #include "Player.h"
+#include "Stats.h"
 #include "Utilities.h"
 #include <filesystem>
 #include <format>
@@ -37,6 +38,28 @@ void Player::SetMove(const PlayerMove move)
 void Player::SetSpeed(const float speed)
 {
     m_speed = speed;
+}
+
+float Player::GetStatValue(const StatType type)
+{
+    float value = 0.0F;
+    switch (type)
+    {
+    case StatType::Health:
+        value = m_survivalStats.health;
+        break;
+    case StatType::Food:
+        value = m_survivalStats.food;
+        break;
+    case StatType::Water:
+        value = m_survivalStats.water;
+        break;
+
+    default:
+        break;
+    }
+
+    return value;
 }
 
 void Player::Load()
@@ -267,7 +290,7 @@ void Player::InitDrawStats(const Game &game)
                                            data["textureData"][1],
                                            data["textureData"][2],
                                            data["textureData"][3]};
-            bool background = data["background"];
+            StatType type = data["type"];
 
             for (const auto &data : game.GetTexture())
             {
@@ -283,15 +306,10 @@ void Player::InitDrawStats(const Game &game)
 
                 sprite->setTexture(*texture);
                 sprite->setTextureRect(textureRect);
+                auto textureSize = textureRect.getSize();
 
-                if (background)
-                {
-                    m_statBackgroundSprites.push_back(sprite);
-                }
-                else
-                {
-                    m_statSprites.push_back(sprite);
-                }
+                auto stats = new Stats(sprite, textureSize, type);
+                m_stats.push_back(stats);
             }
         }
         file.close();
@@ -300,37 +318,41 @@ void Player::InitDrawStats(const Game &game)
 
 void Player::DrawStats(sf::RenderWindow &window, const Game &game)
 {
-    m_stateTextureSize = 66;
-    sf::Sprite sprite;
-    auto height = (game.GetView().getCenter().y + (game.GetWindowZoomHeight() / 2)) - 10.0F;
     auto width = (game.GetView().getCenter().x - (game.GetWindowZoomWidth() / 2)) + 5.0F;
 
-    for (const auto &data : m_statBackgroundSprites)
+    size_t i = 1;
+    size_t j = 1;
+
+    for (const auto &data : m_stats)
     {
-        data->setPosition(sf::Vector2f{width, height});
+        auto textureSize = data->GetTextureSize();
+        auto type = data->GetType();
+        auto sprite = data->GetSprite();
+        auto height = (game.GetView().getCenter().y + (game.GetWindowZoomHeight() / 2)) - 10.0F;
+        auto textureRectSize = sprite->getTextureRect().getSize();
+        auto textureRectPos = sprite->getTextureRect().getPosition();
 
-        window.draw(*data);
-
-        height -= 10;
-    }
-
-    height = (game.GetView().getCenter().y + (game.GetWindowZoomHeight() / 2)) - 10.0F;
-    for (const auto &data : m_statSprites)
-    {
-        data->setPosition(sf::Vector2f{width, height});
-        auto textureRectSize = data->getTextureRect().getSize();
-        auto textureRectPos = data->getTextureRect().getPosition();
-
-        uint8_t newTextureRectSizeX = (m_survivalStats.food * m_stateTextureSize) / 100;
-        if (textureRectSize.x > 10)
+        if (type == StatType::Empty)
         {
-            auto textureRect = sf::IntRect{textureRectPos.x, textureRectPos.y, newTextureRectSizeX, textureRectSize.y};
-            data->setTextureRect(textureRect);
+            height -= i * 10;
+            ++i;
+        }
+        else
+        {
+            auto statValue = GetStatValue(type);
+            uint8_t newTextureRectSizeX = (statValue * textureSize.x) / 100;
+            if (textureRectSize.x > 0)
+            {
+                auto textureRect =
+                    sf::IntRect{textureRectPos.x, textureRectPos.y, newTextureRectSizeX, textureRectSize.y};
+                sprite->setTextureRect(textureRect);
+            }
+            height -= j * 10;
+            ++j;
         }
 
-        window.draw(*data);
-
-        height -= 10;
+        sprite->setPosition(sf::Vector2f{width, height});
+        window.draw(*sprite);
     }
 }
 

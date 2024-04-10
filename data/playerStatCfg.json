@@ -1,7 +1,7 @@
 [
     {
         "add": 3,
-        "background": true,
+        "type": 0,
         "textureID": 6,
         "textureData": [
             40,
@@ -12,7 +12,7 @@
     },
     {
         "add": 1,
-        "background": false,
+        "type": 1,
         "textureID": 6,
         "textureData": [
             40,
@@ -23,7 +23,7 @@
     },
     {
         "add": 1,
-        "background": false,
+        "type": 2,
         "textureID": 6,
         "textureData": [
             40,
@@ -34,7 +34,7 @@
     },
     {
         "add": 1,
-        "background": false,
+        "type": 3,
         "textureID": 6,
         "textureData": [
             40,
