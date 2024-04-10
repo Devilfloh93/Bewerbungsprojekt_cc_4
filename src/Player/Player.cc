@@ -244,30 +244,28 @@ void Player::CheckCollision(Game &game)
 
 void Player::UpdateStats(const sf::RenderWindow &window, const Game &game)
 {
-    sf::Clock clock;
     auto statDecay = game.GetStatDecay();
+
     while (window.isOpen())
     {
+        this_thread::sleep_for(chrono::seconds(1));
         if (game.GetPlaying() && game.GetMenuState() == MenuState::Playing)
         {
-            auto elapsed = clock.getElapsedTime();
-            if (elapsed.asSeconds() >= 1)
+            if (m_survivalStats.food - statDecay.food < 0U)
             {
-                if (m_survivalStats.food - statDecay.food >= 0U)
-                {
-                    m_survivalStats.food -= statDecay.food;
-                }
-                if (m_survivalStats.water - statDecay.water >= 0U)
-                {
-                    m_survivalStats.water -= statDecay.water;
-                }
-
-                cout << format("Food: {} Water: {} Health: {}",
-                               m_survivalStats.food,
-                               m_survivalStats.water,
-                               m_survivalStats.health)
-                     << endl;
-                clock.restart();
+                m_survivalStats.water = 0;
+            }
+            else
+            {
+                m_survivalStats.food -= statDecay.food;
+            }
+            if (m_survivalStats.water - statDecay.water < 0U)
+            {
+                m_survivalStats.water = 0;
+            }
+            else
+            {
+                m_survivalStats.water -= statDecay.water;
             }
         }
     }
