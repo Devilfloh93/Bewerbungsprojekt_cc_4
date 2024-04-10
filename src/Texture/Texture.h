@@ -15,15 +15,24 @@ struct TextureProgData
 
 class Texture
 {
-
 public:
-    Texture(const uint8_t ID, sf::Texture *texture);
+    Texture(sf::Texture *texture);
     ~Texture() = default;
 
-    uint8_t GetID() const;
     sf::Texture *GetTexture() const;
+
+protected:
+    sf::Texture *m_texture;
+};
+
+class AllTextures : public Texture
+{
+public:
+    AllTextures(sf::Texture *texture, const uint8_t ID);
+    ~AllTextures() = default;
+
+    uint8_t GetID() const;
 
 private:
     uint8_t m_ID;
-    sf::Texture *m_texture;
 };

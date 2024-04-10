@@ -25,7 +25,7 @@ Game::Game(const uint16_t windowWidth, const uint16_t windowHeight)
     m_maxTiles = ((m_gameWidth * m_gameHeight) / m_tileSize) / m_tileSize;
 }
 
-vector<Texture *> Game::GetTexture() const
+vector<AllTextures *> Game::GetTexture() const
 {
     return m_textures;
 }
@@ -339,7 +339,7 @@ void Game::DrawItems(sf::RenderWindow &window)
     {
         auto sprite = data->GetSprite();
 
-        window.draw(sprite);
+        window.draw(*sprite);
     }
 }
 
@@ -360,7 +360,7 @@ void Game::InitTexture()
 
             texture->loadFromFile(path);
 
-            auto textures = new Texture(ID, texture);
+            auto textures = new AllTextures(texture, ID);
             m_textures.push_back(textures);
         }
         file.close();
@@ -566,7 +566,6 @@ void Game::InitSurface()
 
         for (size_t i = 0; i < m_maxTiles; ++i)
         {
-            sf::Sprite tileSprite;
             sf::Texture *texture;
             uint8_t id;
             uint8_t textureID;
@@ -620,9 +619,11 @@ void Game::InitSurface()
 
                 if (canCreate)
                 {
-                    tileSprite.setTextureRect(textureData);
-                    tileSprite.setTexture(*texture);
-                    tileSprite.setPosition(j * m_tileSize, k * m_tileSize);
+                    auto tileSprite = new sf::Sprite();
+
+                    tileSprite->setTextureRect(textureData);
+                    tileSprite->setTexture(*texture);
+                    tileSprite->setPosition(j * m_tileSize, k * m_tileSize);
 
                     auto surfaces = new Surface(tileSprite, speed);
                     m_surfaces.push_back(surfaces);
@@ -670,9 +671,6 @@ void Game::InitAnim()
 
 void Game::InitWorld()
 {
-
-    sf::Sprite tileSprite;
-
     ifstream file("./data/worldCfg.json");
 
     if (file.is_open())
@@ -682,6 +680,7 @@ void Game::InitWorld()
         sf::Texture *texture;
         for (const auto &data : jsonData)
         {
+
             Collision collision = {.x = data["textureData"][4], .y = data["textureData"][5]};
             vector<uint8_t> itemOutputID = data["itemOutputID"];
             sf::IntRect textureData = {data["textureData"][0],
@@ -706,12 +705,13 @@ void Game::InitWorld()
                 }
             }
 
-            tileSprite.setTexture(*texture);
-            tileSprite.setTextureRect(textureData);
-
             for (const auto &data1 : data["pos"])
             {
-                tileSprite.setPosition(data1[0], data1[1]);
+                auto tileSprite = new sf::Sprite();
+
+                tileSprite->setTexture(*texture);
+                tileSprite->setTextureRect(textureData);
+                tileSprite->setPosition(data1[0], data1[1]);
 
                 auto world = new World(tileSprite, collision, itemOutputID, textureProgData);
                 m_world.push_back(world);
@@ -797,7 +797,7 @@ void Game::DrawSurface(sf::RenderWindow &window, Player &player)
     for (auto &data : m_surfaces)
     {
         auto sprite = data->GetSprite();
-        auto spritePos = sprite.getPosition();
+        auto spritePos = sprite->getPosition();
         auto tileSize = m_tileSize / 2;
 
         if (playerPos.x >= spritePos.x - tileSize && playerPos.x <= spritePos.x + tileSize &&
@@ -807,7 +807,7 @@ void Game::DrawSurface(sf::RenderWindow &window, Player &player)
             player.SetSpeed(speed);
         }
 
-        window.draw(sprite);
+        window.draw(*sprite);
     }
 }
 
@@ -817,7 +817,7 @@ void Game::DrawWorld(sf::RenderWindow &window)
     {
         auto sprite = data->GetSprite();
 
-        window.draw(sprite);
+        window.draw(*sprite);
     }
 }
 

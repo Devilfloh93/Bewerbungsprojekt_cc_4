@@ -1,12 +1,8 @@
 #include "Surface.h"
 
-Surface::Surface(const sf::Sprite &sprite, const float speed) : m_sprite(sprite), m_speed(speed)
-{
-}
 
-sf::Sprite Surface::GetSprite() const
+Surface::Surface(sf::Sprite *sprite, const float speed) : Sprite(sprite), m_speed(speed)
 {
-    return m_sprite;
 }
 
 float Surface::GetSpeed() const

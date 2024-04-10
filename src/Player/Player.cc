@@ -7,7 +7,7 @@
 #include <memory>
 #include <random>
 
-Player::Player(sf::Sprite *sprite, const uint8_t animID) : m_sprite(sprite), m_animID(animID)
+Player::Player(sf::Sprite *sprite, const uint8_t animID) : Sprite(sprite), m_animID(animID)
 {
     m_sprite->setPosition(80.0F, 80.0F);
     m_survivalStats = {.health = 100.0F, .water = 100.0F, .food = 100.0F};
@@ -37,11 +37,6 @@ void Player::SetMove(const PlayerMove move)
 void Player::SetSpeed(const float speed)
 {
     m_speed = speed;
-}
-
-sf::Sprite *Player::GetSprite() const
-{
-    return m_sprite;
 }
 
 void Player::Load()
@@ -131,9 +126,9 @@ void Player::CheckCollision(Game &game)
 
     for (const auto &data : world)
     {
-        auto objPos = data->GetSprite().getPosition();
+        auto objPos = data->GetSprite()->getPosition();
         auto objCollision = data->GetCollision();
-        auto objSize = data->GetSprite().getLocalBounds().getSize();
+        auto objSize = data->GetSprite()->getLocalBounds().getSize();
         auto isUsable = data->GetUseable();
 
         if (objCollision.x != 0 && objCollision.y != 0)
@@ -414,8 +409,8 @@ void Player::HandleMove(sf::Clock &clock, Game &game)
             auto sprite = items[i]->GetSprite();
             auto ID = items[i]->GetID();
             auto count = items[i]->GetCount();
-            auto itemPos = sprite.getPosition();
-            auto itemSize = sprite.getLocalBounds().getSize();
+            auto itemPos = sprite->getPosition();
+            auto itemSize = sprite->getLocalBounds().getSize();
 
             bool remove = false;
             bool newItem = true;
@@ -558,7 +553,6 @@ void Player::UseItem(Game &game)
             uint16_t posIncrease = 0;
             for (const auto &data : itemCfg)
             {
-                sf::Sprite itemSprite;
                 auto texture = data->GetTexture();
                 auto textureData = data->GetTextureData();
                 auto itemID = data->GetID();
@@ -610,9 +604,10 @@ void Player::UseItem(Game &game)
                             break;
                         }
 
-                        itemSprite.setTexture(*texture);
-                        itemSprite.setTextureRect(textureData);
-                        itemSprite.setPosition(itemPos.x, itemPos.y);
+                        auto itemSprite = new sf::Sprite();
+                        itemSprite->setTexture(*texture);
+                        itemSprite->setTextureRect(textureData);
+                        itemSprite->setPosition(itemPos.x, itemPos.y);
 
                         auto item = new Item(itemSprite, itemID, dist(gen));
                         game.SetItems(item);

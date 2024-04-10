@@ -1,10 +1,14 @@
 #include "Texture.h"
 
-Texture::Texture(const uint8_t ID, sf::Texture *texture) : m_ID(ID), m_texture(texture)
+AllTextures::AllTextures(sf::Texture *texture, const uint8_t ID) : Texture(texture), m_ID(ID)
 {
 }
 
-uint8_t Texture::GetID() const
+Texture::Texture(sf::Texture *texture) : m_texture(texture)
+{
+}
+
+uint8_t AllTextures::GetID() const
 {
     return m_ID;
 }

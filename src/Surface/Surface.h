@@ -1,17 +1,16 @@
 #pragma once
+#include "Sprite.h"
 #include <SFML/Graphics.hpp>
 
-class Surface
+class Surface : public Sprite
 {
 
 public:
-    Surface(const sf::Sprite &sprite, const float speed);
+    Surface(sf::Sprite *sprite, const float speed);
     ~Surface() = default;
 
-    sf::Sprite GetSprite() const;
     float GetSpeed() const;
 
 private:
-    sf::Sprite m_sprite;
     float m_speed;
 };
