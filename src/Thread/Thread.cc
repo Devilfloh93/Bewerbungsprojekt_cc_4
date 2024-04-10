@@ -1,10 +1,10 @@
 #include "Thread.h"
 
 
-Thread::Thread(const sf::RenderWindow &window, Player &player, Game &game)
+Thread::Thread(const sf::RenderWindow &window, Player *player, Game &game)
 {
-    m_threads.push_back(thread(&Thread::CollisionCheck, this, ref(window), ref(player), ref(game)));
-    m_threads.push_back(thread(&Thread::UpdateStats, this, ref(window), ref(player), ref(game)));
+    m_threads.push_back(thread(&Thread::CollisionCheck, this, ref(window), player, ref(game)));
+    m_threads.push_back(thread(&Thread::UpdateStats, this, ref(window), player, ref(game)));
 }
 
 void Thread::Join()
@@ -15,18 +15,18 @@ void Thread::Join()
     }
 }
 
-void Thread::CollisionCheck(const sf::RenderWindow &window, Player &player, Game &game)
+void Thread::CollisionCheck(const sf::RenderWindow &window, Player *player, Game &game)
 {
     while (window.isOpen())
     {
         if (game.GetPlaying() && game.GetMenuState() == MenuState::Playing)
         {
-            player.CheckCollision(game);
+            player->CheckCollision(game);
         }
     }
 }
 
-void Thread::UpdateStats(const sf::RenderWindow &window, Player &player, const Game &game)
+void Thread::UpdateStats(const sf::RenderWindow &window, Player *player, const Game &game)
 {
-    player.UpdateStats(window, game);
+    player->UpdateStats(window, game);
 }

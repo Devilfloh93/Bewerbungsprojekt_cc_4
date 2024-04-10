@@ -1,6 +1,5 @@
 
 #include "Game.h"
-#include "Thread.h"
 #include <SFML/Graphics.hpp>
 #include <cstdint>
 #include <iostream>
@@ -17,6 +16,7 @@ int main()
 
     // Init Game
     auto game = Game(windowWidth, windowHeight);
+    auto player = game.GetPlayer();
 
     // Init Window
     sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), "Good Game",
@@ -26,6 +26,9 @@ int main()
     window.setKeyRepeatEnabled(false);
 
     sf::Clock clock;
+
+    // Folder Structur Init
+    game.CreateFolder();
 
     // Anim Init
     game.InitAnim();
@@ -43,14 +46,6 @@ int main()
     game.InitFont();
     cout << "Font Init Done!" << endl;
 
-    // Player Init
-    auto player = game.InitPlayer();
-    player.CreateFolder();
-    cout << "Player Init Done!" << endl;
-
-    // Draw Stats Init
-    player.InitDrawStats(game);
-
     // Menu Init
     game.InitMenu();
     cout << "Menu Init Done!" << endl;
@@ -67,11 +62,14 @@ int main()
     game.InitItemCfg();
     cout << "Item Init Done!" << endl;
 
-    // Thread Init
-    auto thread = Thread(window, player, game);
+    // Draw Stats Init
+    game.InitDrawStats();
+    cout << "DrawStats Init Done!" << endl;
+
 
     while (window.isOpen())
     {
+
         for (auto event = sf::Event{}; window.pollEvent(event);)
         {
             bool breakLoop = false;
@@ -83,7 +81,7 @@ int main()
                 break;
             case sf::Event::MouseButtonPressed:
                 if (state != MenuState::Playing)
-                    breakLoop = game.HandleBtnClicked(window);
+                    breakLoop = game.HandleBtnClicked(window, game);
                 else if (game.GetPlaying() && state == MenuState::Playing)
                     game.HandleViewPosition(window);
                 break;
@@ -104,19 +102,19 @@ int main()
                             breakLoop = true;
                             break;
                         case sf::Keyboard::Key::A:
-                            player.SetMove(PlayerMove::Left);
+                            player->SetMove(PlayerMove::Left);
                             break;
                         case sf::Keyboard::Key::D:
-                            player.SetMove(PlayerMove::Right);
+                            player->SetMove(PlayerMove::Right);
                             break;
                         case sf::Keyboard::Key::W:
-                            player.SetMove(PlayerMove::Up);
+                            player->SetMove(PlayerMove::Up);
                             break;
                         case sf::Keyboard::Key::S:
-                            player.SetMove(PlayerMove::Down);
+                            player->SetMove(PlayerMove::Down);
                             break;
                         case sf::Keyboard::Key::P:
-                            player.UseItem(game);
+                            player->UseItem(game);
                             breakLoop = true;
                             break;
                         default:
@@ -170,7 +168,7 @@ int main()
                                        sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S));
 
                     if (!keyPressed)
-                        player.SetMove(PlayerMove::NotMoving);
+                        player->SetMove(PlayerMove::NotMoving);
                 }
                 break;
             case sf::Event::MouseWheelScrolled:
@@ -187,49 +185,35 @@ int main()
                 break;
         }
 
+        player = game.GetPlayer();
         auto menuState = game.GetMenuState();
         window.clear(sf::Color(50U, 50U, 50U));
 
         if (game.GetPlaying() && menuState == MenuState::Playing)
         {
             auto gameView = game.GetView();
-            auto playerSprite = player.GetSprite();
+            auto playerSprite = player->GetSprite();
 
             window.setView(gameView);
 
             game.DrawSurface(window, player);
-            player.HandleMove(clock, game);
+            player->HandleMove(clock, game);
 
             game.DrawItems(window);
             window.draw(*playerSprite);
             game.DrawWorld(window);
 
-            player.DrawStats(window, game);
+            player->DrawStats(window, game);
         }
-
-        switch (menuState)
+        else
         {
-        case MenuState::Pause:
             game.DrawMenu(window);
-            break;
-        case MenuState::Options:
-            game.DrawMenu(window);
-            break;
-        case MenuState::Main:
-            game.DrawMenu(window);
-            break;
-        case MenuState::Inventory:
-            game.DrawMenu(window, player);
-            break;
-
-        default:
-            break;
         }
 
         window.display();
     }
 
-    player.Save();
-    thread.Join();
+    game.GetPlayer()->Save();
+    game.GetThread()->Join();
     return 0;
 }

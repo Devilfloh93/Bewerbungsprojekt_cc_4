@@ -17,6 +17,7 @@ Player::Player(sf::Sprite *sprite, const uint8_t animID) : Sprite(sprite), m_ani
     m_move = PlayerMove::NotMoving;
     m_lastMove = m_move;
     m_objectInFront = nullptr;
+    m_ID = 1;
 }
 
 PlayerMove Player::GetMove() const
@@ -40,7 +41,12 @@ void Player::SetSpeed(const float speed)
     m_speed = speed;
 }
 
-float Player::GetStatValue(const StatType type)
+uint8_t Player::GetID() const
+{
+    return m_ID;
+}
+
+float Player::GetStatValue(const StatType type) const
 {
     float value = 0.0F;
     switch (type)
@@ -68,7 +74,8 @@ void Player::Load()
     map<uint32_t, uint16_t> savedItems;
 
     string str;
-    ifstream file("./save/save.txt");
+    auto path = format("./save/{}/save.txt", m_ID);
+    ifstream file(path);
 
     if (file.is_open())
     {
@@ -107,7 +114,8 @@ void Player::Load()
 
 void Player::Save()
 {
-    ofstream file("./save/save.txt");
+    auto path = format("./save/{}/save.txt", m_ID);
+    ofstream file(path);
 
     if (file.is_open())
     {
@@ -128,18 +136,6 @@ void Player::Save()
         file.close();
     }
 }
-
-void Player::CreateFolder()
-{
-    auto new_directory_path = filesystem::current_path();
-    new_directory_path /= "save";
-
-    if (!filesystem::exists(new_directory_path))
-    {
-        filesystem::create_directory(new_directory_path);
-    }
-}
-
 
 void Player::CheckCollision(Game &game)
 {
@@ -271,49 +267,6 @@ void Player::UpdateStats(const sf::RenderWindow &window, const Game &game)
     }
 }
 
-void Player::InitDrawStats(const Game &game)
-{
-    ifstream file("./data/playerStatCfg.json");
-
-    if (file.is_open())
-    {
-        auto jsonData = json::parse(file);
-
-        for (const auto &data : jsonData)
-        {
-            sf::Texture *texture;
-            uint8_t add = data["add"];
-            uint8_t textureID = data["textureID"];
-            auto textureRect = sf::IntRect{data["textureData"][0],
-                                           data["textureData"][1],
-                                           data["textureData"][2],
-                                           data["textureData"][3]};
-            StatType type = data["type"];
-
-            for (const auto &data : game.GetTexture())
-            {
-                if (data->GetID() == textureID)
-                {
-                    texture = data->GetTexture();
-                }
-            }
-
-            for (size_t i = 0; i < add; ++i)
-            {
-                auto sprite = new sf::Sprite();
-
-                sprite->setTexture(*texture);
-                sprite->setTextureRect(textureRect);
-                auto textureSize = textureRect.getSize();
-
-                auto stats = new Stats(sprite, textureSize, type);
-                m_stats.push_back(stats);
-            }
-        }
-        file.close();
-    }
-}
-
 void Player::DrawStats(sf::RenderWindow &window, const Game &game)
 {
     auto width = (game.GetView().getCenter().x - (game.GetWindowZoomWidth() / 2)) + 5.0F;
@@ -321,7 +274,7 @@ void Player::DrawStats(sf::RenderWindow &window, const Game &game)
     size_t i = 1;
     size_t j = 1;
 
-    for (const auto &data : m_stats)
+    for (const auto &data : game.GetStats())
     {
         auto textureSize = data->GetTextureSize();
         auto type = data->GetType();

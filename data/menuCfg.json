@@ -23,12 +23,51 @@
             "name": "Inventory",
             "fontID": 0,
             "fontSize": 40
+        },
+        {
+            "state": 5,
+            "name": "Load",
+            "fontID": 0,
+            "fontSize": 40
+        },
+        {
+            "state": 6,
+            "name": "Save",
+            "fontID": 0,
+            "fontSize": 40
+        },
+        {
+            "state": 7,
+            "name": "Create Player",
+            "fontID": 0,
+            "fontSize": 40
         }
     ],
     "Buttons": [
         {
             "state": [
                 1
+            ],
+            "name": "Create Player",
+            "fontID": 0,
+            "fontSize": 20,
+            "fnc": 10,
+            "textureID": 0,
+            "textureData": [
+                191,
+                146,
+                34,
+                15
+            ],
+            "scale": [
+                5.0,
+                5.0
+            ]
+        },
+        {
+            "state": [
+                7,
+                5
             ],
             "name": "Play",
             "fontID": 0,
@@ -110,27 +149,6 @@
         },
         {
             "state": [
-                1,
-                2
-            ],
-            "name": "Quit",
-            "fontID": 0,
-            "fontSize": 20,
-            "fnc": 2,
-            "textureID": 0,
-            "textureData": [
-                191,
-                146,
-                34,
-                15
-            ],
-            "scale": [
-                5.0,
-                5.0
-            ]
-        },
-        {
-            "state": [
                 3
             ],
             "name": "Fullscreen",
@@ -151,12 +169,76 @@
         },
         {
             "state": [
-                3
+                1
+            ],
+            "name": "Load Game",
+            "fontID": 0,
+            "fontSize": 20,
+            "fnc": 9,
+            "textureID": 0,
+            "textureData": [
+                191,
+                146,
+                34,
+                15
+            ],
+            "scale": [
+                5.0,
+                5.0
+            ]
+        },
+        {
+            "state": [
+                2
+            ],
+            "name": "Save Game",
+            "fontID": 0,
+            "fontSize": 20,
+            "fnc": 8,
+            "textureID": 0,
+            "textureData": [
+                191,
+                146,
+                34,
+                15
+            ],
+            "scale": [
+                5.0,
+                5.0
+            ]
+        },
+        {
+            "state": [
+                3,
+                5,
+                6,
+                7
             ],
             "name": "Back",
             "fontID": 0,
             "fontSize": 20,
             "fnc": 4,
+            "textureID": 0,
+            "textureData": [
+                191,
+                146,
+                34,
+                15
+            ],
+            "scale": [
+                5.0,
+                5.0
+            ]
+        },
+        {
+            "state": [
+                1,
+                2
+            ],
+            "name": "Quit",
+            "fontID": 0,
+            "fontSize": 20,
+            "fnc": 2,
             "textureID": 0,
             "textureData": [
                 191,
