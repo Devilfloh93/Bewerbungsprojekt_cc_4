@@ -6,6 +6,16 @@ Gui::Gui(const MenuState menuState) : m_menuState(menuState)
 {
 }
 
+MenuState Gui::GetMenuState() const
+{
+    return m_menuState;
+}
+
+void Gui::SetMenuState(const MenuState menuState)
+{
+    m_menuState = menuState;
+}
+
 Title::Title(const MenuState menuState, sf::Text *text) : Gui(menuState), Text(text)
 {
 }
@@ -13,11 +23,6 @@ Title::Title(const MenuState menuState, sf::Text *text) : Gui(menuState), Text(t
 Button::Button(const MenuState menuState, const BtnFunc btnfnc, sf::Text *text, sf::Sprite *sprite)
     : Gui(menuState), Text(text), Sprite(sprite), m_btnfnc(btnfnc)
 {
-}
-
-MenuState Gui::GetMenuState() const
-{
-    return m_menuState;
 }
 
 BtnFunc Button::GetBtnFnc() const

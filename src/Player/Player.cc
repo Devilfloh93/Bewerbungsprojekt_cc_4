@@ -20,10 +20,18 @@ Player::Player(sf::Sprite *sprite, const uint8_t animID) : Sprite(sprite), m_ani
     m_ID = 1;
 }
 
+// INFO
+uint8_t Player::GetID() const
+{
+    return m_ID;
+}
+
+// MOVE
 PlayerMove Player::GetMove() const
 {
     return m_move;
 }
+
 
 PlayerMove Player::GetLastMove() const
 {
@@ -39,319 +47,6 @@ void Player::SetMove(const PlayerMove move)
 void Player::SetSpeed(const float speed)
 {
     m_speed = speed;
-}
-
-uint8_t Player::GetID() const
-{
-    return m_ID;
-}
-
-float Player::GetStatValue(const StatType type) const
-{
-    float value = 0.0F;
-    switch (type)
-    {
-    case StatType::Health:
-        value = m_survivalStats.health;
-        break;
-    case StatType::Food:
-        value = m_survivalStats.food;
-        break;
-    case StatType::Water:
-        value = m_survivalStats.water;
-        break;
-
-    default:
-        break;
-    }
-
-    return value;
-}
-
-void Player::Load()
-{
-    vector<string> saves;
-    map<uint32_t, uint16_t> savedItems;
-
-    string str;
-    auto path = format("./save/{}/save.txt", m_ID);
-    ifstream file(path);
-
-    if (file.is_open())
-    {
-        while (getline(file, str))
-        {
-            bool push = true;
-            if (str.find('|') != str.npos)
-            {
-                auto pos = str.find('|');
-                str.replace(pos, 1, "  ");
-
-                istringstream iss(str);
-                uint32_t column1;
-                uint16_t column2;
-                iss >> column1 >> column2;
-                savedItems[column1] = column2;
-                push = false;
-            }
-
-            if (push)
-            {
-                saves.push_back(str);
-            }
-        }
-
-        m_name = saves[0];
-        m_survivalStats.health = stof(saves[1]);
-        m_survivalStats.water = stof(saves[2]);
-        m_survivalStats.food = stof(saves[3]);
-        m_sprite->setPosition(stof(saves[4]), stof(saves[5]));
-        m_items = savedItems;
-
-        file.close();
-    }
-}
-
-void Player::Save()
-{
-    auto path = format("./save/{}/save.txt", m_ID);
-    ofstream file(path);
-
-    if (file.is_open())
-    {
-        auto text = format("{}\n{}\n{}\n{}\n{}\n{}\n",
-                           m_name,
-                           m_survivalStats.health,
-                           m_survivalStats.water,
-                           m_survivalStats.food,
-                           m_sprite->getPosition().x,
-                           m_sprite->getPosition().y);
-        file << text;
-
-        for (const auto &data : m_items)
-        {
-            file << data.first << '|' << data.second << '\n';
-        }
-
-        file.close();
-    }
-}
-
-void Player::CheckCollision(Game &game)
-{
-    auto world = game.GetWorld();
-    auto playerPos = m_sprite->getPosition();
-    auto playerSize = m_sprite->getLocalBounds().getSize();
-
-    for (const auto &data : world)
-    {
-        auto objPos = data->GetSprite()->getPosition();
-        auto objCollision = data->GetCollision();
-        auto objSize = data->GetSprite()->getLocalBounds().getSize();
-        auto isUsable = data->GetUseable();
-
-        if (objCollision.x != 0 && objCollision.y != 0)
-        {
-            if (playerPos.x >= objPos.x && playerPos.x <= objPos.x + objCollision.x &&
-                playerPos.y - m_speed <= objPos.y + objSize.y && playerPos.y >= objPos.y + objCollision.y)
-            {
-                m_moveAllowed.up = false;
-                if (isUsable && m_move == PlayerMove::Up)
-                {
-                    m_objectInFront = data;
-                }
-            }
-
-            if (playerPos.x >= objPos.x && playerPos.x <= objPos.x + objCollision.x &&
-                playerPos.y <= objPos.y + objCollision.y && playerPos.y + m_speed >= objPos.y + objCollision.y)
-            {
-                m_moveAllowed.down = false;
-                if (isUsable && m_move == PlayerMove::Down)
-                {
-                    m_objectInFront = data;
-                }
-            }
-
-            if (playerPos.x >= objPos.x && playerPos.x - m_speed <= objPos.x + objCollision.x &&
-                playerPos.y <= objPos.y + objSize.y && playerPos.y >= objPos.y + objCollision.y)
-            {
-                m_moveAllowed.left = false;
-                if (isUsable && m_move == PlayerMove::Left)
-                {
-                    m_objectInFront = data;
-                }
-            }
-
-
-            if (playerPos.x + m_speed >= objPos.x && playerPos.x <= objPos.x && playerPos.y <= objPos.y + objSize.y &&
-                playerPos.y >= objPos.y + objCollision.y)
-            {
-                m_moveAllowed.right = false;
-                if (isUsable && m_move == PlayerMove::Right)
-                {
-                    m_objectInFront = data;
-                }
-            }
-        }
-        else
-        {
-            if ((playerPos.x + playerSize.x) >= objPos.x && playerPos.x <= objPos.x + objSize.x &&
-                playerPos.y - m_speed <= objPos.y + objSize.y && playerPos.y + playerSize.y >= objPos.y)
-            {
-                m_moveAllowed.up = false;
-                if (isUsable && m_move == PlayerMove::Up)
-                {
-                    m_objectInFront = data;
-                }
-            }
-
-            if ((playerPos.x + playerSize.x) >= objPos.x && playerPos.x <= objPos.x + objSize.x &&
-                playerPos.y <= objPos.y + objSize.y && (playerPos.y + playerSize.y) + m_speed >= objPos.y)
-            {
-                m_moveAllowed.down = false;
-                if (isUsable && m_move == PlayerMove::Down)
-                {
-                    m_objectInFront = data;
-                }
-            }
-
-            if (playerPos.x >= objPos.x && playerPos.x - m_speed <= objPos.x + objSize.x &&
-                playerPos.y <= objPos.y + objSize.y && playerPos.y + playerSize.y >= objPos.y)
-            {
-                m_moveAllowed.left = false;
-                if (isUsable && m_move == PlayerMove::Left)
-                {
-                    m_objectInFront = data;
-                }
-            }
-
-            if ((playerPos.x + playerSize.x) + m_speed >= objPos.x && playerPos.x <= objPos.x &&
-                playerPos.y <= objPos.y + objSize.y && playerPos.y + playerSize.y >= objPos.y)
-            {
-                m_moveAllowed.right = false;
-                if (isUsable && m_move == PlayerMove::Right)
-                {
-                    m_objectInFront = data;
-                }
-            }
-        }
-    }
-}
-
-void Player::UpdateStats(const sf::RenderWindow &window, const Game &game)
-{
-    auto statDecay = game.GetStatDecay();
-
-    while (window.isOpen())
-    {
-        this_thread::sleep_for(chrono::seconds(1));
-        if (game.GetPlaying() && game.GetMenuState() == MenuState::Playing)
-        {
-            if (m_survivalStats.food - statDecay.food < 0U)
-            {
-                m_survivalStats.water = 0;
-            }
-            else
-            {
-                m_survivalStats.food -= statDecay.food;
-            }
-            if (m_survivalStats.water - statDecay.water < 0U)
-            {
-                m_survivalStats.water = 0;
-            }
-            else
-            {
-                m_survivalStats.water -= statDecay.water;
-            }
-        }
-    }
-}
-
-void Player::DrawStats(sf::RenderWindow &window, const Game &game)
-{
-    auto width = (game.GetView().getCenter().x - (game.GetWindowZoomWidth() / 2)) + 5.0F;
-
-    size_t i = 1;
-    size_t j = 1;
-
-    for (const auto &data : game.GetStats())
-    {
-        auto textureSize = data->GetTextureSize();
-        auto type = data->GetType();
-        auto sprite = data->GetSprite();
-        auto height = (game.GetView().getCenter().y + (game.GetWindowZoomHeight() / 2)) - 10.0F;
-        auto textureRectSize = sprite->getTextureRect().getSize();
-        auto textureRectPos = sprite->getTextureRect().getPosition();
-
-        if (type == StatType::Empty)
-        {
-            height -= i * 10;
-            ++i;
-        }
-        else
-        {
-            auto statValue = GetStatValue(type);
-            uint8_t newTextureRectSizeX = (statValue * textureSize.x) / 100;
-            if (textureRectSize.x > 0)
-            {
-                auto textureRect =
-                    sf::IntRect{textureRectPos.x, textureRectPos.y, newTextureRectSizeX, textureRectSize.y};
-                sprite->setTextureRect(textureRect);
-            }
-            height -= j * 10;
-            ++j;
-        }
-
-        sprite->setPosition(sf::Vector2f{width, height});
-        window.draw(*sprite);
-    }
-}
-
-void Player::DrawInventoryItems(sf::RenderWindow &window, const vector<ItemCfg *> &itemCfg)
-{
-    bool firstIcon = true;
-
-    Utilities utilities;
-    sf::Sprite prevSprite;
-
-    sf::Font font;
-    font.loadFromFile("ressources/font/Round9x13.ttf");
-
-    for (size_t i = 0; const auto &[key, value] : m_items)
-    {
-        sf::Sprite itemSprite;
-        sf::Text itemText;
-        for (const auto &data : itemCfg)
-        {
-            auto texture = data->GetTexture();
-            auto textureData = data->GetTextureData();
-            auto ID = data->GetID();
-            if (key == ID)
-            {
-                itemText.setFont(font);
-                itemText.setCharacterSize(15);
-                itemText.setString(format("{}", value));
-
-                itemSprite.setTexture(*texture);
-                itemSprite.setTextureRect(textureData);
-
-                if (firstIcon)
-                {
-                    utilities.SetTextBeforeIcon(300, 200, itemSprite, itemText);
-                    prevSprite = itemSprite;
-                    firstIcon = false;
-                }
-                else
-                {
-                    utilities.SetTextBeforeIcon(itemSprite, itemText, prevSprite);
-                }
-
-                break;
-            }
-        }
-        window.draw(itemText);
-        window.draw(itemSprite);
-    }
 }
 
 void Player::HandleMove(sf::Clock &clock, Game &game)
@@ -502,6 +197,60 @@ void Player::HandleMove(sf::Clock &clock, Game &game)
     m_moveAllowed.right = true;
 }
 
+// STATS
+float Player::GetStatValue(const StatType type) const
+{
+    float value = 0.0F;
+    switch (type)
+    {
+    case StatType::Health:
+        value = m_survivalStats.health;
+        break;
+    case StatType::Food:
+        value = m_survivalStats.food;
+        break;
+    case StatType::Water:
+        value = m_survivalStats.water;
+        break;
+
+    default:
+        break;
+    }
+
+    return value;
+}
+
+void Player::UpdateStats(const sf::RenderWindow &window, const Game &game)
+{
+    auto statDecay = game.GetStatDecay();
+
+    while (window.isOpen())
+    {
+        this_thread::sleep_for(chrono::seconds(1));
+        if (game.GetPlaying() && game.GetMenuState() == MenuState::Playing)
+        {
+            if (m_survivalStats.food - statDecay.food < 0U)
+            {
+                m_survivalStats.water = 0;
+            }
+            else
+            {
+                m_survivalStats.food -= statDecay.food;
+            }
+            if (m_survivalStats.water - statDecay.water < 0U)
+            {
+                m_survivalStats.water = 0;
+            }
+            else
+            {
+                m_survivalStats.water -= statDecay.water;
+            }
+        }
+    }
+}
+
+
+// ITEMS
 void Player::UseItem(Game &game)
 {
     auto itemCfg = game.GetItemCfg();
@@ -588,5 +337,265 @@ void Player::UseItem(Game &game)
                 }
             }
         }
+    }
+}
+
+// DRAW
+void Player::DrawStats(sf::RenderWindow &window, const Game &game)
+{
+    auto width = (game.GetView().getCenter().x - (game.GetWindowZoomWidth() / 2)) + 5.0F;
+
+    size_t i = 1;
+    size_t j = 1;
+
+    for (const auto &data : game.GetStats())
+    {
+        auto textureSize = data->GetTextureSize();
+        auto type = data->GetType();
+        auto sprite = data->GetSprite();
+        auto height = (game.GetView().getCenter().y + (game.GetWindowZoomHeight() / 2)) - 10.0F;
+        auto textureRectSize = sprite->getTextureRect().getSize();
+        auto textureRectPos = sprite->getTextureRect().getPosition();
+
+        if (type == StatType::Empty)
+        {
+            height -= i * 10;
+            ++i;
+        }
+        else
+        {
+            auto statValue = GetStatValue(type);
+            uint8_t newTextureRectSizeX = (statValue * textureSize.x) / 100;
+            if (textureRectSize.x > 0)
+            {
+                auto textureRect =
+                    sf::IntRect{textureRectPos.x, textureRectPos.y, newTextureRectSizeX, textureRectSize.y};
+                sprite->setTextureRect(textureRect);
+            }
+            height -= j * 10;
+            ++j;
+        }
+
+        sprite->setPosition(sf::Vector2f{width, height});
+        window.draw(*sprite);
+    }
+}
+
+void Player::DrawInventoryItems(sf::RenderWindow &window, const vector<ItemCfg *> &itemCfg)
+{
+    bool firstIcon = true;
+
+    Utilities utilities;
+    sf::Sprite prevSprite;
+
+    sf::Font font;
+    font.loadFromFile("ressources/font/Round9x13.ttf");
+
+    for (size_t i = 0; const auto &[key, value] : m_items)
+    {
+        sf::Sprite itemSprite;
+        sf::Text itemText;
+        for (const auto &data : itemCfg)
+        {
+            auto texture = data->GetTexture();
+            auto textureData = data->GetTextureData();
+            auto ID = data->GetID();
+            if (key == ID)
+            {
+                itemText.setFont(font);
+                itemText.setCharacterSize(15);
+                itemText.setString(format("{}", value));
+
+                itemSprite.setTexture(*texture);
+                itemSprite.setTextureRect(textureData);
+
+                if (firstIcon)
+                {
+                    utilities.SetTextBeforeIcon(300, 200, itemSprite, itemText);
+                    prevSprite = itemSprite;
+                    firstIcon = false;
+                }
+                else
+                {
+                    utilities.SetTextBeforeIcon(itemSprite, itemText, prevSprite);
+                }
+
+                break;
+            }
+        }
+        window.draw(itemText);
+        window.draw(itemSprite);
+    }
+}
+
+// COLLISION
+void Player::CheckCollision(Game &game)
+{
+    auto world = game.GetWorld();
+    auto playerPos = m_sprite->getPosition();
+    auto playerSize = m_sprite->getLocalBounds().getSize();
+
+    for (const auto &data : world)
+    {
+        auto objPos = data->GetSprite()->getPosition();
+        auto objCollision = data->GetCollision();
+        auto objSize = data->GetSprite()->getLocalBounds().getSize();
+        auto isUsable = data->GetUseable();
+
+        if (objCollision.x != 0 && objCollision.y != 0)
+        {
+            if (playerPos.x >= objPos.x && playerPos.x <= objPos.x + objCollision.x &&
+                playerPos.y - m_speed <= objPos.y + objSize.y && playerPos.y >= objPos.y + objCollision.y)
+            {
+                m_moveAllowed.up = false;
+                if (isUsable && m_move == PlayerMove::Up)
+                {
+                    m_objectInFront = data;
+                }
+            }
+
+            if (playerPos.x >= objPos.x && playerPos.x <= objPos.x + objCollision.x &&
+                playerPos.y <= objPos.y + objCollision.y && playerPos.y + m_speed >= objPos.y + objCollision.y)
+            {
+                m_moveAllowed.down = false;
+                if (isUsable && m_move == PlayerMove::Down)
+                {
+                    m_objectInFront = data;
+                }
+            }
+
+            if (playerPos.x >= objPos.x && playerPos.x - m_speed <= objPos.x + objCollision.x &&
+                playerPos.y <= objPos.y + objSize.y && playerPos.y >= objPos.y + objCollision.y)
+            {
+                m_moveAllowed.left = false;
+                if (isUsable && m_move == PlayerMove::Left)
+                {
+                    m_objectInFront = data;
+                }
+            }
+
+
+            if (playerPos.x + m_speed >= objPos.x && playerPos.x <= objPos.x && playerPos.y <= objPos.y + objSize.y &&
+                playerPos.y >= objPos.y + objCollision.y)
+            {
+                m_moveAllowed.right = false;
+                if (isUsable && m_move == PlayerMove::Right)
+                {
+                    m_objectInFront = data;
+                }
+            }
+        }
+        else
+        {
+            if ((playerPos.x + playerSize.x) >= objPos.x && playerPos.x <= objPos.x + objSize.x &&
+                playerPos.y - m_speed <= objPos.y + objSize.y && playerPos.y + playerSize.y >= objPos.y)
+            {
+                m_moveAllowed.up = false;
+                if (isUsable && m_move == PlayerMove::Up)
+                {
+                    m_objectInFront = data;
+                }
+            }
+
+            if ((playerPos.x + playerSize.x) >= objPos.x && playerPos.x <= objPos.x + objSize.x &&
+                playerPos.y <= objPos.y + objSize.y && (playerPos.y + playerSize.y) + m_speed >= objPos.y)
+            {
+                m_moveAllowed.down = false;
+                if (isUsable && m_move == PlayerMove::Down)
+                {
+                    m_objectInFront = data;
+                }
+            }
+
+            if (playerPos.x >= objPos.x && playerPos.x - m_speed <= objPos.x + objSize.x &&
+                playerPos.y <= objPos.y + objSize.y && playerPos.y + playerSize.y >= objPos.y)
+            {
+                m_moveAllowed.left = false;
+                if (isUsable && m_move == PlayerMove::Left)
+                {
+                    m_objectInFront = data;
+                }
+            }
+
+            if ((playerPos.x + playerSize.x) + m_speed >= objPos.x && playerPos.x <= objPos.x &&
+                playerPos.y <= objPos.y + objSize.y && playerPos.y + playerSize.y >= objPos.y)
+            {
+                m_moveAllowed.right = false;
+                if (isUsable && m_move == PlayerMove::Right)
+                {
+                    m_objectInFront = data;
+                }
+            }
+        }
+    }
+}
+
+// DATASTORE
+void Player::Load()
+{
+    vector<string> saves;
+    map<uint32_t, uint16_t> savedItems;
+
+    string str;
+    auto path = format("./save/{}/save.txt", m_ID);
+    ifstream file(path);
+
+    if (file.is_open())
+    {
+        while (getline(file, str))
+        {
+            bool push = true;
+            if (str.find('|') != str.npos)
+            {
+                auto pos = str.find('|');
+                str.replace(pos, 1, "  ");
+
+                istringstream iss(str);
+                uint32_t column1;
+                uint16_t column2;
+                iss >> column1 >> column2;
+                savedItems[column1] = column2;
+                push = false;
+            }
+
+            if (push)
+            {
+                saves.push_back(str);
+            }
+        }
+
+        m_name = saves[0];
+        m_survivalStats.health = stof(saves[1]);
+        m_survivalStats.water = stof(saves[2]);
+        m_survivalStats.food = stof(saves[3]);
+        m_sprite->setPosition(stof(saves[4]), stof(saves[5]));
+        m_items = savedItems;
+
+        file.close();
+    }
+}
+
+void Player::Save()
+{
+    auto path = format("./save/{}/save.txt", m_ID);
+    ofstream file(path);
+
+    if (file.is_open())
+    {
+        auto text = format("{}\n{}\n{}\n{}\n{}\n{}\n",
+                           m_name,
+                           m_survivalStats.health,
+                           m_survivalStats.water,
+                           m_survivalStats.food,
+                           m_sprite->getPosition().x,
+                           m_sprite->getPosition().y);
+        file << text;
+
+        for (const auto &data : m_items)
+        {
+            file << data.first << '|' << data.second << '\n';
+        }
+
+        file.close();
     }
 }

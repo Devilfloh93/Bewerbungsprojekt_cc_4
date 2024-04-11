@@ -11,9 +11,8 @@ using json = nlohmann::json;
 using namespace std;
 
 Game::Game(const uint16_t windowWidth, const uint16_t windowHeight)
-    : m_windowWidth(windowWidth), m_windowHeight(windowHeight)
+    : m_windowWidth(windowWidth), m_windowHeight(windowHeight), Gui(MenuState::Main)
 {
-    m_menuState = MenuState::Main;
     m_maxZoom = 3U;
     m_playing = false;
     m_defaultPlayerTextureID = 2U;
@@ -26,21 +25,29 @@ Game::Game(const uint16_t windowWidth, const uint16_t windowHeight)
     m_maxTiles = ((m_gameWidth * m_gameHeight) / m_tileSize) / m_tileSize;
 }
 
-vector<AllTextures *> Game::GetTexture() const
+// RUNNING
+bool Game::GetPlaying() const
 {
-    return m_textures;
+    return m_playing;
 }
 
-MenuState Game::GetMenuState() const
+// AREA
+uint8_t Game::GetTileSize() const
 {
-    return m_menuState;
+    return m_tileSize;
 }
 
-StatDecay Game::GetStatDecay() const
+uint16_t Game::GetGameWidth() const
 {
-    return m_statDecay;
+    return m_gameWidth;
 }
 
+uint16_t Game::GetGameHeight() const
+{
+    return m_gameHeight;
+}
+
+// WINDOW
 uint16_t Game::GetWindowZoomHeight() const
 {
     return m_windowZoomHeight;
@@ -51,16 +58,7 @@ uint16_t Game::GetWindowZoomWidth() const
     return m_windowZoomWidth;
 }
 
-bool Game::GetPlaying() const
-{
-    return m_playing;
-}
-
-void Game::SetMenuState(const MenuState menuState)
-{
-    m_menuState = menuState;
-}
-
+// ZOOM
 void Game::SetZoom(const uint8_t zoom)
 {
     m_zoom += zoom;
@@ -72,23 +70,34 @@ void Game::SetZoom(const uint8_t zoom, const float zoomLevel)
     m_zoom += zoom;
 }
 
-sf::View Game::GetView() const
+void Game::UpdateZoom(const float delta)
 {
-    return m_view;
+    if (delta > 0U)
+    {
+        if (m_zoom < m_maxZoom)
+        {
+            SetZoom(1U, 0.5F);
+            m_windowZoomWidth /= 2U;
+            m_windowZoomHeight /= 2U;
+        }
+    }
+    else
+    {
+        if (m_zoom > 0U)
+        {
+            SetZoom(-1, 2.0F);
+            m_windowZoomWidth *= 2U;
+            m_windowZoomHeight *= 2U;
+        }
+    }
+
+    UpdateView();
 }
 
-uint8_t Game::GetTileSize() const
+// VECTOR
+vector<AllTextures *> Game::GetTexture() const
 {
-    return m_tileSize;
-}
-
-uint16_t Game::GetGameWidth() const
-{
-    return m_gameWidth;
-}
-uint16_t Game::GetGameHeight() const
-{
-    return m_gameHeight;
+    return m_textures;
 }
 
 vector<World *> Game::GetWorld() const
@@ -116,148 +125,10 @@ vector<Anim *> Game::GetAnim() const
     return m_anim;
 }
 
-void Game::SetItems(Item *item)
+// VIEW
+sf::View Game::GetView() const
 {
-    m_items.push_back(item);
-}
-
-Player *Game::GetPlayer() const
-{
-    return m_player;
-}
-
-Thread *Game::GetThread() const
-{
-    return m_thread;
-}
-
-void Game::RemoveItems(const size_t i)
-{
-    auto item = m_items.begin() + i;
-
-    delete *item;
-    *item = nullptr;
-    m_items.erase(item);
-}
-
-void Game::Quit(sf::RenderWindow &window)
-{
-    window.close();
-}
-
-void Game::CreateFolder()
-{
-    auto new_directory_path = filesystem::current_path();
-    new_directory_path /= "save";
-
-    if (!filesystem::exists(new_directory_path))
-    {
-        filesystem::create_directory(new_directory_path);
-    }
-}
-
-void Game::CreateFolder(const uint8_t id)
-{
-    auto new_directory_path = filesystem::current_path();
-    new_directory_path /= format("save/{}", id);
-
-    if (!filesystem::exists(new_directory_path))
-    {
-        filesystem::create_directory(new_directory_path);
-    }
-}
-
-void Game::UpdateZoom(const float delta)
-{
-    if (delta > 0U)
-    {
-        if (m_zoom < m_maxZoom)
-        {
-            SetZoom(1U, 0.5F);
-            m_windowZoomWidth /= 2U;
-            m_windowZoomHeight /= 2U;
-        }
-    }
-    else
-    {
-        if (m_zoom > 0U)
-        {
-            SetZoom(-1, 2.0F);
-            m_windowZoomWidth *= 2U;
-            m_windowZoomHeight *= 2U;
-        }
-    }
-
-    UpdateView();
-}
-
-void Game::InitViews()
-{
-    m_defaultCenter = sf::Vector2f(m_windowWidth / 2U, m_windowHeight / 2U);
-
-    m_menuView.setSize(sf::Vector2f(m_windowWidth, m_windowHeight));
-    m_menuView.setCenter(m_defaultCenter);
-
-    m_view.setSize(sf::Vector2f(m_windowWidth, m_windowHeight));
-    m_view.setCenter(m_defaultCenter);
-
-    auto center = m_view.getCenter();
-
-    m_view.zoom(0.5F);
-    m_zoom = 1U;
-    m_windowZoomWidth /= 2U;
-    m_windowZoomHeight /= 2U;
-
-    m_view.move({-(center.x / 2), -(center.y / 2)});
-}
-
-void Game::ResizeWindow(sf::RenderWindow &window)
-{
-    window.setSize(sf::Vector2u(m_windowWidth, m_windowHeight));
-
-    m_defaultCenter = sf::Vector2f(m_windowWidth / 2U, m_windowHeight / 2U);
-
-    m_menuView.setSize(sf::Vector2f(m_windowWidth, m_windowHeight));
-    m_menuView.setCenter(m_defaultCenter);
-
-    ResizeMenu();
-}
-
-void Game::ResizeMenu()
-{
-    Utilities utilities;
-    sf::Sprite *prevBtn;
-
-    for (const auto &data : m_titles)
-    {
-        auto titleState = data->GetMenuState();
-        bool firstBtn = true;
-
-        auto text = data->GetText();
-        utilities.SetTitlePos(m_windowWidth, text);
-
-        cout << "ButtonSize: " << m_buttons.size() << endl;
-
-        for (const auto &data2 : m_buttons)
-        {
-            cout << "Button: " << data2 << endl;
-            auto btnState = data2->GetMenuState();
-
-            if (titleState == btnState)
-            {
-                cout << "Resize Button" << endl;
-                auto sprite = data2->GetSprite();
-                auto btnText = data2->GetText();
-                if (firstBtn)
-                    utilities.SetBtnAndTextPos(m_windowWidth, sprite, text, btnText);
-                else
-                    utilities.SetBtnAndTextPos(m_windowWidth, sprite, prevBtn, btnText);
-
-                prevBtn = sprite;
-                firstBtn = false;
-            }
-        }
-    }
+    return m_view;
 }
 
 void Game::UpdateView()
@@ -333,6 +204,88 @@ void Game::HandleViewPosition(const sf::RenderWindow &window)
     }
 }
 
+// PLAYER
+Player *Game::GetPlayer() const
+{
+    return m_player;
+}
+
+void Game::CreatePlayer()
+{
+    auto sprite = new sf::Sprite();
+    sf::Texture *texture;
+
+    for (const auto &data : m_textures)
+    {
+        auto texID = data->GetID();
+        if (texID == m_defaultPlayerTextureID)
+        {
+            texture = data->GetTexture();
+        }
+    }
+
+    sprite->setTexture(*texture);
+
+    for (const auto &data : m_anim)
+    {
+        if (data->GetTextureID() == m_defaultPlayerTextureID)
+        {
+            sprite->setTextureRect(data->GetMoveAnim().down00);
+            break;
+        }
+    }
+
+    m_player = new Player(sprite, m_defaultPlayerTextureID);
+}
+
+// STATS
+StatDecay Game::GetStatDecay() const
+{
+    return m_statDecay;
+}
+
+// THREAD
+Thread *Game::GetThread() const
+{
+    return m_thread;
+}
+
+// ITEMS
+void Game::SetItems(Item *item)
+{
+    m_items.push_back(item);
+}
+
+void Game::RemoveItems(const size_t i)
+{
+    auto item = m_items.begin() + i;
+
+    delete *item;
+    *item = nullptr;
+    m_items.erase(item);
+}
+
+// INITS
+void Game::InitViews()
+{
+    m_defaultCenter = sf::Vector2f(m_windowWidth / 2U, m_windowHeight / 2U);
+
+    m_menuView.setSize(sf::Vector2f(m_windowWidth, m_windowHeight));
+    m_menuView.setCenter(m_defaultCenter);
+
+    m_view.setSize(sf::Vector2f(m_windowWidth, m_windowHeight));
+    m_view.setCenter(m_defaultCenter);
+
+    auto center = m_view.getCenter();
+
+    m_view.zoom(0.5F);
+    m_zoom = 1U;
+    m_windowZoomWidth /= 2U;
+    m_windowZoomHeight /= 2U;
+
+    m_view.move({-(center.x / 2), -(center.y / 2)});
+}
+
 void Game::InitItemCfg()
 {
     ifstream file("./data/itemCfg.json");
@@ -370,17 +323,6 @@ void Game::InitItemCfg()
         file.close();
     }
 }
-
-void Game::DrawItems(sf::RenderWindow &window)
-{
-    for (const auto &data : m_items)
-    {
-        auto sprite = data->GetSprite();
-
-        window.draw(*sprite);
-    }
-}
-
 
 void Game::InitTexture()
 {
@@ -426,34 +368,6 @@ void Game::InitFont()
         }
         file.close();
     }
-}
-
-void Game::CreatePlayer()
-{
-    auto sprite = new sf::Sprite();
-    sf::Texture *texture;
-
-    for (const auto &data : m_textures)
-    {
-        auto texID = data->GetID();
-        if (texID == m_defaultPlayerTextureID)
-        {
-            texture = data->GetTexture();
-        }
-    }
-
-    sprite->setTexture(*texture);
-
-    for (const auto &data : m_anim)
-    {
-        if (data->GetTextureID() == m_defaultPlayerTextureID)
-        {
-            sprite->setTextureRect(data->GetMoveAnim().down00);
-            break;
-        }
-    }
-
-    m_player = new Player(sprite, m_defaultPlayerTextureID);
 }
 
 void Game::InitMenu()
@@ -756,6 +670,119 @@ void Game::InitWorld()
     }
 }
 
+void Game::InitDrawStats()
+{
+    ifstream file("./data/playerStatCfg.json");
+
+    if (file.is_open())
+    {
+        auto jsonData = json::parse(file);
+
+        for (const auto &data : jsonData)
+        {
+            sf::Texture *texture;
+            uint8_t add = data["add"];
+            uint8_t textureID = data["textureID"];
+            auto textureRect = sf::IntRect{data["textureData"][0],
+                                           data["textureData"][1],
+                                           data["textureData"][2],
+                                           data["textureData"][3]};
+            StatType type = data["type"];
+
+            for (const auto &data : m_textures)
+            {
+                if (data->GetID() == textureID)
+                {
+                    texture = data->GetTexture();
+                }
+            }
+
+            for (size_t i = 0; i < add; ++i)
+            {
+                auto sprite = new sf::Sprite();
+
+                sprite->setTexture(*texture);
+                sprite->setTextureRect(textureRect);
+                auto textureSize = textureRect.getSize();
+
+                auto stats = new Stats(sprite, textureSize, type);
+                m_stats.push_back(stats);
+            }
+        }
+        file.close();
+    }
+}
+
+// DRAW
+void Game::DrawItems(sf::RenderWindow &window)
+{
+    for (const auto &data : m_items)
+    {
+        auto sprite = data->GetSprite();
+
+        window.draw(*sprite);
+    }
+}
+
+void Game::DrawSurface(sf::RenderWindow &window, Player *player)
+{
+    auto playerSprite = player->GetSprite();
+    auto playerPos = playerSprite->getPosition();
+
+    for (auto &data : m_surfaces)
+    {
+        auto sprite = data->GetSprite();
+        auto spritePos = sprite->getPosition();
+        auto tileSize = m_tileSize / 2;
+
+        if (playerPos.x >= spritePos.x - tileSize && playerPos.x <= spritePos.x + tileSize &&
+            playerPos.y >= spritePos.y - tileSize && playerPos.y <= spritePos.y + tileSize)
+        {
+            auto speed = data->GetSpeed();
+            player->SetSpeed(speed);
+        }
+
+        window.draw(*sprite);
+    }
+}
+
+void Game::DrawWorld(sf::RenderWindow &window)
+{
+    for (auto &data : m_world)
+    {
+        auto sprite = data->GetSprite();
+
+        window.draw(*sprite);
+    }
+}
+
+void Game::DrawMenu(sf::RenderWindow &window)
+{
+    window.setView(m_menuView);
+
+    for (const auto &data : m_titles)
+    {
+        if (m_menuState == data->GetMenuState())
+            window.draw(*(data->GetText()));
+
+        if (m_menuState == MenuState::Inventory)
+            m_player->DrawInventoryItems(window, m_itemCfg);
+
+        for (const auto &data1 : m_buttons)
+        {
+            bool showBtn = false;
+            auto menuStates = data1->GetMenuState();
+
+            if (m_menuState == menuStates)
+            {
+                window.draw(*(data1->GetSprite()));
+                window.draw(*(data1->GetText()));
+            }
+        }
+    }
+}
+
+// GUI
 bool Game::HandleBtnClicked(sf::RenderWindow &window, Game &game)
 {
     // get the current mouse position in the window
@@ -856,103 +883,82 @@ bool Game::HandleBtnClicked(sf::RenderWindow &window, Game &game)
     return breakLoop;
 }
 
-void Game::InitDrawStats()
+// RESIZE
+void Game::ResizeWindow(sf::RenderWindow &window)
 {
-    ifstream file("./data/playerStatCfg.json");
+    window.setSize(sf::Vector2u(m_windowWidth, m_windowHeight));
 
-    if (file.is_open())
-    {
-        auto jsonData = json::parse(file);
+    m_defaultCenter = sf::Vector2f(m_windowWidth / 2U, m_windowHeight / 2U);
 
-        for (const auto &data : jsonData)
-        {
-            sf::Texture *texture;
-            uint8_t add = data["add"];
-            uint8_t textureID = data["textureID"];
-            auto textureRect = sf::IntRect{data["textureData"][0],
-                                           data["textureData"][1],
-                                           data["textureData"][2],
-                                           data["textureData"][3]};
-            StatType type = data["type"];
+    m_menuView.setSize(sf::Vector2f(m_windowWidth, m_windowHeight));
+    m_menuView.setCenter(m_defaultCenter);
 
-            for (const auto &data : m_textures)
-            {
-                if (data->GetID() == textureID)
-                {
-                    texture = data->GetTexture();
-                }
-            }
-
-            for (size_t i = 0; i < add; ++i)
-            {
-                auto sprite = new sf::Sprite();
-
-                sprite->setTexture(*texture);
-                sprite->setTextureRect(textureRect);
-                auto textureSize = textureRect.getSize();
-
-                auto stats = new Stats(sprite, textureSize, type);
-                m_stats.push_back(stats);
-            }
-        }
-        file.close();
-    }
+    ResizeMenu();
 }
 
-void Game::DrawSurface(sf::RenderWindow &window, Player *player)
+void Game::ResizeMenu()
 {
-    auto playerSprite = player->GetSprite();
-    auto playerPos = playerSprite->getPosition();
-
-    for (auto &data : m_surfaces)
-    {
-        auto sprite = data->GetSprite();
-        auto spritePos = sprite->getPosition();
-        auto tileSize = m_tileSize / 2;
-
-        if (playerPos.x >= spritePos.x - tileSize && playerPos.x <= spritePos.x + tileSize &&
-            playerPos.y >= spritePos.y - tileSize && playerPos.y <= spritePos.y + tileSize)
-        {
-            auto speed = data->GetSpeed();
-            player->SetSpeed(speed);
-        }
-
-        window.draw(*sprite);
-    }
-}
-
-void Game::DrawWorld(sf::RenderWindow &window)
-{
-    for (auto &data : m_world)
-    {
-        auto sprite = data->GetSprite();
-
-        window.draw(*sprite);
-    }
-}
-
-void Game::DrawMenu(sf::RenderWindow &window)
-{
-    window.setView(m_menuView);
+    Utilities utilities;
+    sf::Sprite *prevBtn;
 
     for (const auto &data : m_titles)
     {
-        if (m_menuState == data->GetMenuState())
-            window.draw(*(data->GetText()));
+        auto titleState = data->GetMenuState();
+        bool firstBtn = true;
 
-        if (m_menuState == MenuState::Inventory)
-            m_player->DrawInventoryItems(window, m_itemCfg);
+        auto text = data->GetText();
+        utilities.SetTitlePos(m_windowWidth, text);
 
-        for (const auto &data1 : m_buttons)
+        cout << "ButtonSize: " << m_buttons.size() << endl;
+
+        for (const auto &data2 : m_buttons)
         {
-            bool showBtn = false;
-            auto menuStates = data1->GetMenuState();
+            cout << "Button: " << data2 << endl;
+            auto btnState = data2->GetMenuState();
 
-            if (m_menuState == menuStates)
+            if (titleState == btnState)
             {
-                window.draw(*(data1->GetSprite()));
-                window.draw(*(data1->GetText()));
+                cout << "Resize Button" << endl;
+                auto sprite = data2->GetSprite();
+                auto btnText = data2->GetText();
+                if (firstBtn)
+                    utilities.SetBtnAndTextPos(m_windowWidth, sprite, text, btnText);
+                else
+                    utilities.SetBtnAndTextPos(m_windowWidth, sprite, prevBtn, btnText);
+
+                prevBtn = sprite;
+                firstBtn = false;
             }
         }
     }
+}
+
+
+// FOLDER
+void Game::CreateFolder()
+{
+    auto new_directory_path = filesystem::current_path();
+    new_directory_path /= "save";
+
+    if (!filesystem::exists(new_directory_path))
+    {
+        filesystem::create_directory(new_directory_path);
+    }
+}
+
+void Game::CreateFolder(const uint8_t id)
+{
+    auto new_directory_path = filesystem::current_path();
+    new_directory_path /= format("save/{}", id);
+
+    if (!filesystem::exists(new_directory_path))
+    {
+        filesystem::create_directory(new_directory_path);
+    }
+}
+
+// QUIT
+void Game::Quit(sf::RenderWindow &window)
+{
+    window.close();
 }

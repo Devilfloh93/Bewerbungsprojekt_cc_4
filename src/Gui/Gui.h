@@ -1,5 +1,4 @@
 #pragma once
-#include "Game.h"
 #include "Sprite.h"
 #include "Text.h"
 #include <SFML/Graphics.hpp>
@@ -30,7 +29,9 @@ public:
 
     MenuState GetMenuState() const;
 
-private:
+    void SetMenuState(const MenuState menuState);
+
+protected:
     MenuState m_menuState;
 };
 
