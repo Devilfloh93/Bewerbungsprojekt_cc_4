@@ -38,36 +38,50 @@ public:
     Player(sf::Sprite *sprite, const uint8_t animID);
     ~Player() = default;
 
-    PlayerMove GetMove() const;
-    PlayerMove GetLastMove() const;
-    float GetStatValue(const StatType type) const;
+    // INFO
     uint8_t GetID() const;
 
-    void CheckCollision(Game &game);
-    void DrawStats(sf::RenderWindow &window, const Game &game);
-    void UpdateStats(const sf::RenderWindow &window, const Game &game);
+    // MOVE
+    PlayerMove GetMove() const;
+    PlayerMove GetLastMove() const;
+    void HandleMove(sf::Clock &clock, Game &game);
     void SetMove(const PlayerMove move);
     void SetSpeed(const float speed);
 
-    void HandleMove(sf::Clock &clock, Game &game);
+    // STATS
+    float GetStatValue(const StatType type) const;
+    void UpdateStats(const sf::RenderWindow &window, const Game &game);
 
+    // ITEMS
     void UseItem(Game &game);
 
+    // DRAW
+    void DrawStats(sf::RenderWindow &window, const Game &game);
     void DrawInventoryItems(sf::RenderWindow &window, const vector<ItemCfg *> &itemCfg);
 
+    // COLLISION
+    void CheckCollision(Game &game);
+
+    // DATASTORE
     void Load();
     void Save();
 
 private:
+    // INFO
     uint8_t m_ID;
     string m_name;
-    SurvivalStats m_survivalStats;
+    // MOVE
     float m_baseSpeed;
     float m_speed;
     PlayerMove m_move;
     PlayerMove m_lastMove;
-    map<uint32_t, uint16_t> m_items;
-    uint8_t m_animID;
     MoveAllowed m_moveAllowed;
+    // STATS
+    SurvivalStats m_survivalStats;
+    // ITEMS
+    map<uint32_t, uint16_t> m_items;
+    // COLLISION
     World *m_objectInFront;
+    // ANIM
+    uint8_t m_animID;
 };
