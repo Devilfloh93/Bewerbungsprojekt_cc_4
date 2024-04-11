@@ -1,9 +1,9 @@
 #include "Game.h"
-
 #include "Utilities.h"
 #include "nlohmann/json.hpp"
 #include <fstream>
 #include <iostream>
+#include <iterator>
 #include <map>
 #include <random>
 
@@ -56,6 +56,11 @@ uint16_t Game::GetWindowZoomHeight() const
 uint16_t Game::GetWindowZoomWidth() const
 {
     return m_windowZoomWidth;
+}
+
+uint16_t Game::GetWindowWidth() const
+{
+    return m_windowWidth;
 }
 
 // ZOOM
@@ -123,6 +128,11 @@ vector<Stats *> Game::GetStats() const
 vector<Anim *> Game::GetAnim() const
 {
     return m_anim;
+}
+
+vector<Input *> Game::GetInput() const
+{
+    return m_inputs;
 }
 
 // VIEW
@@ -210,7 +220,7 @@ Player *Game::GetPlayer() const
     return m_player;
 }
 
-void Game::CreatePlayer()
+bool Game::LoadPlayer(const uint8_t id)
 {
     auto sprite = new sf::Sprite();
     sf::Texture *texture;
@@ -235,8 +245,54 @@ void Game::CreatePlayer()
         }
     }
 
-    m_player = new Player(sprite, m_defaultPlayerTextureID);
+    m_player = new Player(sprite, m_defaultPlayerTextureID, id);
+    return true;
 }
+
+bool Game::CreatePlayer()
+{
+    auto countFolders = CountFolders();
+    if (countFolders <= 0)
+        return false;
+
+    string_view playerName = "";
+    for (const auto &data : m_inputs)
+    {
+        if (m_menuState == data->GetMenuState())
+            playerName = data->GetName();
+    }
+
+    if (playerName.size() == 0)
+        return false;
+
+
+    auto sprite = new sf::Sprite();
+    sf::Texture *texture;
+
+    for (const auto &data : m_textures)
+    {
+        auto texID = data->GetID();
+        if (texID == m_defaultPlayerTextureID)
+        {
+            texture = data->GetTexture();
+        }
+    }
+
+    sprite->setTexture(*texture);
+
+    for (const auto &data : m_anim)
+    {
+        if (data->GetTextureID() == m_defaultPlayerTextureID)
+        {
+            sprite->setTextureRect(data->GetMoveAnim().down00);
+            break;
+        }
+    }
+
+    m_player = new Player(sprite, m_defaultPlayerTextureID, playerName, countFolders);
+    return true;
+}
+
 
 // STATS
 StatDecay Game::GetStatDecay() const
@@ -288,7 +344,7 @@ void Game::InitViews()
 
 void Game::InitItemCfg()
 {
-    ifstream file("./data/itemCfg.json");
+    ifstream file("./data/item/item.json");
 
     vector<nlohmann::json_abi_v3_11_2::ordered_json> jsonItems;
 
@@ -326,7 +382,7 @@ void Game::InitItemCfg()
 
 void Game::InitTexture()
 {
-    ifstream file("./data/textureCfg.json");
+    ifstream file("./data/texture/texture.json");
 
     if (file.is_open())
     {
@@ -349,7 +405,7 @@ void Game::InitTexture()
 
 void Game::InitFont()
 {
-    ifstream file("./data/fontCfg.json");
+    ifstream file("./data/font/font.json");
 
     if (file.is_open())
     {
@@ -372,44 +428,44 @@ void Game::InitFont()
 
 void Game::InitMenu()
 {
-    Utilities utilities;
-    sf::Sprite *prevBtn;
-
-    ifstream file("./data/menuCfg.json");
-
-    vector<nlohmann::json_abi_v3_11_2::ordered_json> menuTitles;
-    vector<nlohmann::json_abi_v3_11_2::ordered_json> menuButtons;
-
-    if (file.is_open())
+    enum class Element
     {
-        auto jsonData = nlohmann::ordered_json::parse(file);
+        Nothing = 0,
+        Title,
+        Input
+    };
 
-        for (auto it = jsonData.begin(); it != jsonData.end(); ++it)
-        {
-            if (it.key() == "Titles")
-                utilities.ProcessJSON(*it, menuTitles);
+    ifstream fileTitle("./data/menu/title.json");
+    ifstream fileBtn("./data/menu/button.json");
+    ifstream fileInput("./data/menu/input.json");
 
-            if (it.key() == "Buttons")
-                utilities.ProcessJSON(*it, menuButtons);
-        }
+    if (fileTitle.is_open() && fileBtn.is_open() && fileInput.is_open())
+    {
+        auto jsonDataTitle = nlohmann::ordered_json::parse(fileTitle);
+        auto jsonDataBtn = nlohmann::ordered_json::parse(fileBtn);
+        auto jsonDataInput = nlohmann::ordered_json::parse(fileInput);
 
-        for (const auto &data : menuTitles)
+        for (const auto &dataTitle : jsonDataTitle)
         {
             auto titleText = new sf::Text();
+            Element element = Element::Title;
 
-            bool firstBtn = true;
-            MenuState state = data["state"];
-            uint8_t fontSize = data["fontSize"];
-            string text = data["name"];
-            uint8_t fontID = data["fontID"];
+            MenuState state = dataTitle["state"];
+            uint8_t fontSize = dataTitle["fontSize"];
+            string text = dataTitle["name"];
+            uint8_t fontID = dataTitle["fontID"];
             sf::Font *font;
+            Utilities utilities;
+            sf::Sprite *prevBtn;
+            sf::Text *inputText;
 
-            for (const auto &data5 : m_fonts)
+            for (const auto &data : m_fonts)
             {
-                auto fonID = data5->GetID();
+                auto fonID = data->GetID();
                 if (fonID == fontID)
                 {
-                    font = data5->GetFont();
+                    font = data->GetFont();
+                    break;
                 }
             }
 
@@ -422,13 +478,55 @@ void Game::InitMenu()
             auto titles = new Title(state, titleText);
             m_titles.push_back(titles);
 
-            for (const auto &data1 : menuButtons)
+            for (const auto &dataInput : jsonDataInput)
+            {
+                bool addInput = false;
+                vector<MenuState> btnState = dataInput["state"];
+                for (const auto &data : btnState)
+                {
+                    if (state == data)
+                    {
+                        addInput = true;
+                        break;
+                    }
+                }
+
+                if (addInput)
+                {
+                    inputText = new sf::Text();
+                    fontID = dataInput["fontID"];
+                    fontSize = dataInput["fontSize"];
+                    uint8_t maxChars = dataInput["maxChars"];
+
+                    for (const auto &data : m_fonts)
+                    {
+                        auto fonID = data->GetID();
+                        if (fonID == fontID)
+                        {
+                            font = data->GetFont();
+                            break;
+                        }
+                    }
+
+                    inputText->setFont(*font);
+                    inputText->setCharacterSize(fontSize);
+
+                    utilities.SetTitlePos(m_windowWidth, titleText, inputText);
+
+                    element = Element::Input;
+
+                    auto inputs = new Input(state, inputText, maxChars);
+                    m_inputs.push_back(inputs);
+                }
+            }
+
+            for (const auto &dataBtn : jsonDataBtn)
             {
                 bool addBtn = false;
-                vector<MenuState> btnState = data1["state"];
-                for (const auto &data2 : btnState)
+                vector<MenuState> btnState = dataBtn["state"];
+                for (const auto &data : btnState)
                 {
-                    if (state == data2)
+                    if (state == data)
                     {
                         addBtn = true;
                         break;
@@ -440,33 +538,35 @@ void Game::InitMenu()
                     auto btnText = new sf::Text();
                     auto btn = new sf::Sprite();
 
-                    auto textureRect = sf::IntRect{data1["textureData"][0],
-                                                   data1["textureData"][1],
-                                                   data1["textureData"][2],
-                                                   data1["textureData"][3]};
-                    auto scale = sf::Vector2f{data1["scale"][0], data1["scale"][1]};
-                    text = data1["name"];
-                    fontSize = data1["fontSize"];
-                    BtnFunc btnFnc = data1["fnc"];
-                    uint8_t textureID = data1["textureID"];
-                    fontID = data1["fontID"];
+                    auto textureRect = sf::IntRect{dataBtn["textureData"][0],
+                                                   dataBtn["textureData"][1],
+                                                   dataBtn["textureData"][2],
+                                                   dataBtn["textureData"][3]};
+                    auto scale = sf::Vector2f{dataBtn["scale"][0], dataBtn["scale"][1]};
+                    text = dataBtn["name"];
+                    fontSize = dataBtn["fontSize"];
+                    BtnFunc btnFnc = dataBtn["fnc"];
+                    uint8_t textureID = dataBtn["textureID"];
+                    fontID = dataBtn["fontID"];
                     sf::Texture *texture;
 
-                    for (const auto &data3 : m_textures)
+                    for (const auto &data : m_textures)
                     {
-                        auto texID = data3->GetID();
+                        auto texID = data->GetID();
                         if (texID == textureID)
                         {
-                            texture = data3->GetTexture();
+                            texture = data->GetTexture();
+                            break;
                         }
                     }
 
-                    for (const auto &data4 : m_fonts)
+                    for (const auto &data : m_fonts)
                     {
-                        auto fonID = data4->GetID();
+                        auto fonID = data->GetID();
                         if (fonID == fontID)
                         {
-                            font = data4->GetFont();
+                            font = data->GetFont();
+                            break;
                         }
                     }
 
@@ -478,13 +578,15 @@ void Game::InitMenu()
                     btnText->setCharacterSize(fontSize);
                     btnText->setString(text);
 
-                    if (firstBtn)
+                    if (element == Element::Title)
                         utilities.SetBtnAndTextPos(m_windowWidth, btn, titleText, btnText);
+                    else if (element == Element::Input)
+                        utilities.SetBtnAndTextPos(m_windowWidth, btn, inputText, btnText);
                     else
                         utilities.SetBtnAndTextPos(m_windowWidth, btn, prevBtn, btnText);
 
                     prevBtn = btn;
-                    firstBtn = false;
+                    element = Element::Nothing;
 
                     auto buttons = new Button(state, btnFnc, btnText, btn);
                     m_buttons.push_back(buttons);
@@ -492,7 +594,9 @@ void Game::InitMenu()
             }
         }
 
-        file.close();
+        fileTitle.close();
+        fileBtn.close();
+        fileInput.close();
     }
 }
 
@@ -507,7 +611,7 @@ void Game::InitSurface()
     size_t j = 0;
     size_t k = 0;
 
-    ifstream file("./data/surfaceCfg.json");
+    ifstream file("./data/world/surface.json");
 
     if (file.is_open())
     {
@@ -587,7 +691,7 @@ void Game::InitSurface()
 
 void Game::InitAnim()
 {
-    ifstream file("./data/characterAnimCfg.json");
+    ifstream file("./data/anim/anim.json");
 
     if (file.is_open())
     {
@@ -620,7 +724,7 @@ void Game::InitAnim()
 
 void Game::InitWorld()
 {
-    ifstream file("./data/worldCfg.json");
+    ifstream file("./data/world/world.json");
 
     if (file.is_open())
     {
@@ -672,7 +776,7 @@ void Game::InitWorld()
 
 void Game::InitDrawStats()
 {
-    ifstream file("./data/playerStatCfg.json");
+    ifstream file("./data/player/stat.json");
 
     if (file.is_open())
     {
@@ -797,6 +901,10 @@ bool Game::HandleBtnClicked(sf::RenderWindow &window, Game &game)
         auto btnLSize = data->GetSprite()->getLocalBounds().getSize();
         auto btnScale = data->GetSprite()->getScale();
         auto state = data->GetMenuState();
+        bool created = false;
+
+        // ADD SELECT LOAD FILE AND TAKE THE FOLDER ID AND REPLACE ID WITH IT -> btnFnc::Load
+        uint8_t id = 1;
 
         if (worldPos.x > btnPos.x && worldPos.x < btnPos.x + (btnLSize.x * btnScale.x) && worldPos.y > btnPos.y &&
             worldPos.y < btnPos.y + (btnLSize.y * btnScale.y) && m_menuState == state)
@@ -805,26 +913,20 @@ bool Game::HandleBtnClicked(sf::RenderWindow &window, Game &game)
             {
             case BtnFunc::Play:
                 // Player Init
-                game.CreatePlayer();
-                cout << "Player Init Done!" << endl;
-
-                if (m_menuState == MenuState::Create)
+                created = game.CreatePlayer();
+                if (created)
                 {
+                    cout << "Player Init Done!" << endl;
+
                     CreateFolder(m_player->GetID());
+
+                    // Thread Init
+                    m_thread = new Thread(window, m_player, game);
+                    cout << "Thread Init Done!" << endl;
+
+                    m_playing = true;
+                    m_menuState = MenuState::Playing;
                 }
-
-                if (m_menuState == MenuState::Load)
-                {
-                    m_player->Load();
-                    cout << "Player Load Done!" << endl;
-                }
-
-                // Thread Init
-                m_thread = new Thread(window, m_player, game);
-                cout << "Thread Init Done!" << endl;
-
-                m_playing = true;
-                m_menuState = MenuState::Playing;
                 breakLoop = true;
                 break;
             case BtnFunc::Resume:
@@ -865,13 +967,32 @@ bool Game::HandleBtnClicked(sf::RenderWindow &window, Game &game)
                 m_player->Save();
                 breakLoop = true;
                 break;
-            case BtnFunc::Load:
-                m_menuState = MenuState::Load;
+            case BtnFunc::OpenLoad:
+                m_menuState = MenuState::OpenLoad;
 
                 breakLoop = true;
                 break;
             case BtnFunc::Create:
                 m_menuState = MenuState::Create;
+                breakLoop = true;
+                break;
+            case BtnFunc::Load:
+                m_menuState = MenuState::Load;
+
+                created = game.LoadPlayer(id);
+                if (created)
+                {
+                    cout << "Player Init Done!" << endl;
+                    m_player->Load(id);
+                    cout << "Player Load Done!" << endl;
+
+                    // Thread Init
+                    m_thread = new Thread(window, m_player, game);
+                    cout << "Thread Init Done!" << endl;
+
+                    m_playing = true;
+                    m_menuState = MenuState::Playing;
+                }
                 breakLoop = true;
                 break;
             default:
@@ -955,6 +1076,20 @@ void Game::CreateFolder(const uint8_t id)
     {
         filesystem::create_directory(new_directory_path);
     }
+}
+
+uint8_t Game::CountFolders()
+{
+    auto directory_path = filesystem::current_path();
+    directory_path /= format("save");
+
+    if (filesystem::exists(directory_path))
+    {
+        int8_t count = distance(filesystem::directory_iterator(directory_path), filesystem::directory_iterator{});
+
+        return count + 1;
+    }
+    return 0;
 }
 
 // QUIT
