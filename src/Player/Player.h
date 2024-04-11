@@ -35,8 +35,12 @@ enum class PlayerMove
 class Player : public Sprite
 {
 public:
-    Player(sf::Sprite *sprite, const uint8_t animID);
+    Player(sf::Sprite *sprite, const uint8_t animID, const string_view name, const uint8_t id);
+    Player(sf::Sprite *sprite, const uint8_t animID, const uint8_t id);
     ~Player() = default;
+
+    // INIT
+    void Init();
 
     // INFO
     uint8_t GetID() const;
@@ -63,7 +67,7 @@ public:
     void CheckCollision(Game &game);
 
     // DATASTORE
-    void Load();
+    void Load(const uint8_t id);
     void Save();
 
 private:

@@ -4,6 +4,8 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 
+using namespace std;
+
 enum class BtnFunc
 {
     Nothing = 0,
@@ -15,8 +17,9 @@ enum class BtnFunc
     Resolution,
     Fullscreen,
     Save,
-    Load,
-    Create
+    OpenLoad,
+    Create,
+    Load
 };
 
 enum class MenuState;
@@ -52,4 +55,20 @@ public:
 
 private:
     BtnFunc m_btnfnc;
+};
+
+class Input : public Gui, public Text
+{
+public:
+    Input(const MenuState menuState, sf::Text *text, const uint8_t maxChars);
+    ~Input() = default;
+
+    string_view GetName() const;
+
+    void Write(const uint16_t width, const sf::Uint32 character);
+    void Popback(const uint16_t width);
+
+private:
+    string m_string;
+    uint8_t m_maxChars;
 };

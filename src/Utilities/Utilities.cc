@@ -4,22 +4,27 @@ Utilities::Utilities()
 {
 }
 
-void Utilities::ProcessJSON(const json &j, vector<nlohmann::json_abi_v3_11_2::ordered_json> &vec)
+void Utilities::SetTitlePos(const uint16_t width, sf::Text *title)
 {
-    for (auto it = j.begin(); it != j.end(); ++it)
-    {
-        if (it->is_object())
-            vec.push_back(*it);
-    }
+    auto titleLSize = title->getLocalBounds().getSize();
+    title->setPosition(sf::Vector2f((width / 2U) - (titleLSize.x / 2U), 0.0F));
 }
 
-void Utilities::SetTitlePos(const uint32_t width, sf::Text *text)
+void Utilities::SetInputPos(const uint16_t width, sf::Text *input)
 {
-    auto textLSize = text->getLocalBounds().getSize();
-    text->setPosition(sf::Vector2f((width / 2U) - (textLSize.x / 2U), 0.0F));
+    auto inputLSize = input->getLocalBounds().getSize();
+    input->setPosition(sf::Vector2f((width / 2U) - (inputLSize.x / 2U), input->getPosition().y));
 }
 
-void Utilities::SetBtnAndTextPos(const uint32_t width, sf::Sprite *btnObj, sf::Text *title, sf::Text *btntext)
+void Utilities::SetTitlePos(const uint16_t width, sf::Text *title, sf::Text *text)
+{
+    auto titleLSize = title->getLocalBounds().getSize();
+    auto titlePos = title->getGlobalBounds().getPosition();
+
+    text->setPosition(sf::Vector2f((width / 2U), (titlePos.y + titleLSize.y) + 50.0F));
+}
+
+void Utilities::SetBtnAndTextPos(const uint16_t width, sf::Sprite *btnObj, sf::Text *title, sf::Text *btntext)
 {
     auto btnObjLSize = btnObj->getLocalBounds().getSize();
     auto btnObjScale = btnObj->getScale();
@@ -37,7 +42,7 @@ void Utilities::SetBtnAndTextPos(const uint32_t width, sf::Sprite *btnObj, sf::T
                                       btnObjPos.y + ((btnObjSize.y / 2U) - (btnTextLSize.y / 2U))));
 }
 
-void Utilities::SetBtnAndTextPos(const uint32_t width, sf::Sprite *btnObj, sf::Sprite *btn, sf::Text *btntext)
+void Utilities::SetBtnAndTextPos(const uint16_t width, sf::Sprite *btnObj, sf::Sprite *btn, sf::Text *btntext)
 {
     auto btnObjLSize = btnObj->getLocalBounds().getSize();
     auto btnObjScale = btnObj->getScale();

@@ -1,0 +1,44 @@
+[
+    {
+        "state": 1,
+        "name": "Main Menu",
+        "fontID": 0,
+        "fontSize": 40
+    },
+    {
+        "state": 2,
+        "name": "Paused",
+        "fontID": 0,
+        "fontSize": 40
+    },
+    {
+        "state": 3,
+        "name": "Options",
+        "fontID": 0,
+        "fontSize": 40
+    },
+    {
+        "state": 4,
+        "name": "Inventory",
+        "fontID": 0,
+        "fontSize": 40
+    },
+    {
+        "state": 5,
+        "name": "Load",
+        "fontID": 0,
+        "fontSize": 40
+    },
+    {
+        "state": 6,
+        "name": "Save",
+        "fontID": 0,
+        "fontSize": 40
+    },
+    {
+        "state": 7,
+        "name": "Create Player",
+        "fontID": 0,
+        "fontSize": 40
+    }
+]

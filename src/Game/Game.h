@@ -32,15 +32,17 @@ enum class MenuState
     Pause,
     Options,
     Inventory,
-    Load,
+    OpenLoad,
     Save,
-    Create
+    Create,
+    Load
 };
 
 
 class Player;
 class Title;
 class Button;
+class Input;
 class Thread;
 
 class Game : public Gui
@@ -60,6 +62,7 @@ public:
     // WINDOW
     uint16_t GetWindowZoomHeight() const;
     uint16_t GetWindowZoomWidth() const;
+    uint16_t GetWindowWidth() const;
 
     // ZOOM
     void SetZoom(const uint8_t zoom);
@@ -73,6 +76,7 @@ public:
     vector<Anim *> GetAnim() const;
     vector<AllTextures *> GetTexture() const;
     vector<Stats *> GetStats() const;
+    vector<Input *> GetInput() const;
 
     // VIEW
     sf::View GetView() const;
@@ -81,7 +85,8 @@ public:
 
     // PLAYER
     Player *GetPlayer() const;
-    void CreatePlayer();
+    bool CreatePlayer();
+    bool LoadPlayer(const uint8_t id);
 
     // STATS
     StatDecay GetStatDecay() const;
@@ -120,6 +125,7 @@ public:
     // FOLDER
     void CreateFolder();
     void CreateFolder(const uint8_t id);
+    uint8_t CountFolders();
 
     // QUIT
     void Quit(sf::RenderWindow &window);
@@ -151,6 +157,7 @@ private:
     vector<Font *> m_fonts;
     vector<Anim *> m_anim;
     vector<Stats *> m_stats;
+    vector<Input *> m_inputs;
     // VIEW
     sf::View m_view;
     sf::View m_menuView;

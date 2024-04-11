@@ -8,7 +8,19 @@
 #include <memory>
 #include <random>
 
-Player::Player(sf::Sprite *sprite, const uint8_t animID) : Sprite(sprite), m_animID(animID)
+Player::Player(sf::Sprite *sprite, const uint8_t animID, const string_view name, const uint8_t id)
+    : Sprite(sprite), m_animID(animID), m_name(name), m_ID(id)
+{
+    Init();
+}
+
+Player::Player(sf::Sprite *sprite, const uint8_t animID, const uint8_t id) : Sprite(sprite), m_animID(animID), m_ID(id)
+{
+    Init();
+}
+
+// INIT
+void Player::Init()
 {
     m_sprite->setPosition(80.0F, 80.0F);
     m_survivalStats = {.health = 100.0F, .water = 100.0F, .food = 100.0F};
@@ -17,7 +29,6 @@ Player::Player(sf::Sprite *sprite, const uint8_t animID) : Sprite(sprite), m_ani
     m_move = PlayerMove::NotMoving;
     m_lastMove = m_move;
     m_objectInFront = nullptr;
-    m_ID = 1;
 }
 
 // INFO
@@ -531,13 +542,13 @@ void Player::CheckCollision(Game &game)
 }
 
 // DATASTORE
-void Player::Load()
+void Player::Load(const uint8_t id)
 {
     vector<string> saves;
     map<uint32_t, uint16_t> savedItems;
 
     string str;
-    auto path = format("./save/{}/save.txt", m_ID);
+    auto path = format("./save/{}/save.txt", id);
     ifstream file(path);
 
     if (file.is_open())

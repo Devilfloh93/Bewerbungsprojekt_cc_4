@@ -2,10 +2,10 @@
 #include "Game.h"
 #include <SFML/Graphics.hpp>
 #include <cstdint>
+#include <format>
 #include <iostream>
 
 using namespace std;
-
 
 int main()
 {
@@ -69,7 +69,6 @@ int main()
 
     while (window.isOpen())
     {
-
         for (auto event = sf::Event{}; window.pollEvent(event);)
         {
             bool breakLoop = false;
@@ -159,6 +158,26 @@ int main()
                     }
                 }
                 break;
+            case sf::Event::TextEntered:
+                if (state == MenuState::Create)
+                {
+                    auto width = game.GetWindowWidth();
+                    for (const auto &data : game.GetInput())
+                    {
+                        if (data->GetMenuState() == MenuState::Create)
+                        {
+                            if (event.text.unicode == 0x00000008)
+                            {
+                                data->Popback(width);
+                            }
+                            else
+                            {
+                                data->Write(width, event.text.unicode);
+                            }
+                        }
+                    }
+                }
+                break;
             case sf::Event::KeyReleased:
                 if (game.GetPlaying() && state == MenuState::Playing)
                 {
@@ -208,6 +227,15 @@ int main()
         else
         {
             game.DrawMenu(window);
+
+            if (menuState == MenuState::Create)
+            {
+                for (const auto &data : game.GetInput())
+                {
+                    if (data->GetMenuState() == MenuState::Create)
+                        window.draw(*(data->GetText()));
+                }
+            }
         }
 
         window.display();
