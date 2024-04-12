@@ -544,43 +544,24 @@ void Player::CheckCollision(Game &game)
 // DATASTORE
 void Player::Load(const uint8_t id)
 {
-    vector<string> saves;
-    map<uint32_t, uint16_t> savedItems;
+    auto path = format("./save/{}/save.json", id);
 
-    string str;
-    auto path = format("./save/{}/save.txt", id);
     ifstream file(path);
 
     if (file.is_open())
     {
-        while (getline(file, str))
+        auto jsonData = json::parse(file);
+
+        m_name = jsonData["name"];
+        m_survivalStats.health = jsonData["health"];
+        m_survivalStats.water = jsonData["water"];
+        m_survivalStats.food = jsonData["food"];
+        m_sprite->setPosition(jsonData["posX"], jsonData["posY"]);
+
+        for (const auto &data : jsonData["items"])
         {
-            bool push = true;
-            if (str.find('|') != str.npos)
-            {
-                auto pos = str.find('|');
-                str.replace(pos, 1, "  ");
-
-                istringstream iss(str);
-                uint32_t column1;
-                uint16_t column2;
-                iss >> column1 >> column2;
-                savedItems[column1] = column2;
-                push = false;
-            }
-
-            if (push)
-            {
-                saves.push_back(str);
-            }
+            m_items[data[0]] = data[1];
         }
-
-        m_name = saves[0];
-        m_survivalStats.health = stof(saves[1]);
-        m_survivalStats.water = stof(saves[2]);
-        m_survivalStats.food = stof(saves[3]);
-        m_sprite->setPosition(stof(saves[4]), stof(saves[5]));
-        m_items = savedItems;
 
         file.close();
     }
@@ -588,25 +569,20 @@ void Player::Load(const uint8_t id)
 
 void Player::Save()
 {
-    auto path = format("./save/{}/save.txt", m_ID);
+    auto path = format("./save/{}/save.json", m_ID);
+
     ofstream file(path);
 
     if (file.is_open())
     {
-        auto text = format("{}\n{}\n{}\n{}\n{}\n{}\n",
-                           m_name,
-                           m_survivalStats.health,
-                           m_survivalStats.water,
-                           m_survivalStats.food,
-                           m_sprite->getPosition().x,
-                           m_sprite->getPosition().y);
-        file << text;
-
-        for (const auto &data : m_items)
-        {
-            file << data.first << '|' << data.second << '\n';
-        }
-
+        json jsonData = {{"name", m_name},
+                         {"health", m_survivalStats.health},
+                         {"water", m_survivalStats.water},
+                         {"food", m_survivalStats.food},
+                         {"posX", m_sprite->getPosition().x},
+                         {"posY", m_sprite->getPosition().y},
+                         {"items", m_items}};
+        file << jsonData;
         file.close();
     }
 }

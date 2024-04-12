@@ -43,9 +43,9 @@ string_view Input::GetName() const
 
 void Input::Write(const uint16_t width, const sf::Uint32 character)
 {
-    if (m_string.size() < m_maxChars)
+    Utilities utilities;
+    if (m_string.size() < m_maxChars && utilities.isAlpha(character))
     {
-        Utilities utilities;
         m_string.insert(m_string.end(), character);
         m_text->setString(m_string);
         utilities.SetInputPos(width, m_text);

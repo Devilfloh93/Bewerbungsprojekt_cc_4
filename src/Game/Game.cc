@@ -135,6 +135,11 @@ vector<Input *> Game::GetInput() const
     return m_inputs;
 }
 
+vector<sf::Text *> Game::GetSaveFiles() const
+{
+    return m_saveFiles;
+}
+
 // VIEW
 sf::View Game::GetView() const
 {
@@ -345,8 +350,6 @@ void Game::InitViews()
 void Game::InitItemCfg()
 {
     ifstream file("./data/item/item.json");
-
-    vector<nlohmann::json_abi_v3_11_2::ordered_json> jsonItems;
 
     if (file.is_open())
     {
@@ -863,14 +866,35 @@ void Game::DrawWorld(sf::RenderWindow &window)
 void Game::DrawMenu(sf::RenderWindow &window)
 {
     window.setView(m_menuView);
+    Utilities utilities;
+    sf::Sprite *lastbtn;
 
     for (const auto &data : m_titles)
     {
+        bool firstBtn = true;
+        sf::Text *previousTxt = data->GetText();
+
         if (m_menuState == data->GetMenuState())
             window.draw(*(data->GetText()));
 
         if (m_menuState == MenuState::Inventory)
             m_player->DrawInventoryItems(window, m_itemCfg);
+
+        for (const auto &data1 : m_inputs)
+        {
+            if (m_menuState == data1->GetMenuState())
+                window.draw(*(data1->GetText()));
+        }
+
+        for (const auto &data1 : m_saveFiles)
+        {
+            if (m_menuState == MenuState::OpenLoad)
+            {
+                utilities.SetTitlePos(m_windowWidth, previousTxt, data1);
+                window.draw(*data1);
+                previousTxt = data1;
+            }
+        }
 
         for (const auto &data1 : m_buttons)
         {
@@ -879,10 +903,49 @@ void Game::DrawMenu(sf::RenderWindow &window)
 
             if (m_menuState == menuStates)
             {
+                if (m_menuState == MenuState::OpenLoad)
+                {
+                    if (firstBtn)
+                    {
+                        utilities.SetBtnAndTextPos(m_windowWidth, data1->GetSprite(), previousTxt, data1->GetText());
+                        lastbtn = data1->GetSprite();
+                        firstBtn = false;
+                    }
+                    else
+                        utilities.SetBtnAndTextPos(m_windowWidth, data1->GetSprite(), lastbtn, data1->GetText());
+                }
+
                 window.draw(*(data1->GetSprite()));
                 window.draw(*(data1->GetText()));
             }
         }
+    }
+}
+
+void Game::CreateLoadMenu()
+{
+    for (auto &data : m_saveFiles)
+    {
+        delete data;
+        data = nullptr;
+    }
+    m_saveFiles.clear();
+
+    sf::Font *font;
+    auto count = CountFolders();
+
+    for (const auto &data : m_fonts)
+    {
+        if (data->GetID() == 0)
+        {
+            font = data->GetFont();
+        }
+    }
+
+    for (size_t i = 1; i < count; ++i)
+    {
+        auto text = new sf::Text(format("{}. Savegame", i), *font, 20U);
+        m_saveFiles.push_back(text);
     }
 }
 
@@ -895,6 +958,24 @@ bool Game::HandleBtnClicked(sf::RenderWindow &window, Game &game)
     auto worldPos = window.mapPixelToCoords(pixelPos);
     bool breakLoop = false;
 
+    if (m_menuState == MenuState::OpenLoad)
+    {
+        for (size_t i = 1; const auto &data : m_saveFiles)
+        {
+            data->setColor(sf::Color(255, 255, 255));
+            auto txtPos = data->getPosition();
+            auto txtLSize = data->getLocalBounds().getSize();
+
+            if (worldPos.x > txtPos.x && worldPos.x < txtPos.x + txtLSize.x && worldPos.y > txtPos.y &&
+                worldPos.y < txtPos.y + txtLSize.y)
+            {
+                m_saveGameID = i;
+                data->setColor(sf::Color(0, 255, 0));
+            }
+            ++i;
+        }
+    }
+
     for (const auto &data : m_buttons)
     {
         auto btnPos = data->GetSprite()->getPosition();
@@ -903,9 +984,6 @@ bool Game::HandleBtnClicked(sf::RenderWindow &window, Game &game)
         auto state = data->GetMenuState();
         bool created = false;
 
-        // ADD SELECT LOAD FILE AND TAKE THE FOLDER ID AND REPLACE ID WITH IT -> btnFnc::Load
-        uint8_t id = 1;
-
         if (worldPos.x > btnPos.x && worldPos.x < btnPos.x + (btnLSize.x * btnScale.x) && worldPos.y > btnPos.y &&
             worldPos.y < btnPos.y + (btnLSize.y * btnScale.y) && m_menuState == state)
         {
@@ -913,7 +991,7 @@ bool Game::HandleBtnClicked(sf::RenderWindow &window, Game &game)
             {
             case BtnFunc::Play:
                 // Player Init
-                created = game.CreatePlayer();
+                created = CreatePlayer();
                 if (created)
                 {
                     cout << "Player Init Done!" << endl;
@@ -969,7 +1047,7 @@ bool Game::HandleBtnClicked(sf::RenderWindow &window, Game &game)
                 break;
             case BtnFunc::OpenLoad:
                 m_menuState = MenuState::OpenLoad;
-
+                CreateLoadMenu();
                 breakLoop = true;
                 break;
             case BtnFunc::Create:
@@ -978,12 +1056,11 @@ bool Game::HandleBtnClicked(sf::RenderWindow &window, Game &game)
                 break;
             case BtnFunc::Load:
                 m_menuState = MenuState::Load;
-
-                created = game.LoadPlayer(id);
+                created = LoadPlayer(m_saveGameID);
                 if (created)
                 {
                     cout << "Player Init Done!" << endl;
-                    m_player->Load(id);
+                    m_player->Load(m_saveGameID);
                     cout << "Player Load Done!" << endl;
 
                     // Thread Init
@@ -1030,16 +1107,12 @@ void Game::ResizeMenu()
         auto text = data->GetText();
         utilities.SetTitlePos(m_windowWidth, text);
 
-        cout << "ButtonSize: " << m_buttons.size() << endl;
-
         for (const auto &data2 : m_buttons)
         {
-            cout << "Button: " << data2 << endl;
             auto btnState = data2->GetMenuState();
 
             if (titleState == btnState)
             {
-                cout << "Resize Button" << endl;
                 auto sprite = data2->GetSprite();
                 auto btnText = data2->GetText();
                 if (firstBtn)
@@ -1082,14 +1155,27 @@ uint8_t Game::CountFolders()
 {
     auto directory_path = filesystem::current_path();
     directory_path /= format("save");
+    int8_t id = 0;
 
     if (filesystem::exists(directory_path))
     {
         int8_t count = distance(filesystem::directory_iterator(directory_path), filesystem::directory_iterator{});
 
-        return count + 1;
+        for (size_t i = 1; i < count + 1; ++i)
+        {
+            std::filesystem::path folderKnown = directory_path;
+            folderKnown /= format("{}", i);
+            if (!filesystem::exists(folderKnown))
+            {
+                id = i;
+                break;
+            }
+        }
+
+        if (id == 0)
+            id = count + 1;
     }
-    return 0;
+    return id;
 }
 
 // QUIT
