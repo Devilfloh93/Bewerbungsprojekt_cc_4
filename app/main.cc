@@ -1,4 +1,5 @@
 
+#include "EventHandler.h"
 #include "Game.h"
 #include <SFML/Graphics.hpp>
 #include <cstdint>
@@ -26,6 +27,9 @@ int main()
     window.setKeyRepeatEnabled(false);
 
     sf::Clock clock;
+
+    // EventHandler Init
+    auto eventHandler = EventHandler();
 
     // Folder Structur Init
     game.CreateFolder();
@@ -68,146 +72,41 @@ int main()
 
     while (window.isOpen())
     {
+        eventHandler.ResetBreak();
         for (auto event = sf::Event{}; window.pollEvent(event);)
         {
-            bool breakLoop = false;
-            auto state = game.GetMenuState();
             switch (event.type)
             {
             case sf::Event::Closed:
-                game.Quit(window);
+                eventHandler.Quit(window);
                 break;
             case sf::Event::MouseButtonPressed:
-                if (state != MenuState::Playing)
-                    breakLoop = game.HandleBtnClicked(window, game);
-                else if (game.GetPlaying() && state == MenuState::Playing)
-                    game.HandleViewPosition(window);
+                eventHandler.MouseBtnPressed(window, game);
                 break;
             case sf::Event::KeyPressed:
-                if (game.GetPlaying())
-                {
-                    switch (state)
-                    {
-                    case MenuState::Playing:
-                        switch (event.key.code)
-                        {
-                        case sf::Keyboard::Key::Escape:
-                            game.SetMenuState(MenuState::Pause);
-                            breakLoop = true;
-                            break;
-                        case sf::Keyboard::Key::I:
-                            game.SetMenuState(MenuState::Inventory);
-                            breakLoop = true;
-                            break;
-                        case sf::Keyboard::Key::A:
-                            player->SetMove(PlayerMove::Left);
-                            break;
-                        case sf::Keyboard::Key::D:
-                            player->SetMove(PlayerMove::Right);
-                            break;
-                        case sf::Keyboard::Key::W:
-                            player->SetMove(PlayerMove::Up);
-                            break;
-                        case sf::Keyboard::Key::S:
-                            player->SetMove(PlayerMove::Down);
-                            break;
-                        case sf::Keyboard::Key::P:
-                            player->UseItem(game);
-                            breakLoop = true;
-                            break;
-                        default:
-                            break;
-                        }
-                        break;
-                    case MenuState::Inventory:
-                        switch (event.key.code)
-                        {
-                        case sf::Keyboard::Key::I:
-                            game.SetMenuState(MenuState::Playing);
-                            breakLoop = true;
-                            break;
-                        default:
-                            break;
-                        }
-                        break;
-                    case MenuState::Pause:
-                        switch (event.key.code)
-                        {
-                        case sf::Keyboard::Key::Escape:
-                            game.SetMenuState(MenuState::Playing);
-                            breakLoop = true;
-                            break;
-                        default:
-                            break;
-                        }
-                        break;
-                    case MenuState::Options:
-                        switch (event.key.code)
-                        {
-                        case sf::Keyboard::Key::Escape:
-                            game.SetMenuState(MenuState::Pause);
-                            break;
-                        default:
-                            break;
-                        }
-                        break;
-
-                    default:
-                        break;
-                    }
-                }
+                eventHandler.KeyPressed(player, game, event.key.code);
                 break;
             case sf::Event::TextEntered:
-                if (state == MenuState::Create)
-                {
-                    auto width = game.GetWindowWidth();
-                    for (const auto &data : game.GetInput())
-                    {
-                        if (data->GetMenuState() == MenuState::Create)
-                        {
-                            if (event.text.unicode == 0x00000008)
-                            {
-                                data->Popback(width);
-                            }
-                            else
-                            {
-                                data->Write(width, event.text.unicode);
-                            }
-                        }
-                    }
-                }
+                eventHandler.TxtEntered(game, event.text.unicode);
                 break;
             case sf::Event::KeyReleased:
-                if (game.GetPlaying() && state == MenuState::Playing)
-                {
-                    bool keyPressed = (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) ||
-                                       sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) ||
-                                       sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W) ||
-                                       sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S));
-
-                    if (!keyPressed)
-                        player->SetMove(PlayerMove::NotMoving);
-                }
+                eventHandler.KeyReleased(game, player);
                 break;
             case sf::Event::MouseWheelScrolled:
-                if (game.GetPlaying() && state == MenuState::Playing)
-                {
-                    game.UpdateZoom(event.mouseWheelScroll.delta);
-                }
+                eventHandler.MouseWheelScrolled(game, event.mouseWheelScroll.delta);
                 break;
             default:
                 break;
             }
 
-            if (breakLoop)
+            if (eventHandler.GetBreak())
                 break;
         }
 
         player = game.GetPlayer();
-        auto menuState = game.GetMenuState();
         window.clear(sf::Color(50U, 50U, 50U));
 
-        if (game.GetPlaying() && menuState == MenuState::Playing)
+        if (game.GetPlaying() && game.GetMenuState() == MenuState::Playing)
         {
             auto gameView = game.GetView();
             auto playerSprite = player->GetSprite();

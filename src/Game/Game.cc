@@ -25,6 +25,11 @@ Game::Game(const uint16_t windowWidth, const uint16_t windowHeight)
     m_maxTiles = ((m_gameWidth * m_gameHeight) / m_tileSize) / m_tileSize;
 }
 
+void Game::SetMenuState(MenuState state)
+{
+    m_menuState = state;
+}
+
 // RUNNING
 bool Game::GetPlaying() const
 {
@@ -61,6 +66,16 @@ uint16_t Game::GetWindowZoomWidth() const
 uint16_t Game::GetWindowWidth() const
 {
     return m_windowWidth;
+}
+
+void Game::SetWindowHeight(uint16_t height)
+{
+    m_windowHeight = height;
+}
+
+void Game::SetWindowWidth(uint16_t width)
+{
+    m_windowWidth = width;
 }
 
 // ZOOM
@@ -138,6 +153,11 @@ vector<Input *> Game::GetInput() const
 vector<sf::Text *> Game::GetSaveFiles() const
 {
     return m_saveFiles;
+}
+
+vector<Button *> Game::GetBtn() const
+{
+    return m_buttons;
 }
 
 // VIEW
@@ -225,6 +245,11 @@ Player *Game::GetPlayer() const
     return m_player;
 }
 
+void Game::SetPlayer(Player *player)
+{
+    m_player = player;
+}
+
 bool Game::LoadPlayer(const uint8_t id)
 {
     auto sprite = new sf::Sprite();
@@ -250,7 +275,9 @@ bool Game::LoadPlayer(const uint8_t id)
         }
     }
 
+
     m_player = new Player(sprite, m_defaultPlayerTextureID, id);
+
     return true;
 }
 
@@ -327,6 +354,40 @@ void Game::RemoveItems(const size_t i)
 }
 
 // INITS
+void Game::InitPlayer(sf::RenderWindow &window, Game &game)
+{
+    bool startGame = false;
+    if (m_menuState == MenuState::Create)
+    {
+        if (CreatePlayer())
+        {
+            CreateFolder(m_player->GetID());
+            cout << "Player Create Done!" << endl;
+            startGame = true;
+        }
+    }
+
+    if (m_menuState == MenuState::Load)
+    {
+        if (LoadPlayer(m_saveGameID))
+        {
+            m_player->Load(m_saveGameID);
+            cout << "Player Load Done!" << endl;
+            startGame = true;
+        }
+    }
+
+    if (startGame)
+    {
+        // Thread Init
+        m_thread = new Thread(window, m_player, game);
+        cout << "Thread Init Done!" << endl;
+
+        m_playing = true;
+        m_menuState = MenuState::Playing;
+    }
+}
+
 void Game::InitViews()
 {
     m_defaultCenter = sf::Vector2f(m_windowWidth / 2U, m_windowHeight / 2U);
@@ -922,6 +983,7 @@ void Game::DrawMenu(sf::RenderWindow &window)
     }
 }
 
+// LOAD SAVE FILE
 void Game::CreateLoadMenu()
 {
     for (auto &data : m_saveFiles)
@@ -949,136 +1011,14 @@ void Game::CreateLoadMenu()
     }
 }
 
-// GUI
-bool Game::HandleBtnClicked(sf::RenderWindow &window, Game &game)
+uint8_t Game::GetSaveGameID() const
 {
-    // get the current mouse position in the window
-    auto pixelPos = sf::Mouse::getPosition(window);
-    // convert it to world coordinates
-    auto worldPos = window.mapPixelToCoords(pixelPos);
-    bool breakLoop = false;
+    return m_saveGameID;
+}
 
-    if (m_menuState == MenuState::OpenLoad)
-    {
-        for (size_t i = 1; const auto &data : m_saveFiles)
-        {
-            data->setColor(sf::Color(255, 255, 255));
-            auto txtPos = data->getPosition();
-            auto txtLSize = data->getLocalBounds().getSize();
-
-            if (worldPos.x > txtPos.x && worldPos.x < txtPos.x + txtLSize.x && worldPos.y > txtPos.y &&
-                worldPos.y < txtPos.y + txtLSize.y)
-            {
-                m_saveGameID = i;
-                data->setColor(sf::Color(0, 255, 0));
-            }
-            ++i;
-        }
-    }
-
-    for (const auto &data : m_buttons)
-    {
-        auto btnPos = data->GetSprite()->getPosition();
-        auto btnLSize = data->GetSprite()->getLocalBounds().getSize();
-        auto btnScale = data->GetSprite()->getScale();
-        auto state = data->GetMenuState();
-        bool created = false;
-
-        if (worldPos.x > btnPos.x && worldPos.x < btnPos.x + (btnLSize.x * btnScale.x) && worldPos.y > btnPos.y &&
-            worldPos.y < btnPos.y + (btnLSize.y * btnScale.y) && m_menuState == state)
-        {
-            switch (data->GetBtnFnc())
-            {
-            case BtnFunc::Play:
-                // Player Init
-                created = CreatePlayer();
-                if (created)
-                {
-                    cout << "Player Init Done!" << endl;
-
-                    CreateFolder(m_player->GetID());
-
-                    // Thread Init
-                    m_thread = new Thread(window, m_player, game);
-                    cout << "Thread Init Done!" << endl;
-
-                    m_playing = true;
-                    m_menuState = MenuState::Playing;
-                }
-                breakLoop = true;
-                break;
-            case BtnFunc::Resume:
-                m_menuState = MenuState::Playing;
-                breakLoop = true;
-                break;
-            case BtnFunc::Quit:
-                Quit(window);
-                break;
-            case BtnFunc::Options:
-                m_menuState = MenuState::Options;
-                breakLoop = true;
-                break;
-            case BtnFunc::Back:
-                if (m_playing)
-                {
-                    if (m_menuState == MenuState::Inventory)
-                        m_menuState = MenuState::Playing;
-                    else
-                        m_menuState = MenuState::Pause;
-                }
-                else
-                    m_menuState = MenuState::Main;
-
-                breakLoop = true;
-                break;
-            case BtnFunc::Resolution:
-                m_windowWidth = 1920U;
-                m_windowHeight = 1080U;
-                ResizeWindow(window);
-                breakLoop = true;
-                break;
-            case BtnFunc::Fullscreen:
-                breakLoop = true;
-                break;
-            case BtnFunc::Save:
-                m_menuState = MenuState::Save;
-                m_player->Save();
-                breakLoop = true;
-                break;
-            case BtnFunc::OpenLoad:
-                m_menuState = MenuState::OpenLoad;
-                CreateLoadMenu();
-                breakLoop = true;
-                break;
-            case BtnFunc::Create:
-                m_menuState = MenuState::Create;
-                breakLoop = true;
-                break;
-            case BtnFunc::Load:
-                m_menuState = MenuState::Load;
-                created = LoadPlayer(m_saveGameID);
-                if (created)
-                {
-                    cout << "Player Init Done!" << endl;
-                    m_player->Load(m_saveGameID);
-                    cout << "Player Load Done!" << endl;
-
-                    // Thread Init
-                    m_thread = new Thread(window, m_player, game);
-                    cout << "Thread Init Done!" << endl;
-
-                    m_playing = true;
-                    m_menuState = MenuState::Playing;
-                }
-                breakLoop = true;
-                break;
-            default:
-                break;
-            }
-            break;
-        }
-    }
-    return breakLoop;
+void Game::SetSaveGameID(const uint8_t id)
+{
+    m_saveGameID = id;
 }
 
 // RESIZE
@@ -1176,10 +1116,4 @@ uint8_t Game::CountFolders()
             id = count + 1;
     }
     return id;
-}
-
-// QUIT
-void Game::Quit(sf::RenderWindow &window)
-{
-    window.close();
 }
