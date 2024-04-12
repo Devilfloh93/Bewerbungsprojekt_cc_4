@@ -1,5 +1,6 @@
 #pragma once
 #include "Anim.h"
+#include "EventHandler.h"
 #include "Font.h"
 #include "Gui.h"
 #include "Item.h"
@@ -44,12 +45,15 @@ class Title;
 class Button;
 class Input;
 class Thread;
+class EventHandler;
 
 class Game : public Gui
 {
 public:
     Game(const uint16_t windowWidth, const uint16_t windowHeight);
     ~Game() = default;
+
+    void SetMenuState(MenuState state);
 
     // RUNNING
     bool GetPlaying() const;
@@ -63,6 +67,8 @@ public:
     uint16_t GetWindowZoomHeight() const;
     uint16_t GetWindowZoomWidth() const;
     uint16_t GetWindowWidth() const;
+    void SetWindowHeight(uint16_t width);
+    void SetWindowWidth(uint16_t height);
 
     // ZOOM
     void SetZoom(const uint8_t zoom);
@@ -78,6 +84,7 @@ public:
     vector<Stats *> GetStats() const;
     vector<Input *> GetInput() const;
     vector<sf::Text *> GetSaveFiles() const;
+    vector<Button *> GetBtn() const;
 
     // VIEW
     sf::View GetView() const;
@@ -85,10 +92,15 @@ public:
     void HandleViewPosition(const sf::RenderWindow &window);
 
     // PLAYER
+    void SetPlayer(Player *player);
     Player *GetPlayer() const;
     bool CreatePlayer();
     bool LoadPlayer(const uint8_t id);
+
+    // LOAD SAVE FILE
     void CreateLoadMenu();
+    void SetSaveGameID(const uint8_t id);
+    uint8_t GetSaveGameID() const;
 
     // STATS
     StatDecay GetStatDecay() const;
@@ -110,15 +122,13 @@ public:
     void InitWorld();
     void InitAnim();
     void InitViews();
+    void InitPlayer(sf::RenderWindow &window, Game &game);
 
     // DRAW
     void DrawSurface(sf::RenderWindow &window, Player *player);
     void DrawWorld(sf::RenderWindow &window);
     void DrawMenu(sf::RenderWindow &window);
     void DrawItems(sf::RenderWindow &window);
-
-    // GUI
-    bool HandleBtnClicked(sf::RenderWindow &window, Game &game);
 
     // RESIZE
     void ResizeWindow(sf::RenderWindow &window);
@@ -128,9 +138,6 @@ public:
     void CreateFolder();
     void CreateFolder(const uint8_t id);
     uint8_t CountFolders();
-
-    // QUIT
-    void Quit(sf::RenderWindow &window);
 
 private:
     // RUNNING
