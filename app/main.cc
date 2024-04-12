@@ -66,7 +66,6 @@ int main()
     game.InitDrawStats();
     cout << "DrawStats Init Done!" << endl;
 
-
     while (window.isOpen())
     {
         for (auto event = sf::Event{}; window.pollEvent(event);)
@@ -227,15 +226,6 @@ int main()
         else
         {
             game.DrawMenu(window);
-
-            if (menuState == MenuState::Create)
-            {
-                for (const auto &data : game.GetInput())
-                {
-                    if (data->GetMenuState() == MenuState::Create)
-                        window.draw(*(data->GetText()));
-                }
-            }
         }
 
         window.display();

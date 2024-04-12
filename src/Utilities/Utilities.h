@@ -13,6 +13,8 @@ public:
     Utilities();
     ~Utilities() = default;
 
+    bool isAlpha(const sf::Uint32 character) const;
+
     void SetTitlePos(const uint16_t width, sf::Text *text);
     void SetTitlePos(const uint16_t width, sf::Text *title, sf::Text *text);
     void SetInputPos(const uint16_t width, sf::Text *input);
@@ -20,6 +22,7 @@ public:
     void SetBtnAndTextPos(const uint16_t width, sf::Sprite *btnObj, sf::Sprite *btn, sf::Text *btntext);
     void SetTextBeforeIcon(sf::Sprite &icon, sf::Text &text, sf::Sprite &prevIcon);
     void SetTextBeforeIcon(const uint16_t x, const uint16_t y, sf::Sprite &icon, sf::Text &text);
+
 
 private:
 };

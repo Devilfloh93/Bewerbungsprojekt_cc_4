@@ -4,11 +4,15 @@ Utilities::Utilities()
 {
 }
 
-void Utilities::SetTitlePos(const uint16_t width, sf::Text *title)
+bool Utilities::isAlpha(const sf::Uint32 character) const
 {
-    auto titleLSize = title->getLocalBounds().getSize();
-    title->setPosition(sf::Vector2f((width / 2U) - (titleLSize.x / 2U), 0.0F));
+    if ((character > 64 && character < 91) || (character > 96 && character < 123))
+    {
+        return true;
+    }
+    return false;
 }
+
 
 void Utilities::SetInputPos(const uint16_t width, sf::Text *input)
 {
@@ -16,12 +20,19 @@ void Utilities::SetInputPos(const uint16_t width, sf::Text *input)
     input->setPosition(sf::Vector2f((width / 2U) - (inputLSize.x / 2U), input->getPosition().y));
 }
 
+void Utilities::SetTitlePos(const uint16_t width, sf::Text *title)
+{
+    auto titleLSize = title->getLocalBounds().getSize();
+    title->setPosition(sf::Vector2f((width / 2U) - (titleLSize.x / 2U), 0.0F));
+}
+
 void Utilities::SetTitlePos(const uint16_t width, sf::Text *title, sf::Text *text)
 {
     auto titleLSize = title->getLocalBounds().getSize();
     auto titlePos = title->getGlobalBounds().getPosition();
+    auto textLSize = text->getLocalBounds().getSize();
 
-    text->setPosition(sf::Vector2f((width / 2U), (titlePos.y + titleLSize.y) + 50.0F));
+    text->setPosition(sf::Vector2f((width / 2U) - (textLSize.x / 2U), (titlePos.y + titleLSize.y) + 50.0F));
 }
 
 void Utilities::SetBtnAndTextPos(const uint16_t width, sf::Sprite *btnObj, sf::Text *title, sf::Text *btntext)

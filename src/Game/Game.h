@@ -77,6 +77,7 @@ public:
     vector<AllTextures *> GetTexture() const;
     vector<Stats *> GetStats() const;
     vector<Input *> GetInput() const;
+    vector<sf::Text *> GetSaveFiles() const;
 
     // VIEW
     sf::View GetView() const;
@@ -87,6 +88,7 @@ public:
     Player *GetPlayer() const;
     bool CreatePlayer();
     bool LoadPlayer(const uint8_t id);
+    void CreateLoadMenu();
 
     // STATS
     StatDecay GetStatDecay() const;
@@ -158,6 +160,8 @@ private:
     vector<Anim *> m_anim;
     vector<Stats *> m_stats;
     vector<Input *> m_inputs;
+    vector<sf::Text *> m_saveFiles;
+
     // VIEW
     sf::View m_view;
     sf::View m_menuView;
@@ -165,6 +169,7 @@ private:
     // PLAYER
     uint8_t m_defaultPlayerTextureID;
     Player *m_player;
+    uint8_t m_saveGameID;
     // STATS
     StatDecay m_statDecay;
     // THREAD
