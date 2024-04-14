@@ -1067,7 +1067,6 @@ void Game::ResizeMenu()
     }
 }
 
-
 // FOLDER
 void Game::CreateFolder()
 {
