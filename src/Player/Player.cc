@@ -62,6 +62,13 @@ void Player::SetSpeed(const float speed)
 
 void Player::HandleMove(sf::Clock &clock, Game &game)
 {
+    if (m_objectInFront != nullptr)
+    {
+        cout << "ObjectX: " << m_objectInFront->GetSprite()->getPosition().x << endl;
+        cout << "ObjectY: " << m_objectInFront->GetSprite()->getPosition().y << endl;
+        cout << "**********************************************************" << endl;
+    }
+
     auto items = game.GetItem();
     auto anim = game.GetAnim();
     auto elapsed = clock.getElapsedTime();

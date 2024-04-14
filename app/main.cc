@@ -33,6 +33,7 @@ int main()
 
     // Folder Structur Init
     game.CreateFolder();
+    cout << "Create Folder Done!" << endl;
 
     // Anim Init
     game.InitAnim();
