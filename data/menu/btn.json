@@ -4,19 +4,12 @@
             1
         ],
         "name": "Create Player",
-        "fontID": 0,
-        "fontSize": 20,
         "fnc": 10,
-        "textureID": 0,
         "textureData": [
             191,
             146,
             34,
             15
-        ],
-        "scale": [
-            5.0,
-            5.0
         ]
     },
     {
@@ -24,19 +17,12 @@
             7
         ],
         "name": "Play",
-        "fontID": 0,
-        "fontSize": 20,
         "fnc": 1,
-        "textureID": 0,
         "textureData": [
             191,
             146,
             34,
             15
-        ],
-        "scale": [
-            5.0,
-            5.0
         ]
     },
     {
@@ -44,19 +30,12 @@
             5
         ],
         "name": "Load",
-        "fontID": 0,
-        "fontSize": 20,
         "fnc": 11,
-        "textureID": 0,
         "textureData": [
             191,
             146,
             34,
             15
-        ],
-        "scale": [
-            5.0,
-            5.0
         ]
     },
     {
@@ -65,19 +44,12 @@
             4
         ],
         "name": "Resume",
-        "fontID": 0,
-        "fontSize": 20,
         "fnc": 5,
-        "textureID": 0,
         "textureData": [
             191,
             146,
             34,
             15
-        ],
-        "scale": [
-            5.0,
-            5.0
         ]
     },
     {
@@ -86,19 +58,12 @@
             2
         ],
         "name": "Options",
-        "fontID": 0,
-        "fontSize": 20,
         "fnc": 3,
-        "textureID": 0,
         "textureData": [
             191,
             146,
             34,
             15
-        ],
-        "scale": [
-            5.0,
-            5.0
         ]
     },
     {
@@ -106,19 +71,12 @@
             3
         ],
         "name": "Resolution",
-        "fontID": 0,
-        "fontSize": 20,
         "fnc": 6,
-        "textureID": 0,
         "textureData": [
             191,
             146,
             34,
             15
-        ],
-        "scale": [
-            5.0,
-            5.0
         ]
     },
     {
@@ -126,19 +84,12 @@
             3
         ],
         "name": "Fullscreen",
-        "fontID": 0,
-        "fontSize": 20,
         "fnc": 7,
-        "textureID": 0,
         "textureData": [
             191,
             146,
             34,
             15
-        ],
-        "scale": [
-            5.0,
-            5.0
         ]
     },
     {
@@ -146,19 +97,12 @@
             1
         ],
         "name": "Load Game",
-        "fontID": 0,
-        "fontSize": 20,
         "fnc": 9,
-        "textureID": 0,
         "textureData": [
             191,
             146,
             34,
             15
-        ],
-        "scale": [
-            5.0,
-            5.0
         ]
     },
     {
@@ -166,19 +110,12 @@
             2
         ],
         "name": "Save Game",
-        "fontID": 0,
-        "fontSize": 20,
         "fnc": 8,
-        "textureID": 0,
         "textureData": [
             191,
             146,
             34,
             15
-        ],
-        "scale": [
-            5.0,
-            5.0
         ]
     },
     {
@@ -189,19 +126,12 @@
             7
         ],
         "name": "Back",
-        "fontID": 0,
-        "fontSize": 20,
         "fnc": 4,
-        "textureID": 0,
         "textureData": [
             191,
             146,
             34,
             15
-        ],
-        "scale": [
-            5.0,
-            5.0
         ]
     },
     {
@@ -210,19 +140,12 @@
             2
         ],
         "name": "Quit",
-        "fontID": 0,
-        "fontSize": 20,
         "fnc": 2,
-        "textureID": 0,
         "textureData": [
             191,
             146,
             34,
             15
-        ],
-        "scale": [
-            5.0,
-            5.0
         ]
     }
 ]

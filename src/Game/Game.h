@@ -42,7 +42,7 @@ enum class MenuState
 
 class Player;
 class Title;
-class Button;
+class Btn;
 class Input;
 class Thread;
 class EventHandler;
@@ -84,7 +84,7 @@ public:
     vector<Stats *> GetStats() const;
     vector<Input *> GetInput() const;
     vector<sf::Text *> GetSaveFiles() const;
-    vector<Button *> GetBtn() const;
+    vector<Btn *> GetBtn() const;
 
     // VIEW
     sf::View GetView() const;
@@ -106,7 +106,7 @@ public:
     StatDecay GetStatDecay() const;
 
     // THREAD
-    Thread *GetThread() const;
+    Thread *GetThread();
 
     // ITEMS
     void SetItems(Item *item);
@@ -136,8 +136,11 @@ public:
 
     // FOLDER
     void CreateFolder();
-    void CreateFolder(const uint8_t id);
-    uint8_t CountFolders();
+    void CreateSaveFolder(const uint8_t id);
+    uint8_t CountSaveFolders();
+
+    // MENU
+    void ResetInputToDefault();
 
 private:
     // RUNNING
@@ -160,7 +163,7 @@ private:
     vector<World *> m_world;
     vector<Surface *> m_surfaces;
     vector<Title *> m_titles;
-    vector<Button *> m_buttons;
+    vector<Btn *> m_btns;
     vector<Item *> m_items;
     vector<AllTextures *> m_textures;
     vector<Font *> m_fonts;

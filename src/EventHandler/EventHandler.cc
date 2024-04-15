@@ -183,7 +183,7 @@ void EventHandler::BtnPressed(sf::RenderWindow &window, Game &game)
 
     auto saveFiles = game.GetSaveFiles();
     auto menuState = game.GetMenuState();
-    auto buttons = game.GetBtn();
+    auto btns = game.GetBtn();
 
     if (menuState == MenuState::OpenLoad)
     {
@@ -203,7 +203,7 @@ void EventHandler::BtnPressed(sf::RenderWindow &window, Game &game)
         }
     }
 
-    for (const auto &data : buttons)
+    for (const auto &data : btns)
     {
         auto btnPos = data->GetSprite()->getPosition();
         auto btnLSize = data->GetSprite()->getLocalBounds().getSize();
@@ -265,6 +265,7 @@ void EventHandler::BtnPressed(sf::RenderWindow &window, Game &game)
                 break;
             case BtnFunc::Create:
                 game.SetMenuState(MenuState::Create);
+                game.ResetInputToDefault();
                 m_break = true;
                 break;
             case BtnFunc::Load:
