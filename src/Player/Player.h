@@ -54,7 +54,7 @@ public:
 
     // STATS
     float GetStatValue(const StatType type) const;
-    void UpdateStats(const sf::RenderWindow &window, const Game &game);
+    void UpdateStats(const Game &game);
 
     // ITEMS
     void UseItem(Game &game);
