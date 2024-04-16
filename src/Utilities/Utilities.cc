@@ -1,6 +1,5 @@
 #include "Utilities.h"
 
-using ClockType = chrono::steady_clock;
 using ClockRes = chrono::microseconds;
 
 Utilities::Utilities()

@@ -891,10 +891,6 @@ void Game::DrawSurface(sf::RenderWindow &window, Player *player)
     auto playerSprite = player->GetSprite();
     auto playerPos = playerSprite->getPosition();
 
-    auto viewCenter = m_view.getCenter();
-    auto viewSizeX = ((m_view.getSize().x / 2) + m_drawPuffer);
-    auto viewSizeY = ((m_view.getSize().y / 2) + m_drawPuffer);
-
     for (auto &data : m_surfaces)
     {
         auto sprite = data->GetSprite();
