@@ -259,3 +259,15 @@ bool Utilities::CheckInViewRange(Game *game, const sf::Vector2f &spritePos)
     }
     return false;
 }
+
+void Utilities::PlayAnimation(sf::Sprite *sprite, sf::Clock &clock, sf::IntRect &anim0, sf::IntRect &anim1)
+{
+    auto elapsed = clock.getElapsedTime();
+
+    if (elapsed.asMilliseconds() >= 0 && elapsed.asMilliseconds() < 200)
+        sprite->setTextureRect(anim1);
+    else if (elapsed.asMilliseconds() >= 200 && elapsed.asMilliseconds() < 400)
+        sprite->setTextureRect(anim0);
+    else
+        clock.restart();
+}
