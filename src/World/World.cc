@@ -7,13 +7,9 @@ World::World(sf::Sprite *sprite,
     : Sprite(sprite), m_collision(collision), m_itemOutputID(itemOutputID), m_textureProgData(textureProgData)
 {
     if (itemOutputID.size() > 0)
-    {
         m_useable = true;
-    }
     else
-    {
         m_useable = false;
-    }
 }
 
 Collision World::GetCollision() const

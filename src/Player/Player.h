@@ -54,17 +54,25 @@ public:
 
     // STATS
     float GetStatValue(const StatType type) const;
-    void UpdateStats(const Game &game);
+    void UpdateStats(Game *game);
 
     // ITEMS
     void UseItem(Game &game);
 
     // DRAW
     void DrawStats(sf::RenderWindow &window, const Game &game);
-    void DrawInventoryItems(sf::RenderWindow &window, const vector<ItemCfg *> &itemCfg);
+    void DrawInventoryItems(sf::RenderWindow &window,
+                            const vector<ItemCfg *> &itemCfg,
+                            sf::Text *previousTxt,
+                            const uint16_t width);
 
     // COLLISION
-    void CheckCollision(Game &game);
+    void CheckCollision(Game *game);
+    bool CheckMove(const bool isUsable, const sf::Vector2f &objPos, const sf::Vector2f &objSize);
+    bool CheckMove(const bool isUsable,
+                   const sf::Vector2f &objPos,
+                   const sf::Vector2f &objSize,
+                   const Collision objCollision);
 
     // DATASTORE
     void Load(const uint8_t id);

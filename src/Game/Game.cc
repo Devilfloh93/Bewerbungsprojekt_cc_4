@@ -13,15 +13,13 @@ using namespace std;
 Game::Game(const uint16_t windowWidth, const uint16_t windowHeight)
     : m_windowWidth(windowWidth), m_windowHeight(windowHeight), Gui(MenuState::Main)
 {
-    m_player = nullptr;
+    m_drawPuffer = 200.0F;
     m_maxZoom = 3U;
     m_playing = false;
     m_defaultPlayerTextureID = 2U;
     m_statDecay = {.food = 0.2F, .water = 0.5F};
     m_gameWidth = 8800U;
     m_gameHeight = 4800U;
-    m_windowZoomHeight = m_windowHeight;
-    m_windowZoomWidth = m_windowWidth;
     m_tileSize = 32U;
     m_maxTiles = ((m_gameWidth * m_gameHeight) / m_tileSize) / m_tileSize;
 }
@@ -54,16 +52,6 @@ uint16_t Game::GetGameHeight() const
 }
 
 // WINDOW
-uint16_t Game::GetWindowZoomHeight() const
-{
-    return m_windowZoomHeight;
-}
-
-uint16_t Game::GetWindowZoomWidth() const
-{
-    return m_windowZoomWidth;
-}
-
 uint16_t Game::GetWindowWidth() const
 {
     return m_windowWidth;
@@ -96,20 +84,12 @@ void Game::UpdateZoom(const float delta)
     if (delta > 0U)
     {
         if (m_zoom < m_maxZoom)
-        {
             SetZoom(1U, 0.5F);
-            m_windowZoomWidth /= 2U;
-            m_windowZoomHeight /= 2U;
-        }
     }
     else
     {
         if (m_zoom > 0U)
-        {
             SetZoom(-1, 2.0F);
-            m_windowZoomWidth *= 2U;
-            m_windowZoomHeight *= 2U;
-        }
     }
 
     UpdateView();
@@ -131,7 +111,7 @@ vector<ItemCfg *> Game::GetItemCfg() const
     return m_itemCfg;
 }
 
-vector<Item *> Game::GetItem() const
+vector<ItemGround *> Game::GetItem() const
 {
     return m_items;
 }
@@ -177,20 +157,21 @@ void Game::UpdateView()
         m_view.setCenter({m_gameWidth - (size.x / 2U), center.y});
         center = m_view.getCenter();
     }
+
     if (center.x <= 0U + (size.x / 2U))
     {
         m_view.setCenter({size.x / 2U, center.y});
         center = m_view.getCenter();
     }
+
     if (center.y <= 0U + (size.y / 2U))
     {
         m_view.setCenter({center.x, size.y / 2U});
         center = m_view.getCenter();
     }
+
     if (center.y >= m_gameHeight - (size.y / 2U))
-    {
         m_view.setCenter({center.x, m_gameHeight - (size.y / 2U)});
-    }
 }
 
 void Game::HandleViewPosition(const sf::RenderWindow &window)
@@ -260,9 +241,7 @@ bool Game::LoadPlayer(const uint8_t id)
     {
         auto texID = data->GetID();
         if (texID == m_defaultPlayerTextureID)
-        {
             texture = data->GetTexture();
-        }
     }
 
     sprite->setTexture(*texture);
@@ -305,9 +284,7 @@ bool Game::CreatePlayer()
     {
         auto texID = data->GetID();
         if (texID == m_defaultPlayerTextureID)
-        {
             texture = data->GetTexture();
-        }
     }
 
     sprite->setTexture(*texture);
@@ -333,7 +310,7 @@ StatDecay Game::GetStatDecay() const
 }
 
 // ITEMS
-void Game::SetItems(Item *item)
+void Game::SetItems(ItemGround *item)
 {
     m_items.push_back(item);
 }
@@ -348,7 +325,7 @@ void Game::RemoveItems(const size_t i)
 }
 
 // INITS
-void Game::InitPlayer(sf::RenderWindow &window, Game &game)
+void Game::InitPlayer(sf::RenderWindow &window)
 {
     bool startGame = false;
     if (m_menuState == MenuState::Create)
@@ -374,7 +351,7 @@ void Game::InitPlayer(sf::RenderWindow &window, Game &game)
     if (startGame)
     {
         // Thread Init
-        m_thread = new Thread(window, m_player, game);
+        m_thread = new Thread(window, m_player, this);
         cout << "Thread Init Done!" << endl;
 
         m_playing = true;
@@ -398,8 +375,6 @@ void Game::InitViews()
 
     m_view.zoom(0.5F);
     m_zoom = 1U;
-    m_windowZoomWidth /= 2U;
-    m_windowZoomHeight /= 2U;
 
     m_view.move({-(center.x / 2), -(center.y / 2)});
 }
@@ -428,9 +403,7 @@ void Game::InitItemCfg()
             {
                 auto texID = data1->GetID();
                 if (texID == textureID)
-                {
                     texture = data1->GetTexture();
-                }
             }
 
             auto itemCfg = new ItemCfg(texture, textureData, ID, name, maxDrop);
@@ -619,10 +592,10 @@ void Game::InitMenu()
                     uint8_t textureID = jsonDataBtnCfg["textureID"];
                     fontID = jsonDataBtnCfg["fontID"];
 
-                    auto textureRect = sf::IntRect{dataBtn["textureData"][0],
-                                                   dataBtn["textureData"][1],
-                                                   dataBtn["textureData"][2],
-                                                   dataBtn["textureData"][3]};
+                    auto textureRect = sf::IntRect{jsonDataBtnCfg["textureData"][0],
+                                                   jsonDataBtnCfg["textureData"][1],
+                                                   jsonDataBtnCfg["textureData"][2],
+                                                   jsonDataBtnCfg["textureData"][3]};
                     text = dataBtn["name"];
                     BtnFunc btnFnc = dataBtn["fnc"];
 
@@ -901,43 +874,58 @@ void Game::InitDrawStats()
 // DRAW
 void Game::DrawItems(sf::RenderWindow &window)
 {
+    Utilities utilities;
     for (const auto &data : m_items)
     {
         auto sprite = data->GetSprite();
+        auto spritePos = sprite->getPosition();
 
-        window.draw(*sprite);
+        if (utilities.CheckInViewRange(this, spritePos))
+            window.draw(*sprite);
     }
 }
 
 void Game::DrawSurface(sf::RenderWindow &window, Player *player)
 {
+    Utilities utilities;
     auto playerSprite = player->GetSprite();
     auto playerPos = playerSprite->getPosition();
+
+    auto viewCenter = m_view.getCenter();
+    auto viewSizeX = ((m_view.getSize().x / 2) + m_drawPuffer);
+    auto viewSizeY = ((m_view.getSize().y / 2) + m_drawPuffer);
 
     for (auto &data : m_surfaces)
     {
         auto sprite = data->GetSprite();
         auto spritePos = sprite->getPosition();
-        auto tileSize = m_tileSize / 2;
 
-        if (playerPos.x >= spritePos.x - tileSize && playerPos.x <= spritePos.x + tileSize &&
-            playerPos.y >= spritePos.y - tileSize && playerPos.y <= spritePos.y + tileSize)
+        if (utilities.CheckInViewRange(this, spritePos))
         {
-            auto speed = data->GetSpeed();
-            player->SetSpeed(speed);
-        }
+            auto tileSize = m_tileSize / 2;
 
-        window.draw(*sprite);
+            if (playerPos.x >= spritePos.x - tileSize && playerPos.x <= spritePos.x + tileSize &&
+                playerPos.y >= spritePos.y - tileSize && playerPos.y <= spritePos.y + tileSize)
+            {
+                auto speed = data->GetSpeed();
+                player->SetSpeed(speed);
+            }
+
+            window.draw(*sprite);
+        }
     }
 }
 
 void Game::DrawWorld(sf::RenderWindow &window)
 {
+    Utilities utilities;
     for (auto &data : m_world)
     {
         auto sprite = data->GetSprite();
+        auto spritePos = sprite->getPosition();
 
-        window.draw(*sprite);
+        if (utilities.CheckInViewRange(this, spritePos))
+            window.draw(*sprite);
     }
 }
 
@@ -950,13 +938,13 @@ void Game::DrawMenu(sf::RenderWindow &window)
     for (const auto &data : m_titles)
     {
         bool firstBtn = true;
-        sf::Text *previousTxt = data->GetText();
+        auto previousTxt = data->GetText();
 
         if (m_menuState == data->GetMenuState())
-            window.draw(*(data->GetText()));
+            window.draw(*previousTxt);
 
         if (m_menuState == MenuState::Inventory)
-            m_player->DrawInventoryItems(window, m_itemCfg);
+            m_player->DrawInventoryItems(window, m_itemCfg, previousTxt, m_windowWidth);
 
         for (const auto &data1 : m_inputs)
         {
@@ -981,20 +969,22 @@ void Game::DrawMenu(sf::RenderWindow &window)
 
             if (m_menuState == menuStates)
             {
+                auto btnObj = data1->GetSprite();
+                auto btnText = data1->GetText();
                 if (m_menuState == MenuState::OpenLoad)
                 {
                     if (firstBtn)
                     {
-                        utilities.SetBtnAndTextPos(m_windowWidth, data1->GetSprite(), previousTxt, data1->GetText());
-                        lastbtn = data1->GetSprite();
+                        utilities.SetBtnAndTextPos(m_windowWidth, btnObj, previousTxt, btnText);
+                        lastbtn = btnObj;
                         firstBtn = false;
                     }
                     else
-                        utilities.SetBtnAndTextPos(m_windowWidth, data1->GetSprite(), lastbtn, data1->GetText());
+                        utilities.SetBtnAndTextPos(m_windowWidth, btnObj, lastbtn, btnText);
                 }
 
-                window.draw(*(data1->GetSprite()));
-                window.draw(*(data1->GetText()));
+                window.draw(*btnObj);
+                window.draw(*btnText);
             }
         }
     }
@@ -1016,9 +1006,7 @@ void Game::CreateLoadMenu()
     for (const auto &data : m_fonts)
     {
         if (data->GetID() == 0)
-        {
             font = data->GetFont();
-        }
     }
 
     for (size_t i = 1; i < count; ++i)
@@ -1091,9 +1079,7 @@ void Game::CreateFolder()
     new_directory_path /= "save";
 
     if (!filesystem::exists(new_directory_path))
-    {
         filesystem::create_directory(new_directory_path);
-    }
 }
 
 void Game::CreateSaveFolder(const uint8_t id)
@@ -1102,9 +1088,7 @@ void Game::CreateSaveFolder(const uint8_t id)
     new_directory_path /= format("save/{}", id);
 
     if (!filesystem::exists(new_directory_path))
-    {
         filesystem::create_directory(new_directory_path);
-    }
 }
 
 uint8_t Game::CountSaveFolders()
@@ -1140,9 +1124,7 @@ void Game::ResetInputToDefault()
     for (const auto &data : m_inputs)
     {
         if (data->GetMenuState() == m_menuState)
-        {
             data->ResetToDefaultString(m_windowWidth);
-        }
     }
 }
 
@@ -1150,4 +1132,11 @@ void Game::ResetInputToDefault()
 Thread *Game::GetThread()
 {
     return m_thread;
+}
+
+
+// DRAW
+float Game::GetDrawPuffer() const
+{
+    return m_drawPuffer;
 }

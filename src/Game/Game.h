@@ -64,8 +64,6 @@ public:
     uint16_t GetGameHeight() const;
 
     // WINDOW
-    uint16_t GetWindowZoomHeight() const;
-    uint16_t GetWindowZoomWidth() const;
     uint16_t GetWindowWidth() const;
     void SetWindowHeight(uint16_t width);
     void SetWindowWidth(uint16_t height);
@@ -78,7 +76,7 @@ public:
     // VECTOR
     vector<World *> GetWorld() const;
     vector<ItemCfg *> GetItemCfg() const;
-    vector<Item *> GetItem() const;
+    vector<ItemGround *> GetItem() const;
     vector<Anim *> GetAnim() const;
     vector<AllTextures *> GetTexture() const;
     vector<Stats *> GetStats() const;
@@ -109,7 +107,7 @@ public:
     Thread *GetThread();
 
     // ITEMS
-    void SetItems(Item *item);
+    void SetItems(ItemGround *item);
     void RemoveItems(const size_t i);
 
     // INITS
@@ -122,7 +120,7 @@ public:
     void InitWorld();
     void InitAnim();
     void InitViews();
-    void InitPlayer(sf::RenderWindow &window, Game &game);
+    void InitPlayer(sf::RenderWindow &window);
 
     // DRAW
     void DrawSurface(sf::RenderWindow &window, Player *player);
@@ -142,6 +140,9 @@ public:
     // MENU
     void ResetInputToDefault();
 
+    // DRAW
+    float GetDrawPuffer() const;
+
 private:
     // RUNNING
     bool m_playing;
@@ -156,22 +157,19 @@ private:
     // ZOOM
     uint8_t m_maxZoom;
     uint8_t m_zoom;
-    uint16_t m_windowZoomWidth;
-    uint16_t m_windowZoomHeight;
     // VECTOR
     vector<ItemCfg *> m_itemCfg;
     vector<World *> m_world;
     vector<Surface *> m_surfaces;
     vector<Title *> m_titles;
     vector<Btn *> m_btns;
-    vector<Item *> m_items;
+    vector<ItemGround *> m_items;
     vector<AllTextures *> m_textures;
     vector<Font *> m_fonts;
     vector<Anim *> m_anim;
     vector<Stats *> m_stats;
     vector<Input *> m_inputs;
     vector<sf::Text *> m_saveFiles;
-
     // VIEW
     sf::View m_view;
     sf::View m_menuView;
@@ -184,4 +182,6 @@ private:
     StatDecay m_statDecay;
     // THREAD
     Thread *m_thread;
+    // DRAW
+    float m_drawPuffer;
 };

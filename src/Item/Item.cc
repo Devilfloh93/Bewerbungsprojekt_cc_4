@@ -24,17 +24,17 @@ uint8_t ItemCfg::GetMaxDrop() const
     return m_maxDrop;
 }
 
-Item::Item(sf::Sprite *sprite, const uint16_t ID, const uint16_t count) : Sprite(sprite), m_ID(ID), m_count(count)
+ItemGround::ItemGround(sf::Sprite *sprite, const uint16_t ID, const uint16_t count)
+    : Sprite(sprite), m_ID(ID), m_count(count)
 {
 }
 
-uint16_t Item::GetCount() const
+uint16_t ItemGround::GetCount() const
 {
     return m_count;
 }
 
-
-uint16_t Item::GetID() const
+uint16_t ItemGround::GetID() const
 {
     return m_ID;
 }
