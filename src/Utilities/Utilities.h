@@ -7,6 +7,7 @@
 
 using json = nlohmann::json;
 using namespace std;
+using ClockType = chrono::steady_clock;
 
 class Utilities
 {
@@ -80,6 +81,6 @@ public:
     bool CheckInViewRange(Game *game, const sf::Vector2f &spritePos);
 
 private:
-    chrono::steady_clock::time_point m_startTime;
-    chrono::steady_clock::time_point m_endTime;
+    ClockType::time_point m_startTime;
+    ClockType::time_point m_endTime;
 };
