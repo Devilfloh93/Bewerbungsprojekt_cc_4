@@ -139,13 +139,9 @@ void EventHandler::TxtEntered(const Game &game, const sf::Uint32 character)
             if (data->GetMenuState() == MenuState::Create)
             {
                 if (character == 0x00000008)
-                {
                     data->Popback(width);
-                }
                 else
-                {
                     data->Write(width, character);
-                }
             }
         }
     }
@@ -169,9 +165,7 @@ void EventHandler::MouseWheelScrolled(Game &game, float delta)
     auto state = game.GetMenuState();
 
     if (game.GetPlaying() && state == MenuState::Playing)
-    {
         game.UpdateZoom(delta);
-    }
 }
 
 void EventHandler::BtnPressed(sf::RenderWindow &window, Game &game)
@@ -217,7 +211,7 @@ void EventHandler::BtnPressed(sf::RenderWindow &window, Game &game)
             switch (data->GetBtnFnc())
             {
             case BtnFunc::Play:
-                game.InitPlayer(window, game);
+                game.InitPlayer(window);
                 m_break = true;
                 break;
             case BtnFunc::Resume:
@@ -272,7 +266,7 @@ void EventHandler::BtnPressed(sf::RenderWindow &window, Game &game)
                 if (game.GetSaveGameID() > 0)
                 {
                     game.SetMenuState(MenuState::Load);
-                    game.InitPlayer(window, game);
+                    game.InitPlayer(window);
                     m_break = true;
                 }
                 break;

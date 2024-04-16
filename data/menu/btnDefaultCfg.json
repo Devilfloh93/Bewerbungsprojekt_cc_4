@@ -2,6 +2,12 @@
     "fontID": 0,
     "fontSize": 20,
     "textureID": 0,
+    "textureData": [
+        191,
+        146,
+        34,
+        15
+    ],
     "scale": [
         5.0,
         5.0
