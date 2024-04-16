@@ -31,48 +31,11 @@ int main()
     // EventHandler Init
     auto eventHandler = EventHandler();
 
-    // Folder Structur Init
-    game.CreateFolder();
-    cout << "Create Folder Done!" << endl;
-
-    // Anim Init
-    game.InitAnim();
-    cout << "Anim Init Done!" << endl;
-
-    // View Init
-    game.InitViews();
-    cout << "View Init Done!" << endl;
-
-    // Texture Init
-    game.InitTexture();
-    cout << "Texture Init Done!" << endl;
-
-    // Font Init
-    game.InitFont();
-    cout << "Font Init Done!" << endl;
-
-    // Menu Init
-    game.InitMenu();
-    cout << "Menu Init Done!" << endl;
-
-    // Surface Init
-    game.InitSurface();
-    cout << "Surface Init Done!" << endl;
-
-    // World Init
-    game.InitWorld();
-    cout << "World Init Done!" << endl;
-
-    // Item Init
-    game.InitItemCfg();
-    cout << "Item Init Done!" << endl;
-
-    // Draw Stats Init
-    game.InitDrawStats();
-    cout << "DrawStats Init Done!" << endl;
+    game.Init();
 
     while (window.isOpen())
     {
+
         eventHandler.ResetBreak();
         for (auto event = sf::Event{}; window.pollEvent(event);)
         {

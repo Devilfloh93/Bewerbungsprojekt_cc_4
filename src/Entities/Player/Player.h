@@ -1,6 +1,7 @@
 #pragma once
 #include "Game.h"
 #include "Stats.h"
+#include "Unit.h"
 #include <SFML/Graphics.hpp>
 #include <World.h>
 #include <cstdint>
@@ -10,7 +11,6 @@
 class Game;
 struct SurvivalStats
 {
-    float health;
     float water;
     float food;
 };
@@ -32,7 +32,7 @@ enum class PlayerMove
     Right
 };
 
-class Player : public Sprite
+class Player : public Unit
 {
 public:
     Player(sf::Sprite *sprite, const uint8_t animID, const string_view name, const uint8_t id);
@@ -50,7 +50,6 @@ public:
     PlayerMove GetLastMove() const;
     void HandleMove(sf::Clock &clock, Game &game);
     void SetMove(const PlayerMove move);
-    void SetSpeed(const float speed);
 
     // STATS
     float GetStatValue(const StatType type) const;
@@ -58,6 +57,7 @@ public:
 
     // ITEMS
     void UseItem(Game &game);
+    void CollectItem(Game &game);
 
     // DRAW
     void DrawStats(sf::RenderWindow &window, const Game &game);
@@ -83,8 +83,6 @@ private:
     uint8_t m_ID;
     string m_name;
     // MOVE
-    float m_baseSpeed;
-    float m_speed;
     PlayerMove m_move;
     PlayerMove m_lastMove;
     MoveAllowed m_moveAllowed;

@@ -24,6 +24,21 @@ Game::Game(const uint16_t windowWidth, const uint16_t windowHeight)
     m_maxTiles = ((m_gameWidth * m_gameHeight) / m_tileSize) / m_tileSize;
 }
 
+void Game::Init()
+{
+    CreateFolder();
+    InitAnim();
+    InitViews();
+    InitTexture();
+    InitFont();
+    InitMenu();
+    InitSurface();
+    InitWorld();
+    InitItemCfg();
+    InitDrawStats();
+    cout << "Game Init Done!" << endl;
+}
+
 void Game::SetMenuState(MenuState state)
 {
     m_menuState = state;
@@ -302,7 +317,6 @@ bool Game::CreatePlayer()
     return true;
 }
 
-
 // STATS
 StatDecay Game::GetStatDecay() const
 {
@@ -381,7 +395,7 @@ void Game::InitViews()
 
 void Game::InitItemCfg()
 {
-    ifstream file("./data/item/item.json");
+    ifstream file("./data/entities/item/item.json");
 
     if (file.is_open())
     {
@@ -830,7 +844,7 @@ void Game::InitWorld()
 
 void Game::InitDrawStats()
 {
-    ifstream file("./data/player/stat.json");
+    ifstream file("./data/entities/player/stat.json");
 
     if (file.is_open())
     {

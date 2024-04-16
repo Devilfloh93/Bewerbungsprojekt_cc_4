@@ -75,6 +75,8 @@ public:
                                const uint8_t objCollision,
                                const float speed) const;
 
+    void PlayAnimation(sf::Sprite *sprite, sf::Clock &clock, sf::IntRect &anim0, sf::IntRect &anim1);
+
     void PerformanceTestBegin();
     void PerformanceTestEnd();
 

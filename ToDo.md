@@ -12,7 +12,7 @@
 
 ## Player Features
 
-* Implement Player Stat Bar with Health, Food and Water
+* ~~Implement Player Stat Bar with Health, Food and Water~~
 * Implement Item Usage / Crafting / Building
 * Implement Combat Abilities like Sword, Bow, Magic
 
@@ -22,7 +22,7 @@
 
 ## Multithreading
 
-* New Threads for better performance?
+* ~~New Threads for better performance?~~
 
 ## Soundsystem
 
@@ -32,11 +32,11 @@
 ## Menus
 
 * Add Keybindings
-* Add Save/Load
+* ~~Add Save/Load~~
 * Fix Fullscreen and Resize when changing Resolution
 * Add Character Creation
 
 ## Rework
 
-* Collision Detection
+* ~~Collision Detection~~
 * Texture Placement when Trees got chopped  

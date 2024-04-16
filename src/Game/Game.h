@@ -111,6 +111,7 @@ public:
     void RemoveItems(const size_t i);
 
     // INITS
+    void Init();
     void InitItemCfg();
     void InitTexture();
     void InitFont();

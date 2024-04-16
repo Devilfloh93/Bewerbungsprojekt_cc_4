@@ -9,12 +9,13 @@
 #include <random>
 
 Player::Player(sf::Sprite *sprite, const uint8_t animID, const string_view name, const uint8_t id)
-    : Sprite(sprite), m_animID(animID), m_name(name), m_ID(id)
+    : Unit(sprite, 100.0F, 1.0F), m_animID(animID), m_name(name), m_ID(id)
 {
     Init();
 }
 
-Player::Player(sf::Sprite *sprite, const uint8_t animID, const uint8_t id) : Sprite(sprite), m_animID(animID), m_ID(id)
+Player::Player(sf::Sprite *sprite, const uint8_t animID, const uint8_t id)
+    : Unit(sprite, 100.0F, 1.0F), m_animID(animID), m_ID(id)
 {
     Init();
 }
@@ -23,9 +24,8 @@ Player::Player(sf::Sprite *sprite, const uint8_t animID, const uint8_t id) : Spr
 void Player::Init()
 {
     m_sprite->setPosition(80.0F, 80.0F);
-    m_survivalStats = {.health = 100.0F, .water = 100.0F, .food = 100.0F};
-    m_baseSpeed = 1.0F;
-    m_speed = m_baseSpeed;
+    m_survivalStats = {.water = 100.0F, .food = 100.0F};
+
     m_move = PlayerMove::NotMoving;
     m_lastMove = m_move;
     m_objectInFront = nullptr;
@@ -55,31 +55,12 @@ void Player::SetMove(const PlayerMove move)
     m_move = move;
 }
 
-void Player::SetSpeed(const float speed)
-{
-    m_speed = speed;
-}
 
-void Player::HandleMove(sf::Clock &clock, Game &game)
+void Player::CollectItem(Game &game)
 {
     auto items = game.GetItem();
-    auto anim = game.GetAnim();
-    auto elapsed = clock.getElapsedTime();
     auto playerPos = m_sprite->getPosition();
     auto playerSize = m_sprite->getLocalBounds().getSize();
-    auto tileSize = game.GetTileSize();
-    auto width = game.GetGameWidth();
-    auto height = game.GetGameHeight();
-    MovementTexture moveAnim;
-
-    for (const auto &data : anim)
-    {
-        if (data->GetTextureID() == m_animID)
-        {
-            moveAnim = data->GetMoveAnim();
-            break;
-        }
-    }
 
     if (!items.empty())
     {
@@ -119,17 +100,31 @@ void Player::HandleMove(sf::Clock &clock, Game &game)
             }
         }
     }
+}
 
+void Player::HandleMove(sf::Clock &clock, Game &game)
+{
+    Utilities utilities;
+    MovementTexture moveAnim;
+    auto anim = game.GetAnim();
+    auto tileSize = game.GetTileSize();
+    auto width = game.GetGameWidth();
+    auto height = game.GetGameHeight();
+    auto playerPos = m_sprite->getPosition();
+
+    for (const auto &data : anim)
+    {
+        if (data->GetTextureID() == m_animID)
+        {
+            moveAnim = data->GetMoveAnim();
+            break;
+        }
+    }
 
     switch (m_move)
     {
     case PlayerMove::Left:
-        if (elapsed.asMilliseconds() >= 0 && elapsed.asMilliseconds() < 200)
-            m_sprite->setTextureRect(moveAnim.left01);
-        else if (elapsed.asMilliseconds() >= 200 && elapsed.asMilliseconds() < 400)
-            m_sprite->setTextureRect(moveAnim.left00);
-        else
-            clock.restart();
+        utilities.PlayAnimation(m_sprite, clock, moveAnim.left00, moveAnim.left01);
 
         if (playerPos.x - m_speed > 0 + (tileSize / 2) && m_moveAllowed.left)
             m_sprite->setPosition(playerPos.x - m_speed, playerPos.y);
@@ -137,12 +132,7 @@ void Player::HandleMove(sf::Clock &clock, Game &game)
             m_sprite->setTextureRect(moveAnim.left00);
         break;
     case PlayerMove::Right:
-        if (elapsed.asMilliseconds() >= 0 && elapsed.asMilliseconds() < 200)
-            m_sprite->setTextureRect(moveAnim.right01);
-        else if (elapsed.asMilliseconds() >= 200 && elapsed.asMilliseconds() < 400)
-            m_sprite->setTextureRect(moveAnim.right00);
-        else
-            clock.restart();
+        utilities.PlayAnimation(m_sprite, clock, moveAnim.right00, moveAnim.right01);
 
         if (playerPos.x + m_speed < width - tileSize && m_moveAllowed.right)
             m_sprite->setPosition(playerPos.x + m_speed, playerPos.y);
@@ -150,12 +140,7 @@ void Player::HandleMove(sf::Clock &clock, Game &game)
             m_sprite->setTextureRect(moveAnim.right00);
         break;
     case PlayerMove::Down:
-        if (elapsed.asMilliseconds() >= 0 && elapsed.asMilliseconds() < 200)
-            m_sprite->setTextureRect(moveAnim.down01);
-        else if (elapsed.asMilliseconds() >= 200 && elapsed.asMilliseconds() < 400)
-            m_sprite->setTextureRect(moveAnim.down02);
-        else
-            clock.restart();
+        utilities.PlayAnimation(m_sprite, clock, moveAnim.down02, moveAnim.down01);
 
         if (playerPos.y + m_speed < height - tileSize && m_moveAllowed.down)
             m_sprite->setPosition(playerPos.x, playerPos.y + m_speed);
@@ -164,12 +149,7 @@ void Player::HandleMove(sf::Clock &clock, Game &game)
 
         break;
     case PlayerMove::Up:
-        if (elapsed.asMilliseconds() >= 0 && elapsed.asMilliseconds() < 200)
-            m_sprite->setTextureRect(moveAnim.up01);
-        else if (elapsed.asMilliseconds() >= 200 && elapsed.asMilliseconds() < 400)
-            m_sprite->setTextureRect(moveAnim.up02);
-        else
-            clock.restart();
+        utilities.PlayAnimation(m_sprite, clock, moveAnim.up02, moveAnim.up01);
 
         if (playerPos.y - m_speed > 0 + (tileSize / 2) && m_moveAllowed.up)
             m_sprite->setPosition(playerPos.x, playerPos.y - m_speed);
@@ -201,6 +181,8 @@ void Player::HandleMove(sf::Clock &clock, Game &game)
         break;
     }
 
+    CollectItem(game);
+
     m_moveAllowed.up = true;
     m_moveAllowed.down = true;
     m_moveAllowed.left = true;
@@ -214,7 +196,7 @@ float Player::GetStatValue(const StatType type) const
     switch (type)
     {
     case StatType::Health:
-        value = m_survivalStats.health;
+        value = m_health;
         break;
     case StatType::Food:
         value = m_survivalStats.food;
@@ -570,7 +552,7 @@ void Player::Load(const uint8_t id)
         auto jsonData = json::parse(file);
 
         m_name = jsonData["name"];
-        m_survivalStats.health = jsonData["health"];
+        m_health = jsonData["health"];
         m_survivalStats.water = jsonData["water"];
         m_survivalStats.food = jsonData["food"];
         m_sprite->setPosition(jsonData["posX"], jsonData["posY"]);
@@ -593,7 +575,7 @@ void Player::Save()
     if (file.is_open())
     {
         json jsonData = {{"name", m_name},
-                         {"health", m_survivalStats.health},
+                         {"health", m_health},
                          {"water", m_survivalStats.water},
                          {"food", m_survivalStats.food},
                          {"posX", m_sprite->getPosition().x},
