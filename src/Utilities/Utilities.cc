@@ -243,7 +243,7 @@ void Utilities::PerformanceTestEnd()
     cout << "Elapsed time: " << elapsed_time << '\n';
 }
 
-bool Utilities::CheckInViewRange(Game *game, const sf::Vector2f &spritePos)
+bool Utilities::InViewRange(Game *game, const sf::Vector2f &spritePos)
 {
     auto drawPuffer = game->GetDrawPuffer();
     auto view = game->GetView();

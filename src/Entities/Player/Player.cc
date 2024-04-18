@@ -9,13 +9,13 @@
 #include <random>
 
 Player::Player(sf::Sprite *sprite, const uint8_t animID, const string_view name, const uint8_t id)
-    : Unit(sprite, 100.0F, 1.0F), m_animID(animID), m_name(name), m_ID(id)
+    : Unit(sprite, 100.0F, 1.0F, animID), m_name(name), m_ID(id)
 {
     Init();
 }
 
 Player::Player(sf::Sprite *sprite, const uint8_t animID, const uint8_t id)
-    : Unit(sprite, 100.0F, 1.0F), m_animID(animID), m_ID(id)
+    : Unit(sprite, 100.0F, 1.0F, animID), m_ID(id)
 {
     Init();
 }
@@ -29,6 +29,7 @@ void Player::Init()
     m_move = PlayerMove::NotMoving;
     m_lastMove = m_move;
     m_objectInFront = nullptr;
+    m_creatureInFront = nullptr;
 }
 
 // INFO
@@ -114,7 +115,7 @@ void Player::HandleMove(sf::Clock &clock, Game &game)
 
     for (const auto &data : anim)
     {
-        if (data->GetTextureID() == m_animID)
+        if (data->GetID() == m_animID)
         {
             moveAnim = data->GetMoveAnim();
             break;
@@ -232,7 +233,7 @@ void Player::UpdateStats(Game *game)
 
 
 // ITEMS
-void Player::UseItem(Game &game)
+void Player::Interact(Game &game)
 {
     auto itemCfg = game.GetItemCfg();
     auto playerPos = m_sprite->getPosition();
@@ -418,14 +419,17 @@ void Player::CheckCollision(Game *game)
 {
     Utilities utilities;
     auto world = game->GetWorld();
+    auto creature = game->GetCreature();
+
     bool objectInFront = false;
     m_objectInFront = nullptr;
+    m_creatureInFront = nullptr;
 
     for (const auto &data : world)
     {
         auto objPos = data->GetSprite()->getPosition();
 
-        if (utilities.CheckInViewRange(game, objPos))
+        if (utilities.InViewRange(game, objPos))
         {
             auto objCollision = data->GetCollision();
             auto objSize = data->GetSprite()->getLocalBounds().getSize();
@@ -438,6 +442,22 @@ void Player::CheckCollision(Game *game)
 
             if (objectInFront)
                 m_objectInFront = data;
+        }
+    }
+
+    for (const auto &data : creature)
+    {
+        auto objPos = data->GetSprite()->getPosition();
+
+        if (utilities.InViewRange(game, objPos))
+        {
+            auto objSize = data->GetSprite()->getLocalBounds().getSize();
+            auto isUsable = data->GetUseable();
+
+            objectInFront = CheckMove(isUsable, objPos, objSize);
+
+            if (objectInFront)
+                m_creatureInFront = data;
         }
     }
 }
@@ -457,7 +477,7 @@ bool Player::CheckMove(const bool isUsable,
     if (!canMoveDownUpCollisionX && !canMoveUpCollisionY)
     {
         m_moveAllowed.up = false;
-        if (isUsable && m_lastMove == PlayerMove::Up)
+        if (isUsable && (m_lastMove == PlayerMove::Up || m_move == PlayerMove::Up))
             return true;
     }
 
@@ -466,7 +486,7 @@ bool Player::CheckMove(const bool isUsable,
     if (!canMoveDownUpCollisionX && !canMoveDownCollisionY)
     {
         m_moveAllowed.down = false;
-        if (isUsable && m_lastMove == PlayerMove::Down)
+        if (isUsable && (m_lastMove == PlayerMove::Down || m_move == PlayerMove::Down))
             return true;
     }
 
@@ -477,7 +497,7 @@ bool Player::CheckMove(const bool isUsable,
     if (!canMoveLeftCollisionX && !canMoveRightLeftCollisionY)
     {
         m_moveAllowed.left = false;
-        if (isUsable && m_lastMove == PlayerMove::Left)
+        if (isUsable && (m_lastMove == PlayerMove::Left || m_move == PlayerMove::Left))
             return true;
     }
 
@@ -486,7 +506,7 @@ bool Player::CheckMove(const bool isUsable,
     if (!canMoveRightCollisionX && !canMoveRightLeftCollisionY)
     {
         m_moveAllowed.right = false;
-        if (isUsable && m_lastMove == PlayerMove::Right)
+        if (isUsable && (m_lastMove == PlayerMove::Right || m_move == PlayerMove::Right))
             return true;
     }
 
@@ -505,7 +525,7 @@ bool Player::CheckMove(const bool isUsable, const sf::Vector2f &objPos, const sf
     if (!canMoveDownUpX && !canMoveUpY)
     {
         m_moveAllowed.up = false;
-        if (isUsable && m_lastMove == PlayerMove::Up)
+        if (isUsable && (m_lastMove == PlayerMove::Up || m_move == PlayerMove::Up))
             return true;
     }
 
@@ -514,7 +534,7 @@ bool Player::CheckMove(const bool isUsable, const sf::Vector2f &objPos, const sf
     if (!canMoveDownUpX && !canMoveDownY)
     {
         m_moveAllowed.down = false;
-        if (isUsable && m_lastMove == PlayerMove::Down)
+        if (isUsable && (m_lastMove == PlayerMove::Down || m_move == PlayerMove::Down))
             return true;
     }
 
@@ -524,7 +544,7 @@ bool Player::CheckMove(const bool isUsable, const sf::Vector2f &objPos, const sf
     if (!canMoveLeftX && !canMoveRightLeftY)
     {
         m_moveAllowed.left = false;
-        if (isUsable && m_lastMove == PlayerMove::Left)
+        if (isUsable && (m_lastMove == PlayerMove::Left || m_move == PlayerMove::Left))
             return true;
     }
 
@@ -533,7 +553,7 @@ bool Player::CheckMove(const bool isUsable, const sf::Vector2f &objPos, const sf
     if (!canMoveRightX && !canMoveRightLeftY)
     {
         m_moveAllowed.right = false;
-        if (isUsable && m_lastMove == PlayerMove::Right)
+        if (isUsable && (m_lastMove == PlayerMove::Right || m_move == PlayerMove::Right))
             return true;
     }
 

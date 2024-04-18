@@ -1,7 +1,6 @@
 #pragma once
 #include "Game.h"
 #include "Stats.h"
-#include "Unit.h"
 #include <SFML/Graphics.hpp>
 #include <World.h>
 #include <cstdint>
@@ -56,7 +55,7 @@ public:
     void UpdateStats(Game *game);
 
     // ITEMS
-    void UseItem(Game &game);
+    void Interact(Game &game);
     void CollectItem(Game &game);
 
     // DRAW
@@ -92,6 +91,5 @@ private:
     map<uint32_t, uint16_t> m_items;
     // COLLISION
     World *m_objectInFront;
-    // ANIM
-    uint8_t m_animID;
+    Creature *m_creatureInFront;
 };

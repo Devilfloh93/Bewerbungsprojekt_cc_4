@@ -1,4 +1,5 @@
 #include "Game.h"
+
 #include "Utilities.h"
 #include "nlohmann/json.hpp"
 #include <fstream>
@@ -16,7 +17,7 @@ Game::Game(const uint16_t windowWidth, const uint16_t windowHeight)
     m_drawPuffer = 200.0F;
     m_maxZoom = 3U;
     m_playing = false;
-    m_defaultPlayerTextureID = 2U;
+    m_defaultAnimID = 0;
     m_statDecay = {.food = 0.2F, .water = 0.5F};
     m_gameWidth = 8800U;
     m_gameHeight = 4800U;
@@ -26,16 +27,19 @@ Game::Game(const uint16_t windowWidth, const uint16_t windowHeight)
 
 void Game::Init()
 {
-    CreateFolder();
-    InitAnim();
+    InitFolder();
     InitViews();
     InitTexture();
     InitFont();
+    InitAnim();
+
+    InitItemCfg();
+    InitDrawStats();
     InitMenu();
     InitSurface();
     InitWorld();
-    InitItemCfg();
-    InitDrawStats();
+    InitCreature();
+
     cout << "Game Init Done!" << endl;
 }
 
@@ -119,6 +123,11 @@ vector<AllTextures *> Game::GetTexture() const
 vector<World *> Game::GetWorld() const
 {
     return m_world;
+}
+
+vector<Creature *> Game::GetCreature() const
+{
+    return m_creature;
 }
 
 vector<ItemCfg *> Game::GetItemCfg() const
@@ -250,27 +259,30 @@ void Game::SetPlayer(Player *player)
 bool Game::LoadPlayer(const uint8_t id)
 {
     auto sprite = new sf::Sprite();
-    sf::Texture *texture;
-
-    for (const auto &data : m_textures)
-    {
-        auto texID = data->GetID();
-        if (texID == m_defaultPlayerTextureID)
-            texture = data->GetTexture();
-    }
-
-    sprite->setTexture(*texture);
 
     for (const auto &data : m_anim)
     {
-        if (data->GetTextureID() == m_defaultPlayerTextureID)
+        auto id = data->GetID();
+        auto textureID = data->GetTextureID();
+
+        if (id == m_defaultAnimID)
         {
+            for (const auto &data1 : m_textures)
+            {
+                auto texID = data1->GetID();
+                if (texID == textureID)
+                {
+                    sprite->setTexture(*(data1->GetTexture()));
+                    break;
+                }
+            }
+
             sprite->setTextureRect(data->GetMoveAnim().down00);
             break;
         }
     }
 
-    m_player = new Player(sprite, m_defaultPlayerTextureID, id);
+    m_player = new Player(sprite, m_defaultAnimID, id);
 
     return true;
 }
@@ -293,27 +305,30 @@ bool Game::CreatePlayer()
 
 
     auto sprite = new sf::Sprite();
-    sf::Texture *texture;
-
-    for (const auto &data : m_textures)
-    {
-        auto texID = data->GetID();
-        if (texID == m_defaultPlayerTextureID)
-            texture = data->GetTexture();
-    }
-
-    sprite->setTexture(*texture);
 
     for (const auto &data : m_anim)
     {
-        if (data->GetTextureID() == m_defaultPlayerTextureID)
+        auto id = data->GetID();
+        auto textureID = data->GetTextureID();
+
+        if (id == m_defaultAnimID)
         {
+            for (const auto &data1 : m_textures)
+            {
+                auto texID = data1->GetID();
+                if (texID == textureID)
+                {
+                    sprite->setTexture(*(data1->GetTexture()));
+                    break;
+                }
+            }
+
             sprite->setTextureRect(data->GetMoveAnim().down00);
             break;
         }
     }
 
-    m_player = new Player(sprite, m_defaultPlayerTextureID, playerName, countFolders);
+    m_player = new Player(sprite, m_defaultAnimID, playerName, countFolders);
     return true;
 }
 
@@ -339,6 +354,15 @@ void Game::RemoveItems(const size_t i)
 }
 
 // INITS
+void Game::InitFolder()
+{
+    auto new_directory_path = filesystem::current_path();
+    new_directory_path /= "save";
+
+    if (!filesystem::exists(new_directory_path))
+        filesystem::create_directory(new_directory_path);
+}
+
 void Game::InitPlayer(sf::RenderWindow &window)
 {
     bool startGame = false;
@@ -417,7 +441,10 @@ void Game::InitItemCfg()
             {
                 auto texID = data1->GetID();
                 if (texID == textureID)
+                {
                     texture = data1->GetTexture();
+                    break;
+                }
             }
 
             auto itemCfg = new ItemCfg(texture, textureData, ID, name, maxDrop);
@@ -483,33 +510,33 @@ void Game::InitMenu()
     };
 
     ifstream fileTitle("./data/menu/title.json");
-    ifstream fileTitleCfg("./data/menu/titleDefaultCfg.json");
+    ifstream fileTitleTemplate("./data/menu/titleTemplate.json");
 
     ifstream fileBtn("./data/menu/btn.json");
-    ifstream fileBtnCfg("./data/menu/btnDefaultCfg.json");
+    ifstream fileBtnTemplate("./data/menu/btnTemplate.json");
 
     ifstream fileInput("./data/menu/input.json");
-    ifstream fileInputCfg("./data/menu/inputDefaultCfg.json");
+    ifstream fileInputTemplate("./data/menu/inputTemplate.json");
 
-    if (fileTitle.is_open() && fileBtn.is_open() && fileInput.is_open() && fileTitleCfg.is_open() &&
-        fileBtnCfg.is_open() && fileInputCfg.is_open())
+    if (fileTitle.is_open() && fileBtn.is_open() && fileInput.is_open() && fileTitleTemplate.is_open() &&
+        fileBtnTemplate.is_open() && fileInputTemplate.is_open())
     {
         auto jsonDataTitle = nlohmann::ordered_json::parse(fileTitle);
-        auto jsonDataTitleCfg = json::parse(fileTitleCfg);
+        auto jsonDataTitleTemplate = json::parse(fileTitleTemplate);
 
         auto jsonDataBtn = nlohmann::ordered_json::parse(fileBtn);
-        auto jsonDataBtnCfg = json::parse(fileBtnCfg);
+        auto jsonDataBtnTemplate = json::parse(fileBtnTemplate);
 
         auto jsonDataInput = nlohmann::ordered_json::parse(fileInput);
-        auto jsonDataInputCfg = json::parse(fileInputCfg);
+        auto jsonDataInputTemplate = json::parse(fileInputTemplate);
 
         for (const auto &dataTitle : jsonDataTitle)
         {
             auto titleText = new sf::Text();
             Element element = Element::Title;
 
-            uint8_t fontSize = jsonDataTitleCfg["fontSize"];
-            uint8_t fontID = jsonDataTitleCfg["fontID"];
+            uint8_t fontSize = jsonDataTitleTemplate["fontSize"];
+            uint8_t fontID = jsonDataTitleTemplate["fontID"];
 
             MenuState state = dataTitle["state"];
             string text = dataTitle["name"];
@@ -555,9 +582,9 @@ void Game::InitMenu()
                 {
                     inputText = new sf::Text();
 
-                    fontID = jsonDataInputCfg["fontID"];
-                    fontSize = jsonDataInputCfg["fontSize"];
-                    uint8_t maxChars = jsonDataInputCfg["maxChars"];
+                    fontID = jsonDataInputTemplate["fontID"];
+                    fontSize = jsonDataInputTemplate["fontSize"];
+                    uint8_t maxChars = jsonDataInputTemplate["maxChars"];
 
                     text = dataInput["name"];
 
@@ -601,15 +628,15 @@ void Game::InitMenu()
                     auto btnText = new sf::Text();
                     auto btn = new sf::Sprite();
 
-                    auto scale = sf::Vector2f{jsonDataBtnCfg["scale"][0], jsonDataBtnCfg["scale"][1]};
-                    fontSize = jsonDataBtnCfg["fontSize"];
-                    uint8_t textureID = jsonDataBtnCfg["textureID"];
-                    fontID = jsonDataBtnCfg["fontID"];
+                    auto scale = sf::Vector2f{jsonDataBtnTemplate["scale"][0], jsonDataBtnTemplate["scale"][1]};
+                    fontSize = jsonDataBtnTemplate["fontSize"];
+                    uint8_t textureID = jsonDataBtnTemplate["textureID"];
+                    fontID = jsonDataBtnTemplate["fontID"];
 
-                    auto textureRect = sf::IntRect{jsonDataBtnCfg["textureData"][0],
-                                                   jsonDataBtnCfg["textureData"][1],
-                                                   jsonDataBtnCfg["textureData"][2],
-                                                   jsonDataBtnCfg["textureData"][3]};
+                    auto textureRect = sf::IntRect{jsonDataBtnTemplate["textureData"][0],
+                                                   jsonDataBtnTemplate["textureData"][1],
+                                                   jsonDataBtnTemplate["textureData"][2],
+                                                   jsonDataBtnTemplate["textureData"][3]};
                     text = dataBtn["name"];
                     BtnFunc btnFnc = dataBtn["fnc"];
 
@@ -659,12 +686,13 @@ void Game::InitMenu()
             }
         }
 
+
         fileTitle.close();
         fileBtn.close();
         fileInput.close();
-        fileTitleCfg.close();
-        fileBtnCfg.close();
-        fileInputCfg.close();
+        fileTitleTemplate.close();
+        fileBtnTemplate.close();
+        fileInputTemplate.close();
     }
 }
 
@@ -714,6 +742,7 @@ void Game::InitSurface()
                     if (texID == textureID)
                     {
                         texture = data1->GetTexture();
+                        break;
                     }
                 }
 
@@ -770,18 +799,54 @@ void Game::InitAnim()
             uint8_t id = data["id"];
             uint8_t textureId = data["textureID"];
 
-            MovementTexture animTexture = {.up00 = {data["textureUp"][0][0], data["textureUp"][0][1], 16, 16},
-                                           .up01 = {data["textureUp"][1][0], data["textureUp"][1][1], 16, 16},
-                                           .up02 = {data["textureUp"][2][0], data["textureUp"][2][1], 16, 16},
-                                           .down00 = {data["textureDown"][0][0], data["textureDown"][0][1], 16, 16},
-                                           .down01 = {data["textureDown"][1][0], data["textureDown"][1][1], 16, 16},
-                                           .down02 = {data["textureDown"][2][0], data["textureDown"][2][1], 16, 16},
-                                           .left00 = {data["textureLeft"][0][0], data["textureLeft"][0][1], 16, 16},
-                                           .left01 = {data["textureLeft"][1][0], data["textureLeft"][1][1], 16, 16},
-                                           .left02 = {data["textureLeft"][2][0], data["textureLeft"][2][1], 16, 16},
-                                           .right00 = {data["textureRight"][0][0], data["textureRight"][0][1], 16, 16},
-                                           .right01 = {data["textureRight"][1][0], data["textureRight"][1][1], 16, 16},
-                                           .right02 = {data["textureRight"][2][0], data["textureRight"][2][1], 16, 16}};
+            MovementTexture animTexture = {.up00 = {data["textureUp"][0][0],
+                                                    data["textureUp"][0][1],
+                                                    data["textureUp"][0][2],
+                                                    data["textureUp"][0][3]},
+                                           .up01 = {data["textureUp"][1][0],
+                                                    data["textureUp"][1][1],
+                                                    data["textureUp"][1][2],
+                                                    data["textureUp"][1][3]},
+                                           .up02 = {data["textureUp"][2][0],
+                                                    data["textureUp"][2][1],
+                                                    data["textureUp"][2][2],
+                                                    data["textureUp"][2][3]},
+                                           .down00 = {data["textureDown"][0][0],
+                                                      data["textureDown"][0][1],
+                                                      data["textureDown"][0][2],
+                                                      data["textureDown"][0][3]},
+                                           .down01 = {data["textureDown"][1][0],
+                                                      data["textureDown"][1][1],
+                                                      data["textureDown"][1][2],
+                                                      data["textureDown"][1][3]},
+                                           .down02 = {data["textureDown"][2][0],
+                                                      data["textureDown"][2][1],
+                                                      data["textureDown"][2][2],
+                                                      data["textureDown"][2][3]},
+                                           .left00 = {data["textureLeft"][0][0],
+                                                      data["textureLeft"][0][1],
+                                                      data["textureLeft"][0][2],
+                                                      data["textureLeft"][0][3]},
+                                           .left01 = {data["textureLeft"][1][0],
+                                                      data["textureLeft"][1][1],
+                                                      data["textureLeft"][1][2],
+                                                      data["textureLeft"][1][3]},
+                                           .left02 = {data["textureLeft"][2][0],
+                                                      data["textureLeft"][2][1],
+                                                      data["textureLeft"][2][2],
+                                                      data["textureLeft"][2][3]},
+                                           .right00 = {data["textureRight"][0][0],
+                                                       data["textureRight"][0][1],
+                                                       data["textureRight"][0][2],
+                                                       data["textureRight"][0][3]},
+                                           .right01 = {data["textureRight"][1][0],
+                                                       data["textureRight"][1][1],
+                                                       data["textureRight"][1][2],
+                                                       data["textureRight"][1][3]},
+                                           .right02 = {data["textureRight"][2][0],
+                                                       data["textureRight"][2][1],
+                                                       data["textureRight"][2][2],
+                                                       data["textureRight"][2][3]}};
 
             auto anim = new Anim(id, textureId, animTexture);
             m_anim.push_back(anim);
@@ -790,18 +855,87 @@ void Game::InitAnim()
     }
 }
 
-void Game::InitWorld()
+void Game::InitCreature()
 {
-    ifstream file("./data/world/world.json");
+    ifstream fileCreatureTemplate("./data/entities/creature/creatureTemplate.json");
+    ifstream fileCreature("./data/world/creature.json");
 
-    if (file.is_open())
+    if (fileCreatureTemplate.is_open() && fileCreature.is_open())
     {
-        auto jsonData = json::parse(file);
+        auto jsonDataCreatureTemplate = json::parse(fileCreatureTemplate);
+        auto jsonDataCreature = json::parse(fileCreature);
 
         sf::Texture *texture;
-        for (const auto &data : jsonData)
+        for (const auto &data : jsonDataCreatureTemplate)
         {
+            uint8_t id = data["id"];
+            string name = data["name"];
+            uint8_t animID = data["animID"];
+            MovementTexture textureData;
 
+            for (const auto &data1 : m_anim)
+            {
+                if (data1->GetID() == animID)
+                {
+                    textureData = data1->GetMoveAnim();
+                    auto textureID = data1->GetTextureID();
+                    for (const auto &data2 : m_textures)
+                    {
+                        auto texID = data2->GetID();
+
+                        if (texID == textureID)
+                        {
+                            texture = data2->GetTexture();
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+
+            for (const auto &data1 : jsonDataCreature)
+            {
+                uint8_t templateId = data1["creatureTemplateID"];
+
+                if (templateId == id)
+                {
+                    vector<vector<float>> pos = data1["pos"];
+
+                    for (const auto &data2 : pos)
+                    {
+                        auto tileSprite = new sf::Sprite();
+
+                        tileSprite->setTexture(*texture);
+                        tileSprite->setTextureRect(textureData.down00);
+                        tileSprite->setPosition(data2[0], data2[1]);
+
+                        auto creature = new Creature(tileSprite, 100.0F, 1.0F, animID);
+                        m_creature.push_back(creature);
+                    }
+                    break;
+                }
+            }
+        }
+        fileCreatureTemplate.close();
+        fileCreature.close();
+    }
+}
+
+
+void Game::InitWorld()
+{
+    ifstream fileWorld("./data/world/world.json");
+    ifstream fileWorldTemplate("./data/world/worldTemplate.json");
+
+    if (fileWorld.is_open() && fileWorldTemplate.is_open())
+    {
+        auto jsonDataWorld = json::parse(fileWorld);
+        auto jsonDataWorldTemplate = json::parse(fileWorldTemplate);
+
+        sf::Texture *texture;
+        for (const auto &data : jsonDataWorldTemplate)
+        {
+            uint8_t id = data["id"];
             Collision collision = {.x = data["textureData"][4], .y = data["textureData"][5]};
             vector<uint8_t> itemOutputID = data["itemOutputID"];
             sf::IntRect textureData = {data["textureData"][0],
@@ -817,28 +951,41 @@ void Game::InitWorld()
 
             uint8_t textureID = data["textureID"];
 
-            for (const auto &data2 : m_textures)
+            for (const auto &data1 : m_textures)
             {
-                auto texID = data2->GetID();
+                auto texID = data1->GetID();
                 if (texID == textureID)
                 {
-                    texture = data2->GetTexture();
+                    texture = data1->GetTexture();
+                    break;
                 }
             }
 
-            for (const auto &data1 : data["pos"])
+            for (const auto &data1 : jsonDataWorld)
             {
-                auto tileSprite = new sf::Sprite();
+                uint8_t templateId = data1["worldTemplateID"];
 
-                tileSprite->setTexture(*texture);
-                tileSprite->setTextureRect(textureData);
-                tileSprite->setPosition(data1[0], data1[1]);
+                if (templateId == id)
+                {
+                    vector<vector<float>> pos = data1["pos"];
 
-                auto world = new World(tileSprite, collision, itemOutputID, textureProgData);
-                m_world.push_back(world);
+                    for (const auto &data2 : pos)
+                    {
+                        auto tileSprite = new sf::Sprite();
+
+                        tileSprite->setTexture(*texture);
+                        tileSprite->setTextureRect(textureData);
+                        tileSprite->setPosition(data2[0], data2[1]);
+
+                        auto world = new World(tileSprite, collision, itemOutputID, textureProgData);
+                        m_world.push_back(world);
+                    }
+                    break;
+                }
             }
         }
-        file.close();
+        fileWorld.close();
+        fileWorldTemplate.close();
     }
 }
 
@@ -861,11 +1008,12 @@ void Game::InitDrawStats()
                                            data["textureData"][3]};
             StatType type = data["type"];
 
-            for (const auto &data : m_textures)
+            for (const auto &data1 : m_textures)
             {
-                if (data->GetID() == textureID)
+                if (data1->GetID() == textureID)
                 {
-                    texture = data->GetTexture();
+                    texture = data1->GetTexture();
+                    break;
                 }
             }
 
@@ -894,7 +1042,7 @@ void Game::DrawItems(sf::RenderWindow &window)
         auto sprite = data->GetSprite();
         auto spritePos = sprite->getPosition();
 
-        if (utilities.CheckInViewRange(this, spritePos))
+        if (utilities.InViewRange(this, spritePos))
             window.draw(*sprite);
     }
 }
@@ -910,7 +1058,7 @@ void Game::DrawSurface(sf::RenderWindow &window, Player *player)
         auto sprite = data->GetSprite();
         auto spritePos = sprite->getPosition();
 
-        if (utilities.CheckInViewRange(this, spritePos))
+        if (utilities.InViewRange(this, spritePos))
         {
             auto tileSize = m_tileSize / 2;
 
@@ -934,7 +1082,20 @@ void Game::DrawWorld(sf::RenderWindow &window)
         auto sprite = data->GetSprite();
         auto spritePos = sprite->getPosition();
 
-        if (utilities.CheckInViewRange(this, spritePos))
+        if (utilities.InViewRange(this, spritePos))
+            window.draw(*sprite);
+    }
+}
+
+void Game::DrawCreature(sf::RenderWindow &window)
+{
+    Utilities utilities;
+    for (auto &data : m_creature)
+    {
+        auto sprite = data->GetSprite();
+        auto spritePos = sprite->getPosition();
+
+        if (utilities.InViewRange(this, spritePos))
             window.draw(*sprite);
     }
 }
@@ -1083,15 +1244,6 @@ void Game::ResizeMenu()
 }
 
 // FOLDER
-void Game::CreateFolder()
-{
-    auto new_directory_path = filesystem::current_path();
-    new_directory_path /= "save";
-
-    if (!filesystem::exists(new_directory_path))
-        filesystem::create_directory(new_directory_path);
-}
-
 void Game::CreateSaveFolder(const uint8_t id)
 {
     auto new_directory_path = filesystem::current_path();

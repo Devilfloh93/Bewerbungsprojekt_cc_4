@@ -35,7 +35,6 @@ int main()
 
     while (window.isOpen())
     {
-
         eventHandler.ResetBreak();
         for (auto event = sf::Event{}; window.pollEvent(event);)
         {
@@ -82,6 +81,8 @@ int main()
 
             game.DrawItems(window);
             window.draw(*playerSprite);
+            game.DrawCreature(window);
+
             game.DrawWorld(window);
 
             player->DrawStats(window, game);
