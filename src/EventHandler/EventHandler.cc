@@ -55,7 +55,7 @@ void EventHandler::Playing(Player *player, Game &game, const sf::Keyboard::Key &
         player->SetMove(PlayerMove::Down);
         break;
     case sf::Keyboard::Key::P:
-        player->UseItem(game);
+        player->Interact(game);
         m_break = true;
         break;
     default:

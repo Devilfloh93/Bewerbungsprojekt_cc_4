@@ -1,34 +1,15 @@
 [
     {
+        "worldTemplateID": 0,
         "pos": [
             [
                 40,
                 40
             ]
-        ],
-        "itemOutputID": [
-            1,
-            2
-        ],
-        "textureID": 1,
-        "textureData": [
-            1,
-            11,
-            30,
-            22,
-            0,
-            0
-        ],
-        "textureProgData": [
-            49,
-            40,
-            32,
-            25,
-            0,
-            0
         ]
     },
     {
+        "worldTemplateID": 1,
         "pos": [
             [
                 100,
@@ -94,29 +75,10 @@
                 380,
                 201
             ]
-        ],
-        "itemOutputID": [
-            1
-        ],
-        "textureID": 4,
-        "textureData": [
-            391,
-            144,
-            48,
-            65,
-            32,
-            40
-        ],
-        "textureProgData": [
-            262,
-            157,
-            20,
-            20,
-            0,
-            0
         ]
     },
     {
+        "worldTemplateID": 2,
         "pos": [
             [
                 60,
@@ -142,26 +104,6 @@
                 310,
                 190
             ]
-        ],
-        "itemOutputID": [
-            2
-        ],
-        "textureID": 4,
-        "textureData": [
-            454,
-            12,
-            48,
-            85,
-            32,
-            60
-        ],
-        "textureProgData": [
-            261,
-            44,
-            22,
-            21,
-            0,
-            0
         ]
     }
 ]

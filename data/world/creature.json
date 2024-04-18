@@ -1,0 +1,29 @@
+[
+    {
+        "creatureTemplateID": 1,
+        "pos": [
+            [
+                200,
+                200
+            ]
+        ]
+    },
+    {
+        "creatureTemplateID": 2,
+        "pos": [
+            [
+                400,
+                200
+            ]
+        ]
+    },
+    {
+        "creatureTemplateID": 3,
+        "pos": [
+            [
+                600,
+                200
+            ]
+        ]
+    }
+]

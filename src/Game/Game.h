@@ -1,5 +1,6 @@
 #pragma once
 #include "Anim.h"
+#include "Creature.h"
 #include "EventHandler.h"
 #include "Font.h"
 #include "Gui.h"
@@ -83,6 +84,7 @@ public:
     vector<Input *> GetInput() const;
     vector<sf::Text *> GetSaveFiles() const;
     vector<Btn *> GetBtn() const;
+    vector<Creature *> GetCreature() const;
 
     // VIEW
     sf::View GetView() const;
@@ -112,29 +114,32 @@ public:
 
     // INITS
     void Init();
-    void InitItemCfg();
+    void InitFolder();
+    void InitViews();
     void InitTexture();
     void InitFont();
+    void InitAnim();
+
+    void InitItemCfg();
     void InitDrawStats();
     void InitMenu();
     void InitSurface();
     void InitWorld();
-    void InitAnim();
-    void InitViews();
     void InitPlayer(sf::RenderWindow &window);
+    void InitCreature();
 
     // DRAW
     void DrawSurface(sf::RenderWindow &window, Player *player);
     void DrawWorld(sf::RenderWindow &window);
     void DrawMenu(sf::RenderWindow &window);
     void DrawItems(sf::RenderWindow &window);
+    void DrawCreature(sf::RenderWindow &window);
 
     // RESIZE
     void ResizeWindow(sf::RenderWindow &window);
     void ResizeMenu();
 
     // FOLDER
-    void CreateFolder();
     void CreateSaveFolder(const uint8_t id);
     uint8_t CountSaveFolders();
 
@@ -161,6 +166,7 @@ private:
     // VECTOR
     vector<ItemCfg *> m_itemCfg;
     vector<World *> m_world;
+    vector<Creature *> m_creature;
     vector<Surface *> m_surfaces;
     vector<Title *> m_titles;
     vector<Btn *> m_btns;
@@ -171,12 +177,14 @@ private:
     vector<Stats *> m_stats;
     vector<Input *> m_inputs;
     vector<sf::Text *> m_saveFiles;
+
+
     // VIEW
     sf::View m_view;
     sf::View m_menuView;
     sf::Vector2f m_defaultCenter;
     // PLAYER
-    uint8_t m_defaultPlayerTextureID;
+    uint8_t m_defaultAnimID;
     Player *m_player;
     uint8_t m_saveGameID;
     // STATS

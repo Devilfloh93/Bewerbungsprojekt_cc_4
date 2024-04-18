@@ -80,7 +80,7 @@ public:
     void PerformanceTestBegin();
     void PerformanceTestEnd();
 
-    bool CheckInViewRange(Game *game, const sf::Vector2f &spritePos);
+    bool InViewRange(Game *game, const sf::Vector2f &spritePos);
 
 private:
     ClockType::time_point m_startTime;

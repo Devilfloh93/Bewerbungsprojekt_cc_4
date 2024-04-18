@@ -9,11 +9,11 @@
     },
     {
         "id": 2,
-        "path": "./ressources/textures/character/Human-Worker-Red.png"
+        "path": "./ressources/textures/entities/player/Human-Worker-Red.png"
     },
     {
         "id": 3,
-        "path": "./ressources/textures/loot/NatureLoot.png"
+        "path": "./ressources/textures/entities/item/NatureLoot.png"
     },
     {
         "id": 4,
@@ -26,5 +26,17 @@
     {
         "id": 6,
         "path": "./ressources/textures/gui/statbar.png"
+    },
+    {
+        "id": 7,
+        "path": "./ressources/textures/entities/creature/Archer-Green.png"
+    },
+    {
+        "id": 8,
+        "path": "./ressources/textures/entities/creature/Human-Soldier-Cyan.png"
+    },
+    {
+        "id": 9,
+        "path": "./ressources/textures/entities/creature/Mage-Cyan.png"
     }
 ]
