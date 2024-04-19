@@ -56,10 +56,9 @@ void Player::SetMove(const PlayerMove move)
     m_move = move;
 }
 
-
-void Player::CollectItem(Game &game)
+void Player::CollectItem(Game *game)
 {
-    auto items = game.GetItem();
+    auto items = game->GetItem();
     auto playerPos = m_sprite->getPosition();
     auto playerSize = m_sprite->getLocalBounds().getSize();
 
@@ -96,21 +95,21 @@ void Player::CollectItem(Game &game)
 
             if (remove)
             {
-                game.RemoveItems(i);
+                game->RemoveItems(i);
                 break;
             }
         }
     }
 }
 
-void Player::HandleMove(sf::Clock &clock, Game &game)
+void Player::HandleMove(sf::Clock &clock, Game *game)
 {
     Utilities utilities;
     MovementTexture moveAnim;
-    auto anim = game.GetAnim();
-    auto tileSize = game.GetTileSize();
-    auto width = game.GetGameWidth();
-    auto height = game.GetGameHeight();
+    auto anim = game->GetAnim();
+    auto tileSize = game->GetTileSize();
+    auto width = game->GetGameWidth();
+    auto height = game->GetGameHeight();
     auto playerPos = m_sprite->getPosition();
 
     for (const auto &data : anim)
@@ -253,6 +252,7 @@ void Player::Interact(Game &game)
                 objectInFront->UpdatePosition();
                 objectInFront->UpdateTextureRect();
                 objectInFront->SetUseable(false);
+                objectInFront->SetSaveIt(true);
 
                 random_device rd;  // a seed source for the random number engine
                 mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
@@ -326,19 +326,19 @@ void Player::Interact(Game &game)
 }
 
 // DRAW
-void Player::DrawStats(sf::RenderWindow &window, const Game &game)
+void Player::DrawStats(sf::RenderWindow &window, Game *game)
 {
-    auto width = (game.GetView().getCenter().x - (game.GetView().getSize().x / 2)) + 5.0F;
+    auto width = (game->GetView().getCenter().x - (game->GetView().getSize().x / 2)) + 5.0F;
 
     size_t i = 1;
     size_t j = 1;
 
-    for (const auto &data : game.GetStats())
+    for (const auto &data : game->GetStats())
     {
         auto textureSize = data->GetTextureSize();
         auto type = data->GetType();
         auto sprite = data->GetSprite();
-        auto height = (game.GetView().getCenter().y + (game.GetView().getSize().y / 2)) - 10.0F;
+        auto height = (game->GetView().getCenter().y + (game->GetView().getSize().y / 2)) - 10.0F;
         auto textureRectSize = sprite->getTextureRect().getSize();
         auto textureRectPos = sprite->getTextureRect().getPosition();
 
@@ -561,9 +561,10 @@ bool Player::CheckMove(const bool isUsable, const sf::Vector2f &objPos, const sf
 }
 
 // DATASTORE
-void Player::Load(const uint8_t id)
+void Player::Load(const uint8_t id, Game *game)
 {
-    auto path = format("./save/{}/save.json", id);
+    auto view = game->GetView();
+    auto path = format("./save/{}/player.json", id);
 
     ifstream file(path);
 
@@ -576,6 +577,7 @@ void Player::Load(const uint8_t id)
         m_survivalStats.water = jsonData["water"];
         m_survivalStats.food = jsonData["food"];
         m_sprite->setPosition(jsonData["posX"], jsonData["posY"]);
+        view.setCenter(jsonData["posX"], jsonData["posY"]);
 
         for (const auto &data : jsonData["items"])
         {
@@ -588,7 +590,7 @@ void Player::Load(const uint8_t id)
 
 void Player::Save()
 {
-    auto path = format("./save/{}/save.json", m_ID);
+    auto path = format("./save/{}/player.json", m_ID);
 
     ofstream file(path);
 

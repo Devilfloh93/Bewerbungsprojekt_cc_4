@@ -47,7 +47,7 @@ public:
     // MOVE
     PlayerMove GetMove() const;
     PlayerMove GetLastMove() const;
-    void HandleMove(sf::Clock &clock, Game &game);
+    void HandleMove(sf::Clock &clock, Game *game);
     void SetMove(const PlayerMove move);
 
     // STATS
@@ -56,10 +56,10 @@ public:
 
     // ITEMS
     void Interact(Game &game);
-    void CollectItem(Game &game);
+    void CollectItem(Game *game);
 
     // DRAW
-    void DrawStats(sf::RenderWindow &window, const Game &game);
+    void DrawStats(sf::RenderWindow &window, Game *game);
     void DrawInventoryItems(sf::RenderWindow &window,
                             const vector<ItemCfg *> &itemCfg,
                             sf::Text *previousTxt,
@@ -74,7 +74,7 @@ public:
                    const Collision objCollision);
 
     // DATASTORE
-    void Load(const uint8_t id);
+    void Load(const uint8_t id, Game *game);
     void Save();
 
 private:

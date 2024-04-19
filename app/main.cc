@@ -17,7 +17,6 @@ int main()
 
     // Init Game
     auto game = Game(windowWidth, windowHeight);
-    auto player = game.GetPlayer();
 
     // Init Window
     sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), "Good Game",
@@ -47,13 +46,13 @@ int main()
                 eventHandler.MouseBtnPressed(window, game);
                 break;
             case sf::Event::KeyPressed:
-                eventHandler.KeyPressed(player, game, event.key.code);
+                eventHandler.KeyPressed(game, event.key.code);
                 break;
             case sf::Event::TextEntered:
                 eventHandler.TxtEntered(game, event.text.unicode);
                 break;
             case sf::Event::KeyReleased:
-                eventHandler.KeyReleased(game, player);
+                eventHandler.KeyReleased(game);
                 break;
             case sf::Event::MouseWheelScrolled:
                 eventHandler.MouseWheelScrolled(game, event.mouseWheelScroll.delta);
@@ -66,26 +65,11 @@ int main()
                 break;
         }
 
-        player = game.GetPlayer();
         window.clear(sf::Color(50U, 50U, 50U));
 
         if (game.GetPlaying() && game.GetMenuState() == MenuState::Playing)
         {
-            auto gameView = game.GetView();
-            auto playerSprite = player->GetSprite();
-
-            window.setView(gameView);
-
-            game.DrawSurface(window, player);
-            player->HandleMove(clock, game);
-
-            game.DrawItems(window);
-            window.draw(*playerSprite);
-            game.DrawCreature(window);
-
-            game.DrawWorld(window);
-
-            player->DrawStats(window, game);
+            game.Draw(window, clock);
         }
         else
         {
@@ -95,7 +79,7 @@ int main()
         window.display();
     }
 
-    game.GetPlayer()->Save();
+    game.Saving(true);
     game.GetThread()->Join();
     return 0;
 }

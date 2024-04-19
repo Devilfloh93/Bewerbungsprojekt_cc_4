@@ -14,13 +14,13 @@ class Game;
 class Thread
 {
 public:
-    Thread(const sf::RenderWindow &window, Player *player, Game *game);
+    Thread(const sf::RenderWindow &window, Game *game);
     ~Thread() = default;
 
     void Join();
 
-    void CollisionCheck(const sf::RenderWindow &window, Player *player, Game *game);
-    void UpdateStats(const sf::RenderWindow &window, Player *player, Game *game);
+    void CollisionCheck(const sf::RenderWindow &window, Game *game);
+    void UpdateStats(const sf::RenderWindow &window, Game *game);
     void SaveGame(const sf::RenderWindow &window, Game *game);
 
     // Function to returns false when

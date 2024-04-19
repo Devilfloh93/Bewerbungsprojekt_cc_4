@@ -1,11 +1,11 @@
 #include "Thread.h"
 
 
-Thread::Thread(const sf::RenderWindow &window, Player *player, Game *game)
+Thread::Thread(const sf::RenderWindow &window, Game *game)
 {
 
-    m_threads.push_back(thread(&Thread::CollisionCheck, this, ref(window), player, game));
-    m_threads.push_back(thread(&Thread::UpdateStats, this, ref(window), player, game));
+    m_threads.push_back(thread(&Thread::CollisionCheck, this, ref(window), game));
+    m_threads.push_back(thread(&Thread::UpdateStats, this, ref(window), game));
     m_threads.push_back(thread(&Thread::SaveGame, this, ref(window), game));
 }
 
@@ -20,8 +20,11 @@ void Thread::Join()
     for (auto &data : m_threads)
     {
         if (data.joinable())
+        {
             data.join();
+        }
     }
+    m_threads.clear();
 }
 
 template <class Duration>
@@ -31,18 +34,21 @@ bool Thread::WaitFor(Duration duration)
     return !m_conditionVar.wait_for(l, duration, [this]() { return m_stop; });
 }
 
-void Thread::CollisionCheck(const sf::RenderWindow &window, Player *player, Game *game)
+void Thread::CollisionCheck(const sf::RenderWindow &window, Game *game)
 {
-    while (window.isOpen())
+    auto player = game->GetPlayer();
+    while (window.isOpen() && game->GetPlaying())
     {
         if (game->GetPlaying() && game->GetMenuState() == MenuState::Playing)
             player->CheckCollision(game);
     }
 }
 
-void Thread::UpdateStats(const sf::RenderWindow &window, Player *player, Game *game)
+void Thread::UpdateStats(const sf::RenderWindow &window, Game *game)
 {
-    while (window.isOpen())
+    auto player = game->GetPlayer();
+
+    while (window.isOpen() && game->GetPlaying())
     {
         this_thread::sleep_for(chrono::seconds(1));
         player->UpdateStats(game);
@@ -51,7 +57,7 @@ void Thread::UpdateStats(const sf::RenderWindow &window, Player *player, Game *g
 
 void Thread::SaveGame(const sf::RenderWindow &window, Game *game)
 {
-    while (window.isOpen())
+    while (window.isOpen() && game->GetPlaying())
     {
         while (WaitFor(chrono::minutes(1)))
             game->GetPlayer()->Save();
