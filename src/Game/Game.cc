@@ -60,11 +60,7 @@ void Game::SetPlaying(const bool playing)
 // UNLOAD
 void Game::Unload()
 {
-    m_player->Save();
-
-    SaveGroundItems(true);
-    SaveWorld(true);
-    SaveCreatures(true);
+    Saving(true);
 
     m_menuState = MenuState::Main;
     m_playing = false;
@@ -422,7 +418,7 @@ void Game::InitPlayer(sf::RenderWindow &window)
         m_thread = new Thread(window, this);
         cout << "Thread Init Done!" << endl;
 
-        m_player->Save();
+        Saving(false);
     }
 }
 
@@ -893,60 +889,65 @@ void Game::InitCreature()
         auto jsonDataCreature = json::parse(fileCreature);
 
         sf::Texture *texture;
-        for (const auto &data : jsonDataCreatureTemplate)
+
+        for (const auto &data : jsonDataCreature)
         {
-            uint8_t id = data["id"];
-            string name = data["name"];
-            uint8_t animID = data["animID"];
+            string name;
+            uint8_t animID;
             MovementTexture textureData;
+            uint8_t templateId = data["creatureTemplateID"];
 
-            for (const auto &data1 : m_anim)
+            for (const auto &data1 : jsonDataCreatureTemplate)
             {
-                if (data1->GetID() == animID)
-                {
-                    textureData = data1->GetMoveAnim();
-                    auto textureID = data1->GetTextureID();
-                    for (const auto &data2 : m_textures)
-                    {
-                        auto texID = data2->GetID();
-
-                        if (texID == textureID)
-                        {
-                            texture = data2->GetTexture();
-                            break;
-                        }
-                    }
-                    break;
-                }
-            }
-
-            for (const auto &data1 : jsonDataCreature)
-            {
-                uint8_t templateId = data1["creatureTemplateID"];
+                uint8_t id = data1["id"];
 
                 if (templateId == id)
                 {
-                    vector<vector<float>> pos = data1["pos"];
+                    name = data1["name"];
+                    animID = data1["animID"];
 
-                    for (const auto &data2 : pos)
+                    for (const auto &data2 : m_anim)
                     {
-                        float posX = data2[0];
-                        float posY = data2[1];
-                        bool moving = data2[2];
+                        if (data2->GetID() == animID)
+                        {
+                            textureData = data2->GetMoveAnim();
+                            auto textureID = data2->GetTextureID();
 
-                        auto tileSprite = new sf::Sprite();
+                            for (const auto &data3 : m_textures)
+                            {
+                                auto texID = data3->GetID();
 
-                        tileSprite->setTexture(*texture);
-                        tileSprite->setTextureRect(textureData.down00);
-                        tileSprite->setPosition(posX, posY);
-
-                        auto creature = new Creature(tileSprite, 100.0F, 1.0F, animID, moving);
-                        m_creature.push_back(creature);
+                                if (texID == textureID)
+                                {
+                                    texture = data3->GetTexture();
+                                    break;
+                                }
+                            }
+                            break;
+                        }
                     }
-                    break;
                 }
             }
+
+            vector<vector<float>> pos = data["pos"];
+
+            for (const auto &data1 : pos)
+            {
+                float posX = data1[0];
+                float posY = data1[1];
+                bool moving = data1[2];
+
+                auto tileSprite = new sf::Sprite();
+
+                tileSprite->setTexture(*texture);
+                tileSprite->setTextureRect(textureData.down00);
+                tileSprite->setPosition(posX, posY);
+
+                auto creature = new Creature(tileSprite, 100.0F, 1.0F, animID, moving);
+                m_creature.push_back(creature);
+            }
         }
+
         fileCreatureTemplate.close();
         fileCreature.close();
     }
@@ -958,65 +959,127 @@ void Game::InitWorld()
     ifstream fileWorld("./data/world/world.json");
     ifstream fileWorldTemplate("./data/world/worldTemplate.json");
 
+    auto saveId = m_player->GetID();
+    auto path = format("./save/{}/world.json", saveId);
+
+    ifstream fileWorldSave(path);
+
     if (fileWorld.is_open() && fileWorldTemplate.is_open())
     {
+        bool saveFileFound = false;
         auto jsonDataWorld = json::parse(fileWorld);
         auto jsonDataWorldTemplate = json::parse(fileWorldTemplate);
+        nlohmann::json_abi_v3_11_2::json jsonDataWorldSave;
+
+        if (fileWorldSave.is_open())
+        {
+            jsonDataWorldSave = json::parse(fileWorldSave);
+            saveFileFound = true;
+        }
 
         sf::Texture *texture;
-        for (const auto &data : jsonDataWorldTemplate)
+
+        for (const auto &data : jsonDataWorld)
         {
-            uint8_t id = data["id"];
-            Collision collision = {.x = data["textureData"][4], .y = data["textureData"][5]};
-            vector<uint8_t> itemOutputID = data["itemOutputID"];
-            sf::IntRect textureData = {data["textureData"][0],
-                                       data["textureData"][1],
-                                       data["textureData"][2],
-                                       data["textureData"][3]};
-            TextureProgData textureProgData = {
-                .rect = sf::IntRect{data["textureProgData"][0],
-                                    data["textureProgData"][1],
-                                    data["textureProgData"][2],
-                                    data["textureProgData"][3]},
-                .collision = Collision{.x = data["textureProgData"][4], .y = data["textureProgData"][5]}};
+            Collision templateCollision;
+            Collision collision;
+            vector<uint8_t> itemOutputID;
+            sf::IntRect textureData;
+            TextureProgData textureProgData;
+            uint8_t worldId = data["id"];
+            uint8_t templateId = data["worldTemplateID"];
 
-            uint8_t textureID = data["textureID"];
-
-            for (const auto &data1 : m_textures)
+            for (const auto &data1 : jsonDataWorldTemplate)
             {
-                auto texID = data1->GetID();
-                if (texID == textureID)
-                {
-                    texture = data1->GetTexture();
-                    break;
-                }
-            }
-
-            for (const auto &data1 : jsonDataWorld)
-            {
-                uint8_t templateId = data1["worldTemplateID"];
+                uint8_t id = data1["id"];
 
                 if (templateId == id)
                 {
-                    vector<vector<float>> pos = data1["pos"];
+                    templateCollision = {.x = data1["textureData"][4], .y = data1["textureData"][5]};
 
-                    for (const auto &data2 : pos)
+                    vector<uint8_t> itemOutputIds = data1["itemOutputID"];
+                    for (const auto &data : itemOutputIds)
+                        itemOutputID.push_back(data);
+
+                    textureData = {data1["textureData"][0],
+                                   data1["textureData"][1],
+                                   data1["textureData"][2],
+                                   data1["textureData"][3]};
+                    textureProgData = {
+                        .rect = sf::IntRect{data1["textureProgData"][0],
+                                            data1["textureProgData"][1],
+                                            data1["textureProgData"][2],
+                                            data1["textureProgData"][3]},
+                        .collision = Collision{.x = data1["textureProgData"][4], .y = data1["textureProgData"][5]}};
+
+                    uint8_t textureID = data1["textureID"];
+
+                    for (const auto &data2 : m_textures)
                     {
-                        auto tileSprite = new sf::Sprite();
-
-                        tileSprite->setTexture(*texture);
-                        tileSprite->setTextureRect(textureData);
-                        tileSprite->setPosition(data2[0], data2[1]);
-
-                        auto world = new World(tileSprite, collision, itemOutputID, textureProgData, false);
-                        m_world.push_back(world);
+                        auto texID = data2->GetID();
+                        if (texID == textureID)
+                        {
+                            texture = data2->GetTexture();
+                            break;
+                        }
                     }
                     break;
                 }
             }
+
+            vector<vector<float>> pos = data["pos"];
+
+            for (size_t i = 0; const auto &data1 : pos)
+            {
+                bool load = false;
+                float posX = data1[0];
+                float posY = data1[1];
+
+                if (saveFileFound)
+                {
+                    for (const auto &data2 : jsonDataWorldSave)
+                    {
+                        uint8_t saveID = data2["id"];
+
+                        if (worldId == saveID)
+                        {
+                            uint8_t overrideId = data2["override"];
+                            if (overrideId == i)
+                            {
+                                posX = data2["posX"];
+                                posY = data2["posY"];
+                                load = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                auto tileSprite = new sf::Sprite();
+
+                tileSprite->setTexture(*texture);
+
+                if (load)
+                {
+                    tileSprite->setTextureRect(textureProgData.rect);
+                    collision = {.x = textureProgData.collision.x, .y = textureProgData.collision.y};
+                }
+                else
+                {
+                    tileSprite->setTextureRect(textureData);
+                    collision = templateCollision;
+                }
+
+                tileSprite->setPosition(posX, posY);
+
+                auto world = new World(tileSprite, worldId, collision, itemOutputID, textureProgData, load);
+                m_world.push_back(world);
+                ++i;
+            }
         }
         fileWorld.close();
         fileWorldTemplate.close();
+        fileWorldSave.close();
     }
 }
 
@@ -1301,16 +1364,26 @@ void Game::SaveWorld(const bool destroy)
 
     if (file.is_open())
     {
+        uint8_t prevID = 0;
         bool firstElement = true;
         file << '[';
-        for (auto &data : m_world)
+        for (size_t i = 0; auto &data : m_world)
         {
+            auto id = data->GetID();
+            if (prevID != id)
+            {
+                i = 0;
+                prevID = id;
+            }
+
             if (data->GetSaveIt())
             {
                 if (!firstElement)
                     file << ",";
 
-                json jsonData = {{"posX", data->GetSprite()->getPosition().x},
+                json jsonData = {{"id", id},
+                                 {"override", i},
+                                 {"posX", data->GetSprite()->getPosition().x},
                                  {"posY", data->GetSprite()->getPosition().y}};
 
                 file << jsonData;
@@ -1322,6 +1395,7 @@ void Game::SaveWorld(const bool destroy)
                 }
                 firstElement = false;
             }
+            ++i;
         }
 
         file << ']';

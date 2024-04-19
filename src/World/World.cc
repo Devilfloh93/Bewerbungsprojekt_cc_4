@@ -1,14 +1,15 @@
 #include "World.h"
 
 World::World(sf::Sprite *sprite,
+             const uint8_t id,
              const Collision collision,
              const vector<uint8_t> itemOutputID,
              const TextureProgData textureProgData,
              const bool saving)
-    : Sprite(sprite), m_collision(collision), m_itemOutputID(itemOutputID), m_textureProgData(textureProgData),
-      m_saveIt(saving)
+    : Sprite(sprite), m_ID(id), m_collision(collision), m_itemOutputID(itemOutputID),
+      m_textureProgData(textureProgData), m_saveIt(saving)
 {
-    if (itemOutputID.size() > 0)
+    if (itemOutputID.size() > 0 && !m_saveIt)
         m_useable = true;
     else
         m_useable = false;
@@ -28,6 +29,11 @@ void World::UpdateTextureRect()
 {
     if (m_textureProgData.rect.getSize().x > 0 && m_textureProgData.rect.getSize().y > 0)
         m_sprite->setTextureRect(m_textureProgData.rect);
+}
+
+uint8_t World::GetID() const
+{
+    return m_ID;
 }
 
 bool World::GetUseable() const
