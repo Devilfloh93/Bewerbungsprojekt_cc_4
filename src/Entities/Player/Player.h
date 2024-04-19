@@ -34,8 +34,8 @@ enum class PlayerMove
 class Player : public Unit
 {
 public:
-    Player(sf::Sprite *sprite, const uint8_t animID, const string_view name, const uint8_t id);
-    Player(sf::Sprite *sprite, const uint8_t animID, const uint8_t id);
+    Player(sf::Sprite *sprite, const uint8_t animID, const string_view name, const uint8_t id, sf::Text *hotkeyDraw);
+    Player(sf::Sprite *sprite, const uint8_t animID, const uint8_t id, sf::Text *hotkeyDraw);
     ~Player() = default;
 
     // INIT
@@ -59,6 +59,7 @@ public:
     void CollectItem(Game *game);
 
     // DRAW
+    void DrawHotkey(sf::RenderWindow &window, Game *game);
     void DrawStats(sf::RenderWindow &window, Game *game);
     void DrawInventoryItems(sf::RenderWindow &window,
                             const vector<ItemCfg *> &itemCfg,
@@ -67,15 +68,15 @@ public:
 
     // COLLISION
     void CheckCollision(Game *game);
-    bool CheckMove(const bool isUsable, const sf::Vector2f &objPos, const sf::Vector2f &objSize);
-    bool CheckMove(const bool isUsable,
-                   const sf::Vector2f &objPos,
-                   const sf::Vector2f &objSize,
-                   const Collision objCollision);
+    bool CheckInFront(const bool interactable, const sf::Vector2f &objPos, const sf::Vector2f &objSize);
+    bool CheckInFront(const bool interactable,
+                      const sf::Vector2f &objPos,
+                      const sf::Vector2f &objSize,
+                      const Collision objCollision);
 
     // DATASTORE
     void Load(const uint8_t id, Game *game);
-    void Save();
+    void Save(const bool destroy);
 
 private:
     // INFO
@@ -92,4 +93,6 @@ private:
     // COLLISION
     World *m_objectInFront;
     Creature *m_creatureInFront;
+    // Draw
+    sf::Text *m_hotkeyDraw;
 };

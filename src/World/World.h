@@ -21,7 +21,7 @@ public:
 
     Collision GetCollision() const;
     vector<uint8_t> GetItemOutputID() const;
-    bool GetUseable() const;
+    bool GetInteractable() const;
     uint8_t GetID() const;
 
     bool GetSaveIt() const;
@@ -29,7 +29,7 @@ public:
 
     void UpdateTextureRect();
     void UpdatePosition();
-    void SetUseable(const bool useable);
+    void SetInteractable(const bool interactable);
 
 private:
     uint8_t m_ID;
@@ -37,5 +37,5 @@ private:
     vector<uint8_t> m_itemOutputID;
     TextureProgData m_textureProgData;
     bool m_saveIt;
-    bool m_useable;
+    bool m_interactable;
 };

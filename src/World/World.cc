@@ -10,9 +10,9 @@ World::World(sf::Sprite *sprite,
       m_textureProgData(textureProgData), m_saveIt(saving)
 {
     if (itemOutputID.size() > 0 && !m_saveIt)
-        m_useable = true;
+        m_interactable = true;
     else
-        m_useable = false;
+        m_interactable = false;
 }
 
 Collision World::GetCollision() const
@@ -36,9 +36,9 @@ uint8_t World::GetID() const
     return m_ID;
 }
 
-bool World::GetUseable() const
+bool World::GetInteractable() const
 {
-    return m_useable;
+    return m_interactable;
 }
 
 bool World::GetSaveIt() const
@@ -51,9 +51,9 @@ void World::SetSaveIt(const bool saving)
     m_saveIt = saving;
 }
 
-void World::SetUseable(const bool useable)
+void World::SetInteractable(const bool interactable)
 {
-    m_useable = useable;
+    m_interactable = interactable;
 }
 
 void World::UpdatePosition()

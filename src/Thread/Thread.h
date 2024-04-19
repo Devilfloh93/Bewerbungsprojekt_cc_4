@@ -19,7 +19,6 @@ public:
 
     void Join();
 
-    void CollisionCheck(const sf::RenderWindow &window, Game *game);
     void UpdateStats(const sf::RenderWindow &window, Game *game);
     void SaveGame(const sf::RenderWindow &window, Game *game);
 
