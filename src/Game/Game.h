@@ -75,6 +75,8 @@ public:
     void SetZoom(const uint8_t zoom);
     void SetZoom(const uint8_t zoom, const float zoomLevel);
     void UpdateZoom(const float delta);
+    uint8_t GetZoom() const;
+    uint8_t GetMaxZoom() const;
 
     // VECTOR
     vector<ItemCfg *> GetItemCfg() const;
@@ -91,8 +93,8 @@ public:
     vector<Creature *> GetCreature() const;
 
     // VIEW
-    sf::View GetView() const;
-    void UpdateView();
+    sf::View *GetView();
+    void UpdateView(const sf::Vector2f &size);
     void HandleViewPosition(const sf::RenderWindow &window);
 
     // PLAYER
@@ -188,7 +190,7 @@ private:
     vector<sf::Text *> m_saveFiles;
 
     // VIEW
-    sf::View m_view;
+    sf::View *m_view;
     sf::View m_menuView;
     sf::Vector2f m_defaultCenter;
     // PLAYER

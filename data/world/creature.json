@@ -28,5 +28,15 @@
                 false
             ]
         ]
+    },
+    {
+        "creatureTemplateID": 4,
+        "pos": [
+            [
+                70,
+                200,
+                false
+            ]
+        ]
     }
 ]

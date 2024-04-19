@@ -2,16 +2,25 @@
     {
         "id": 1,
         "name": "Archer",
-        "animID": 1
+        "animID": 1,
+        "dialogID": 0
     },
     {
         "id": 2,
         "name": "Soldier",
-        "animID": 2
+        "animID": 2,
+        "dialogID": 0
     },
     {
         "id": 3,
         "name": "Mage",
-        "animID": 3
+        "animID": 3,
+        "dialogID": 0
+    },
+    {
+        "id": 4,
+        "name": "Trader",
+        "animID": 4,
+        "dialogID": 1
     }
 ]

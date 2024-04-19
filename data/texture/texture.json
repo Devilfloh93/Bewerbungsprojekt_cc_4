@@ -38,5 +38,9 @@
     {
         "id": 9,
         "path": "./ressources/textures/entities/creature/Mage-Cyan.png"
+    },
+    {
+        "id": 10,
+        "path": "./ressources/textures/entities/creature/Human-Worker-Cyan.png"
     }
 ]
