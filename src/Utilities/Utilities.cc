@@ -248,9 +248,9 @@ bool Utilities::InViewRange(Game *game, const sf::Vector2f &spritePos)
     auto drawPuffer = game->GetDrawPuffer();
     auto view = game->GetView();
 
-    auto viewCenter = view.getCenter();
-    auto viewSizeX = ((view.getSize().x / 2) + drawPuffer);
-    auto viewSizeY = ((view.getSize().y / 2) + drawPuffer);
+    auto viewCenter = view->getCenter();
+    auto viewSizeX = ((view->getSize().x / 2) + drawPuffer);
+    auto viewSizeY = ((view->getSize().y / 2) + drawPuffer);
 
     if (spritePos.x >= (viewCenter.x - viewSizeX) && spritePos.x <= (viewCenter.x + viewSizeX) &&
         spritePos.y >= (viewCenter.y - viewSizeY) && spritePos.y <= (viewCenter.y + viewSizeY))

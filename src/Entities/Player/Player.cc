@@ -340,7 +340,7 @@ void Player::DrawHotkey(sf::RenderWindow &window, Game *game)
 
 void Player::DrawStats(sf::RenderWindow &window, Game *game)
 {
-    auto width = (game->GetView().getCenter().x - (game->GetView().getSize().x / 2)) + 5.0F;
+    auto width = (game->GetView()->getCenter().x - (game->GetView()->getSize().x / 2)) + 5.0F;
 
     size_t i = 1;
     size_t j = 1;
@@ -350,7 +350,7 @@ void Player::DrawStats(sf::RenderWindow &window, Game *game)
         auto textureSize = data->GetTextureSize();
         auto type = data->GetType();
         auto sprite = data->GetSprite();
-        auto height = (game->GetView().getCenter().y + (game->GetView().getSize().y / 2)) - 10.0F;
+        auto height = (game->GetView()->getCenter().y + (game->GetView()->getSize().y / 2)) - 10.0F;
         auto textureRectSize = sprite->getTextureRect().getSize();
         auto textureRectPos = sprite->getTextureRect().getPosition();
 
@@ -597,8 +597,22 @@ void Player::Load(const uint8_t id, Game *game)
         m_health = jsonData["health"];
         m_survivalStats.water = jsonData["water"];
         m_survivalStats.food = jsonData["food"];
-        m_sprite->setPosition(jsonData["posX"], jsonData["posY"]);
-        view.setCenter(jsonData["posX"], jsonData["posY"]);
+        m_sprite->setPosition(jsonData["playerPosX"], jsonData["playerPosY"]);
+        view->setCenter(jsonData["viewPosX"], jsonData["viewPosY"]);
+
+        while (game->GetZoom() != jsonData["zoom"])
+        {
+            if (game->GetZoom() < jsonData["zoom"])
+            {
+                view->zoom(0.5F);
+                game->SetZoom(1U);
+            }
+            else
+            {
+                view->zoom(2.0F);
+                game->SetZoom(-1);
+            }
+        }
 
         for (const auto &data : jsonData["items"])
         {
@@ -609,7 +623,7 @@ void Player::Load(const uint8_t id, Game *game)
     }
 }
 
-void Player::Save(const bool destroy)
+void Player::Save(const bool destroy, Game *game)
 {
     auto path = format("./save/{}/player.json", m_ID);
 
@@ -621,9 +635,13 @@ void Player::Save(const bool destroy)
                          {"health", m_health},
                          {"water", m_survivalStats.water},
                          {"food", m_survivalStats.food},
-                         {"posX", m_sprite->getPosition().x},
-                         {"posY", m_sprite->getPosition().y},
-                         {"items", m_items}};
+                         {"playerPosX", m_sprite->getPosition().x},
+                         {"playerPosY", m_sprite->getPosition().y},
+                         {"items", m_items},
+                         {"viewPosX", game->GetView()->getCenter().x},
+                         {"viewPosY", game->GetView()->getCenter().y},
+                         {"zoom", game->GetZoom()}};
+
         file << jsonData;
         file.close();
     }

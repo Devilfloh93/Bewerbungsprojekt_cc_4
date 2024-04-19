@@ -76,7 +76,7 @@ public:
 
     // DATASTORE
     void Load(const uint8_t id, Game *game);
-    void Save(const bool destroy);
+    void Save(const bool destroy, Game *game);
 
 private:
     // INFO

@@ -111,9 +111,14 @@ void Game::SetZoom(const uint8_t zoom)
     m_zoom += zoom;
 }
 
+uint8_t Game::GetMaxZoom() const
+{
+    return m_maxZoom;
+}
+
 void Game::SetZoom(const uint8_t zoom, const float zoomLevel)
 {
-    m_view.zoom(zoomLevel);
+    m_view->zoom(zoomLevel);
     m_zoom += zoom;
 }
 
@@ -130,7 +135,12 @@ void Game::UpdateZoom(const float delta)
             SetZoom(-1, 2.0F);
     }
 
-    UpdateView();
+    UpdateView(m_view->getSize());
+}
+
+uint8_t Game::GetZoom() const
+{
+    return m_zoom;
 }
 
 // VECTOR
@@ -190,36 +200,24 @@ vector<Font *> Game::GetFont() const
 }
 
 // VIEW
-sf::View Game::GetView() const
+sf::View *Game::GetView()
 {
     return m_view;
 }
 
-void Game::UpdateView()
+void Game::UpdateView(const sf::Vector2f &size)
 {
-    auto size = m_view.getSize();
-    auto center = m_view.getCenter();
+    if (m_view->getCenter().x >= m_gameWidth - (size.x / 2U))
+        m_view->setCenter({m_gameWidth - (size.x / 2U), m_view->getCenter().y});
 
-    if (center.x >= m_gameWidth - (size.x / 2U))
-    {
-        m_view.setCenter({m_gameWidth - (size.x / 2U), center.y});
-        center = m_view.getCenter();
-    }
+    if (m_view->getCenter().x <= 0U + (size.x / 2U))
+        m_view->setCenter({size.x / 2U, m_view->getCenter().y});
 
-    if (center.x <= 0U + (size.x / 2U))
-    {
-        m_view.setCenter({size.x / 2U, center.y});
-        center = m_view.getCenter();
-    }
+    if (m_view->getCenter().y <= 0U + (size.y / 2U))
+        m_view->setCenter({m_view->getCenter().x, size.y / 2U});
 
-    if (center.y <= 0U + (size.y / 2U))
-    {
-        m_view.setCenter({center.x, size.y / 2U});
-        center = m_view.getCenter();
-    }
-
-    if (center.y >= m_gameHeight - (size.y / 2U))
-        m_view.setCenter({center.x, m_gameHeight - (size.y / 2U)});
+    if (m_view->getCenter().y >= m_gameHeight - (size.y / 2U))
+        m_view->setCenter({m_view->getCenter().x, m_gameHeight - (size.y / 2U)});
 }
 
 void Game::HandleViewPosition(const sf::RenderWindow &window)
@@ -229,8 +227,8 @@ void Game::HandleViewPosition(const sf::RenderWindow &window)
     // convert it to world coordinates
     sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
 
-    auto center = m_view.getCenter();
-    auto size = m_view.getSize();
+    auto center = m_view->getCenter();
+    auto size = m_view->getSize();
 
     auto moveX = worldPos.x - center.x;
     auto moveY = worldPos.y - center.y;
@@ -239,33 +237,33 @@ void Game::HandleViewPosition(const sf::RenderWindow &window)
     if (moveX > 0U)
     {
         if (moveX + center.x >= m_gameWidth - (size.x / 2U))
-            m_view.setCenter({m_gameWidth - (size.x / 2U), center.y});
+            m_view->setCenter({m_gameWidth - (size.x / 2U), center.y});
         else
-            m_view.move({moveX, 0U});
+            m_view->move({moveX, 0U});
     }
     else // LEFT
     {
         if (center.x + (moveX) <= 0U + (size.x / 2U))
-            m_view.setCenter({size.x / 2U, center.y});
+            m_view->setCenter({size.x / 2U, center.y});
         else
-            m_view.move({moveX, 0U});
+            m_view->move({moveX, 0U});
     }
-    center = m_view.getCenter();
+    center = m_view->getCenter();
 
     // UP
     if (moveY < 0U)
     {
         if (moveY + center.y <= 0U + (size.y / 2U))
-            m_view.setCenter({center.x, size.y / 2U});
+            m_view->setCenter({center.x, size.y / 2U});
         else
-            m_view.move({0U, moveY});
+            m_view->move({0U, moveY});
     }
     else // DOWN
     {
         if (moveY + center.y >= m_gameHeight - (size.y / 2U))
-            m_view.setCenter({center.x, m_gameHeight - (size.y / 2U)});
+            m_view->setCenter({center.x, m_gameHeight - (size.y / 2U)});
         else
-            m_view.move({0U, moveY});
+            m_view->move({0U, moveY});
     }
 }
 
@@ -449,20 +447,22 @@ void Game::InitPlayer(sf::RenderWindow &window)
 
 void Game::InitViews()
 {
+    m_view = new sf::View();
+
     m_defaultCenter = sf::Vector2f(m_windowWidth / 2U, m_windowHeight / 2U);
 
     m_menuView.setSize(sf::Vector2f(m_windowWidth, m_windowHeight));
     m_menuView.setCenter(m_defaultCenter);
 
-    m_view.setSize(sf::Vector2f(m_windowWidth, m_windowHeight));
-    m_view.setCenter(m_defaultCenter);
+    m_view->setSize(sf::Vector2f(m_windowWidth, m_windowHeight));
+    m_view->setCenter(m_defaultCenter);
 
-    auto center = m_view.getCenter();
+    auto center = m_view->getCenter();
 
-    m_view.zoom(0.5F);
+    m_view->zoom(0.5F);
     m_zoom = 1U;
 
-    m_view.move({-(center.x / 2), -(center.y / 2)});
+    m_view->move({-(center.x / 2), -(center.y / 2)});
 }
 
 void Game::InitItemCfg()
@@ -907,11 +907,13 @@ void Game::InitCreature()
 {
     ifstream fileCreatureTemplate("./data/entities/creature/creatureTemplate.json");
     ifstream fileCreature("./data/world/creature.json");
+    ifstream fileDialog("./data/dialog/common.json");
 
-    if (fileCreatureTemplate.is_open() && fileCreature.is_open())
+    if (fileCreatureTemplate.is_open() && fileCreature.is_open() && fileDialog.is_open())
     {
         auto jsonDataCreatureTemplate = json::parse(fileCreatureTemplate);
         auto jsonDataCreature = json::parse(fileCreature);
+        auto jsonDataDialog = json::parse(fileDialog);
 
         sf::Texture *texture;
 
@@ -921,6 +923,9 @@ void Game::InitCreature()
             uint8_t animID;
             MovementTexture textureData;
             uint8_t templateId = data["creatureTemplateID"];
+            vector<string> dialogIntro;
+            vector<string> dialogOutro;
+            vector<string> dialogOffensive;
 
             for (const auto &data1 : jsonDataCreatureTemplate)
             {
@@ -930,6 +935,7 @@ void Game::InitCreature()
                 {
                     name = data1["name"];
                     animID = data1["animID"];
+                    uint8_t dialogID = data1["dialogID"];
 
                     for (const auto &data2 : m_anim)
                     {
@@ -951,6 +957,21 @@ void Game::InitCreature()
                             break;
                         }
                     }
+
+                    for (const auto &data3 : jsonDataDialog)
+                    {
+                        if (data3["id"] == dialogID)
+                        {
+                            for (const auto &data4 : data3["intro"])
+                                dialogIntro.push_back(data4);
+
+                            for (const auto &data4 : data3["outro"])
+                                dialogOutro.push_back(data4);
+
+                            for (const auto &data4 : data3["offensive"])
+                                dialogOffensive.push_back(data4);
+                        }
+                    }
                 }
             }
 
@@ -968,7 +989,8 @@ void Game::InitCreature()
                 tileSprite->setTextureRect(textureData.down00);
                 tileSprite->setPosition(posX, posY);
 
-                auto creature = new Creature(tileSprite, 100.0F, 1.0F, animID, moving);
+                auto creature =
+                    new Creature(tileSprite, 100.0F, 1.0F, animID, moving, dialogIntro, dialogOutro, dialogOffensive);
                 m_creature.push_back(creature);
             }
         }
@@ -1155,7 +1177,7 @@ void Game::InitDrawStats()
 // DRAW
 void Game::Draw(sf::RenderWindow &window, sf::Clock &clock)
 {
-    window.setView(m_view);
+    window.setView(*m_view);
 
     DrawSurface(window);
     m_player->HandleMove(clock, this);
@@ -1338,7 +1360,7 @@ void Game::SetSaveGameID(const uint8_t id)
 
 void Game::Saving(const bool destroy)
 {
-    m_player->Save(destroy);
+    m_player->Save(destroy, this);
     SaveCreatures(destroy);
     SaveWorld(destroy);
     SaveGroundItems(destroy);
