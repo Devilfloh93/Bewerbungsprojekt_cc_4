@@ -60,6 +60,6 @@ void Thread::SaveGame(const sf::RenderWindow &window, Game *game)
     while (window.isOpen() && game->GetPlaying())
     {
         while (WaitFor(chrono::minutes(1)))
-            game->GetPlayer()->Save();
+            game->Saving(false);
     }
 }

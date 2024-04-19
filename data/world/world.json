@@ -1,5 +1,6 @@
 [
     {
+        "id": 1,
         "worldTemplateID": 0,
         "pos": [
             [
@@ -9,6 +10,7 @@
         ]
     },
     {
+        "id": 2,
         "worldTemplateID": 1,
         "pos": [
             [
@@ -78,6 +80,7 @@
         ]
     },
     {
+        "id": 3,
         "worldTemplateID": 2,
         "pos": [
             [
