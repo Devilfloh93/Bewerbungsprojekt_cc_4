@@ -184,6 +184,11 @@ vector<Btn *> Game::GetBtn() const
     return m_btns;
 }
 
+vector<Font *> Game::GetFont() const
+{
+    return m_fonts;
+}
+
 // VIEW
 sf::View Game::GetView() const
 {
@@ -301,7 +306,17 @@ bool Game::LoadPlayer(const uint8_t id)
         }
     }
 
-    m_player = new Player(sprite, m_defaultAnimID, id);
+    sf::Font *font;
+    for (const auto &data : m_fonts)
+    {
+        font = data->GetFont();
+    }
+
+    auto hotkeyDraw = new sf::Text();
+    hotkeyDraw->setFont(*font);
+    hotkeyDraw->setCharacterSize(10U);
+
+    m_player = new Player(sprite, m_defaultAnimID, id, hotkeyDraw);
 
     return true;
 }
@@ -347,7 +362,17 @@ bool Game::CreatePlayer()
         }
     }
 
-    m_player = new Player(sprite, m_defaultAnimID, playerName, countFolders);
+    sf::Font *font;
+    for (const auto &data : m_fonts)
+    {
+        font = data->GetFont();
+    }
+
+    auto hotkeyDraw = new sf::Text();
+    hotkeyDraw->setFont(*font);
+    hotkeyDraw->setCharacterSize(10U);
+
+    m_player = new Player(sprite, m_defaultAnimID, playerName, countFolders, hotkeyDraw);
     return true;
 }
 
@@ -1141,6 +1166,10 @@ void Game::Draw(sf::RenderWindow &window, sf::Clock &clock)
 
     DrawWorld(window);
 
+    m_player->CheckCollision(this);
+
+    m_player->DrawHotkey(window, this);
+
     m_player->DrawStats(window, this);
 }
 
@@ -1309,7 +1338,7 @@ void Game::SetSaveGameID(const uint8_t id)
 
 void Game::Saving(const bool destroy)
 {
-    m_player->Save();
+    m_player->Save(destroy);
     SaveCreatures(destroy);
     SaveWorld(destroy);
     SaveGroundItems(destroy);

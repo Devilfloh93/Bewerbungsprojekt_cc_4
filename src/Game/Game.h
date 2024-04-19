@@ -84,6 +84,7 @@ public:
     vector<Input *> GetInput() const;
     vector<sf::Text *> GetSaveFiles() const;
     vector<Btn *> GetBtn() const;
+    vector<Font *> GetFont() const;
 
     vector<ItemGround *> GetItem() const;
     vector<World *> GetWorld() const;

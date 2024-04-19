@@ -8,14 +8,14 @@
 #include <memory>
 #include <random>
 
-Player::Player(sf::Sprite *sprite, const uint8_t animID, const string_view name, const uint8_t id)
-    : Unit(sprite, 100.0F, 1.0F, animID), m_name(name), m_ID(id)
+Player::Player(sf::Sprite *sprite, const uint8_t animID, const string_view name, const uint8_t id, sf::Text *hotkeyDraw)
+    : Unit(sprite, 100.0F, 1.0F, animID), m_name(name), m_ID(id), m_hotkeyDraw(hotkeyDraw)
 {
     Init();
 }
 
-Player::Player(sf::Sprite *sprite, const uint8_t animID, const uint8_t id)
-    : Unit(sprite, 100.0F, 1.0F, animID), m_ID(id)
+Player::Player(sf::Sprite *sprite, const uint8_t animID, const uint8_t id, sf::Text *hotkeyDraw)
+    : Unit(sprite, 100.0F, 1.0F, animID), m_ID(id), m_hotkeyDraw(hotkeyDraw)
 {
     Init();
 }
@@ -240,39 +240,51 @@ void Player::Interact(Game &game)
 
     if (m_objectInFront != nullptr)
     {
-        auto objectInFront = m_objectInFront;
-        if (objectInFront != nullptr)
+        auto interactable = m_objectInFront->GetInteractable();
+
+        if (interactable)
         {
-            auto useable = objectInFront->GetUseable();
+            auto itemOutputID = m_objectInFront->GetItemOutputID();
 
-            if (useable)
+            m_objectInFront->UpdatePosition();
+            m_objectInFront->UpdateTextureRect();
+            m_objectInFront->SetInteractable(false);
+            m_objectInFront->SetSaveIt(true);
+
+            random_device rd;  // a seed source for the random number engine
+            mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
+            uint16_t posIncrease = 0;
+            for (const auto &data : itemCfg)
             {
-                auto itemOutputID = objectInFront->GetItemOutputID();
+                auto texture = data->GetTexture();
+                auto textureData = data->GetTextureData();
+                auto itemID = data->GetID();
+                auto maxDrop = data->GetMaxDrop();
 
-                objectInFront->UpdatePosition();
-                objectInFront->UpdateTextureRect();
-                objectInFront->SetUseable(false);
-                objectInFront->SetSaveIt(true);
+                // Random Drop Count
+                uniform_int_distribution<> dist(1U, maxDrop);
 
-                random_device rd;  // a seed source for the random number engine
-                mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
-                uint16_t posIncrease = 0;
-                for (const auto &data : itemCfg)
+                for (const auto &data1 : itemOutputID)
                 {
-                    auto texture = data->GetTexture();
-                    auto textureData = data->GetTextureData();
-                    auto itemID = data->GetID();
-                    auto maxDrop = data->GetMaxDrop();
-
-                    // Random Drop Count
-                    uniform_int_distribution<> dist(1U, maxDrop);
-
-                    for (const auto &data1 : itemOutputID)
+                    if (data1 == itemID)
                     {
-                        if (data1 == itemID)
+                        posIncrease += 20;
+                        switch (m_move)
                         {
-                            posIncrease += 20;
-                            switch (m_move)
+                        case PlayerMove::Up:
+                            itemPos = {playerPos.x, playerPos.y + posIncrease};
+                            break;
+                        case PlayerMove::Down:
+                            itemPos = {playerPos.x, playerPos.y - posIncrease};
+                            break;
+                        case PlayerMove::Right:
+                            itemPos = {playerPos.x - posIncrease, playerPos.y};
+                            break;
+                        case PlayerMove::Left:
+                            itemPos = {playerPos.x + posIncrease, playerPos.y};
+                            break;
+                        case PlayerMove::NotMoving:
+                            switch (m_lastMove)
                             {
                             case PlayerMove::Up:
                                 itemPos = {playerPos.x, playerPos.y + posIncrease};
@@ -286,38 +298,22 @@ void Player::Interact(Game &game)
                             case PlayerMove::Left:
                                 itemPos = {playerPos.x + posIncrease, playerPos.y};
                                 break;
-                            case PlayerMove::NotMoving:
-                                switch (m_lastMove)
-                                {
-                                case PlayerMove::Up:
-                                    itemPos = {playerPos.x, playerPos.y + posIncrease};
-                                    break;
-                                case PlayerMove::Down:
-                                    itemPos = {playerPos.x, playerPos.y - posIncrease};
-                                    break;
-                                case PlayerMove::Right:
-                                    itemPos = {playerPos.x - posIncrease, playerPos.y};
-                                    break;
-                                case PlayerMove::Left:
-                                    itemPos = {playerPos.x + posIncrease, playerPos.y};
-                                    break;
-                                default:
-                                    break;
-                                }
-                                break;
-
                             default:
                                 break;
                             }
+                            break;
 
-                            auto itemSprite = new sf::Sprite();
-                            itemSprite->setTexture(*texture);
-                            itemSprite->setTextureRect(textureData);
-                            itemSprite->setPosition(itemPos.x, itemPos.y);
-
-                            auto item = new ItemGround(itemSprite, itemID, dist(gen));
-                            game.SetItems(item);
+                        default:
+                            break;
                         }
+
+                        auto itemSprite = new sf::Sprite();
+                        itemSprite->setTexture(*texture);
+                        itemSprite->setTextureRect(textureData);
+                        itemSprite->setPosition(itemPos.x, itemPos.y);
+
+                        auto item = new ItemGround(itemSprite, itemID, dist(gen));
+                        game.SetItems(item);
                     }
                 }
             }
@@ -326,6 +322,22 @@ void Player::Interact(Game &game)
 }
 
 // DRAW
+void Player::DrawHotkey(sf::RenderWindow &window, Game *game)
+{
+    if (m_objectInFront != nullptr)
+    {
+        if (m_objectInFront->GetInteractable())
+        {
+            m_hotkeyDraw->setString("E");
+            m_hotkeyDraw->setPosition((m_sprite->getPosition().x - (m_hotkeyDraw->getLocalBounds().getSize().x / 2)) +
+                                          (m_sprite->getLocalBounds().getSize().x / 2),
+                                      m_sprite->getPosition().y - 15);
+
+            window.draw(*m_hotkeyDraw);
+        }
+    }
+}
+
 void Player::DrawStats(sf::RenderWindow &window, Game *game)
 {
     auto width = (game->GetView().getCenter().x - (game->GetView().getSize().x / 2)) + 5.0F;
@@ -421,51 +433,60 @@ void Player::CheckCollision(Game *game)
     auto world = game->GetWorld();
     auto creature = game->GetCreature();
 
-    bool objectInFront = false;
-    m_objectInFront = nullptr;
-    m_creatureInFront = nullptr;
-
     for (const auto &data : world)
     {
+        bool objectInFront = false;
         auto objPos = data->GetSprite()->getPosition();
 
         if (utilities.InViewRange(game, objPos))
         {
             auto objCollision = data->GetCollision();
             auto objSize = data->GetSprite()->getLocalBounds().getSize();
-            auto isUsable = data->GetUseable();
+            auto interactable = data->GetInteractable();
 
             if (objCollision.x != 0 && objCollision.y != 0)
-                objectInFront = CheckMove(isUsable, objPos, objSize, objCollision);
+                objectInFront = CheckInFront(interactable, objPos, objSize, objCollision);
             else
-                objectInFront = CheckMove(isUsable, objPos, objSize);
+                objectInFront = CheckInFront(interactable, objPos, objSize);
 
             if (objectInFront)
+            {
                 m_objectInFront = data;
+                break;
+            }
+            else
+                m_objectInFront = nullptr;
         }
     }
 
     for (const auto &data : creature)
     {
+        bool objectInFront = false;
+
         auto objPos = data->GetSprite()->getPosition();
 
         if (utilities.InViewRange(game, objPos))
         {
             auto objSize = data->GetSprite()->getLocalBounds().getSize();
-            auto isUsable = data->GetUseable();
+            auto interactable = data->GetUseable();
 
-            objectInFront = CheckMove(isUsable, objPos, objSize);
+            objectInFront = CheckInFront(interactable, objPos, objSize);
 
             if (objectInFront)
+            {
                 m_creatureInFront = data;
+                break;
+            }
+            else
+                m_creatureInFront = nullptr;
         }
     }
 }
 
-bool Player::CheckMove(const bool isUsable,
-                       const sf::Vector2f &objPos,
-                       const sf::Vector2f &objSize,
-                       const Collision objCollision)
+bool Player::CheckInFront(const bool interactable,
+                          const sf::Vector2f &objPos,
+                          const sf::Vector2f &objSize,
+                          const Collision objCollision)
 {
     Utilities utilities;
     auto playerPos = m_sprite->getPosition();
@@ -477,7 +498,7 @@ bool Player::CheckMove(const bool isUsable,
     if (!canMoveDownUpCollisionX && !canMoveUpCollisionY)
     {
         m_moveAllowed.up = false;
-        if (isUsable && (m_lastMove == PlayerMove::Up || m_move == PlayerMove::Up))
+        if (interactable && (m_lastMove == PlayerMove::Up || m_move == PlayerMove::Up))
             return true;
     }
 
@@ -486,7 +507,7 @@ bool Player::CheckMove(const bool isUsable,
     if (!canMoveDownUpCollisionX && !canMoveDownCollisionY)
     {
         m_moveAllowed.down = false;
-        if (isUsable && (m_lastMove == PlayerMove::Down || m_move == PlayerMove::Down))
+        if (interactable && (m_lastMove == PlayerMove::Down || m_move == PlayerMove::Down))
             return true;
     }
 
@@ -497,7 +518,7 @@ bool Player::CheckMove(const bool isUsable,
     if (!canMoveLeftCollisionX && !canMoveRightLeftCollisionY)
     {
         m_moveAllowed.left = false;
-        if (isUsable && (m_lastMove == PlayerMove::Left || m_move == PlayerMove::Left))
+        if (interactable && (m_lastMove == PlayerMove::Left || m_move == PlayerMove::Left))
             return true;
     }
 
@@ -506,14 +527,14 @@ bool Player::CheckMove(const bool isUsable,
     if (!canMoveRightCollisionX && !canMoveRightLeftCollisionY)
     {
         m_moveAllowed.right = false;
-        if (isUsable && (m_lastMove == PlayerMove::Right || m_move == PlayerMove::Right))
+        if (interactable && (m_lastMove == PlayerMove::Right || m_move == PlayerMove::Right))
             return true;
     }
 
     return false;
 }
 
-bool Player::CheckMove(const bool isUsable, const sf::Vector2f &objPos, const sf::Vector2f &objSize)
+bool Player::CheckInFront(const bool interactable, const sf::Vector2f &objPos, const sf::Vector2f &objSize)
 {
     Utilities utilities;
     auto playerPos = m_sprite->getPosition();
@@ -525,7 +546,7 @@ bool Player::CheckMove(const bool isUsable, const sf::Vector2f &objPos, const sf
     if (!canMoveDownUpX && !canMoveUpY)
     {
         m_moveAllowed.up = false;
-        if (isUsable && (m_lastMove == PlayerMove::Up || m_move == PlayerMove::Up))
+        if (interactable && (m_lastMove == PlayerMove::Up || m_move == PlayerMove::Up))
             return true;
     }
 
@@ -534,7 +555,7 @@ bool Player::CheckMove(const bool isUsable, const sf::Vector2f &objPos, const sf
     if (!canMoveDownUpX && !canMoveDownY)
     {
         m_moveAllowed.down = false;
-        if (isUsable && (m_lastMove == PlayerMove::Down || m_move == PlayerMove::Down))
+        if (interactable && (m_lastMove == PlayerMove::Down || m_move == PlayerMove::Down))
             return true;
     }
 
@@ -544,7 +565,7 @@ bool Player::CheckMove(const bool isUsable, const sf::Vector2f &objPos, const sf
     if (!canMoveLeftX && !canMoveRightLeftY)
     {
         m_moveAllowed.left = false;
-        if (isUsable && (m_lastMove == PlayerMove::Left || m_move == PlayerMove::Left))
+        if (interactable && (m_lastMove == PlayerMove::Left || m_move == PlayerMove::Left))
             return true;
     }
 
@@ -553,7 +574,7 @@ bool Player::CheckMove(const bool isUsable, const sf::Vector2f &objPos, const sf
     if (!canMoveRightX && !canMoveRightLeftY)
     {
         m_moveAllowed.right = false;
-        if (isUsable && (m_lastMove == PlayerMove::Right || m_move == PlayerMove::Right))
+        if (interactable && (m_lastMove == PlayerMove::Right || m_move == PlayerMove::Right))
             return true;
     }
 
@@ -588,7 +609,7 @@ void Player::Load(const uint8_t id, Game *game)
     }
 }
 
-void Player::Save()
+void Player::Save(const bool destroy)
 {
     auto path = format("./save/{}/player.json", m_ID);
 
@@ -605,5 +626,11 @@ void Player::Save()
                          {"items", m_items}};
         file << jsonData;
         file.close();
+    }
+
+    if (destroy)
+    {
+        delete m_hotkeyDraw;
+        m_hotkeyDraw = nullptr;
     }
 }
