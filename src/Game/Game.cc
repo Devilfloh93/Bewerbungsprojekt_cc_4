@@ -37,8 +37,6 @@ void Game::Init()
     InitDrawStats();
     InitMenu();
     InitSurface();
-    InitWorld();
-    InitCreature();
 
     cout << "Game Init Done!" << endl;
 }
@@ -52,6 +50,31 @@ void Game::SetMenuState(MenuState state)
 bool Game::GetPlaying() const
 {
     return m_playing;
+}
+
+void Game::SetPlaying(const bool playing)
+{
+    m_playing = playing;
+}
+
+// UNLOAD
+void Game::Unload()
+{
+    m_player->Save();
+
+    SaveGroundItems(true);
+    SaveWorld(true);
+    SaveCreatures(true);
+
+    m_menuState = MenuState::Main;
+    m_playing = false;
+
+    m_thread->Join();
+    delete m_thread;
+    m_thread = nullptr;
+
+    delete m_player;
+    m_player = nullptr;
 }
 
 // AREA
@@ -380,7 +403,8 @@ void Game::InitPlayer(sf::RenderWindow &window)
     {
         if (LoadPlayer(m_saveGameID))
         {
-            m_player->Load(m_saveGameID);
+            m_player->Load(m_saveGameID, this);
+            LoadGroundItems();
             cout << "Player Load Done!" << endl;
             startGame = true;
         }
@@ -388,12 +412,15 @@ void Game::InitPlayer(sf::RenderWindow &window)
 
     if (startGame)
     {
-        // Thread Init
-        m_thread = new Thread(window, m_player, this);
-        cout << "Thread Init Done!" << endl;
+        InitWorld();
+        InitCreature();
 
         m_playing = true;
         m_menuState = MenuState::Playing;
+
+        // Thread Init
+        m_thread = new Thread(window, this);
+        cout << "Thread Init Done!" << endl;
 
         m_player->Save();
     }
@@ -903,13 +930,17 @@ void Game::InitCreature()
 
                     for (const auto &data2 : pos)
                     {
+                        float posX = data2[0];
+                        float posY = data2[1];
+                        bool moving = data2[2];
+
                         auto tileSprite = new sf::Sprite();
 
                         tileSprite->setTexture(*texture);
                         tileSprite->setTextureRect(textureData.down00);
-                        tileSprite->setPosition(data2[0], data2[1]);
+                        tileSprite->setPosition(posX, posY);
 
-                        auto creature = new Creature(tileSprite, 100.0F, 1.0F, animID);
+                        auto creature = new Creature(tileSprite, 100.0F, 1.0F, animID, moving);
                         m_creature.push_back(creature);
                     }
                     break;
@@ -977,7 +1008,7 @@ void Game::InitWorld()
                         tileSprite->setTextureRect(textureData);
                         tileSprite->setPosition(data2[0], data2[1]);
 
-                        auto world = new World(tileSprite, collision, itemOutputID, textureProgData);
+                        auto world = new World(tileSprite, collision, itemOutputID, textureProgData, false);
                         m_world.push_back(world);
                     }
                     break;
@@ -1034,6 +1065,22 @@ void Game::InitDrawStats()
 }
 
 // DRAW
+void Game::Draw(sf::RenderWindow &window, sf::Clock &clock)
+{
+    window.setView(m_view);
+
+    DrawSurface(window);
+    m_player->HandleMove(clock, this);
+
+    DrawItems(window);
+    window.draw(*(m_player->GetSprite()));
+    DrawCreature(window);
+
+    DrawWorld(window);
+
+    m_player->DrawStats(window, this);
+}
+
 void Game::DrawItems(sf::RenderWindow &window)
 {
     Utilities utilities;
@@ -1047,10 +1094,10 @@ void Game::DrawItems(sf::RenderWindow &window)
     }
 }
 
-void Game::DrawSurface(sf::RenderWindow &window, Player *player)
+void Game::DrawSurface(sf::RenderWindow &window)
 {
     Utilities utilities;
-    auto playerSprite = player->GetSprite();
+    auto playerSprite = m_player->GetSprite();
     auto playerPos = playerSprite->getPosition();
 
     for (auto &data : m_surfaces)
@@ -1066,7 +1113,7 @@ void Game::DrawSurface(sf::RenderWindow &window, Player *player)
                 playerPos.y >= spritePos.y - tileSize && playerPos.y <= spritePos.y + tileSize)
             {
                 auto speed = data->GetSpeed();
-                player->SetSpeed(speed);
+                m_player->SetSpeed(speed);
             }
 
             window.draw(*sprite);
@@ -1195,6 +1242,175 @@ uint8_t Game::GetSaveGameID() const
 void Game::SetSaveGameID(const uint8_t id)
 {
     m_saveGameID = id;
+}
+
+void Game::Saving(const bool destroy)
+{
+    m_player->Save();
+    SaveCreatures(destroy);
+    SaveWorld(destroy);
+    SaveGroundItems(destroy);
+}
+
+void Game::SaveCreatures(const bool destroy)
+{
+    auto saveId = m_player->GetID();
+    auto path = format("./save/{}/creature.json", saveId);
+
+    ofstream file(path);
+
+    if (file.is_open())
+    {
+        bool firstElement = true;
+        file << '[';
+        for (auto &data : m_creature)
+        {
+            if (data->GetMoving())
+            {
+                if (!firstElement)
+                    file << ",";
+
+                json jsonData = {{"posX", data->GetSprite()->getPosition().x},
+                                 {"posY", data->GetSprite()->getPosition().y}};
+
+                file << jsonData;
+
+                if (destroy)
+                {
+                    delete data;
+                    data = nullptr;
+                }
+                firstElement = false;
+            }
+        }
+
+        file << ']';
+        if (destroy)
+            m_creature.clear();
+
+        file.close();
+    }
+}
+
+void Game::SaveWorld(const bool destroy)
+{
+    auto saveId = m_player->GetID();
+    auto path = format("./save/{}/world.json", saveId);
+
+    ofstream file(path);
+
+    if (file.is_open())
+    {
+        bool firstElement = true;
+        file << '[';
+        for (auto &data : m_world)
+        {
+            if (data->GetSaveIt())
+            {
+                if (!firstElement)
+                    file << ",";
+
+                json jsonData = {{"posX", data->GetSprite()->getPosition().x},
+                                 {"posY", data->GetSprite()->getPosition().y}};
+
+                file << jsonData;
+
+                if (destroy)
+                {
+                    delete data;
+                    data = nullptr;
+                }
+                firstElement = false;
+            }
+        }
+
+        file << ']';
+        if (destroy)
+            m_world.clear();
+
+        file.close();
+    }
+}
+
+void Game::LoadGroundItems()
+{
+    auto saveId = m_player->GetID();
+    auto path = format("./save/{}/groundItems.json", saveId);
+
+    ifstream file(path);
+
+    if (file.is_open())
+    {
+        auto jsonData = json::parse(file);
+
+        for (const auto &data : jsonData)
+        {
+            uint16_t id = data["id"];
+            uint16_t count = data["count"];
+            float posX = data["posX"];
+            float posY = data["posY"];
+
+            for (const auto &data : m_itemCfg)
+            {
+                auto texture = data->GetTexture();
+                auto textureData = data->GetTextureData();
+                auto itemID = data->GetID();
+
+                if (id == itemID)
+                {
+                    auto itemSprite = new sf::Sprite();
+                    itemSprite->setTexture(*texture);
+                    itemSprite->setTextureRect(textureData);
+                    itemSprite->setPosition(posX, posY);
+
+                    auto item = new ItemGround(itemSprite, id, count);
+                    m_items.push_back(item);
+                }
+            }
+        }
+
+        file.close();
+    }
+}
+
+void Game::SaveGroundItems(const bool destroy)
+{
+    auto saveId = m_player->GetID();
+    auto path = format("./save/{}/groundItems.json", saveId);
+
+    ofstream file(path);
+
+    if (file.is_open())
+    {
+        bool firstElement = true;
+
+        file << '[';
+        for (auto &data : m_items)
+        {
+            if (!firstElement)
+                file << ",";
+
+            json jsonData = {{"id", data->GetID()},
+                             {"count", data->GetCount()},
+                             {"posX", data->GetSprite()->getPosition().x},
+                             {"posY", data->GetSprite()->getPosition().y}};
+
+            file << jsonData;
+
+            if (destroy)
+            {
+                delete data;
+                data = nullptr;
+            }
+            firstElement = false;
+        }
+        file << ']';
+
+        if (destroy)
+            m_items.clear();
+
+        file.close();
+    }
 }
 
 // RESIZE

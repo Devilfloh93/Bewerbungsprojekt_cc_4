@@ -14,12 +14,16 @@ public:
     World(sf::Sprite *sprite,
           const Collision collision,
           const vector<uint8_t> itemOutputID,
-          const TextureProgData textureProgData);
+          const TextureProgData textureProgData,
+          const bool saving);
     ~World() = default;
 
     Collision GetCollision() const;
     vector<uint8_t> GetItemOutputID() const;
     bool GetUseable() const;
+
+    bool GetSaveIt() const;
+    void SetSaveIt(const bool saving);
 
     void UpdateTextureRect();
     void UpdatePosition();
@@ -29,5 +33,6 @@ private:
     Collision m_collision;
     vector<uint8_t> m_itemOutputID;
     TextureProgData m_textureProgData;
+    bool m_saveIt;
     bool m_useable;
 };

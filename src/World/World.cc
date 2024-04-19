@@ -3,8 +3,10 @@
 World::World(sf::Sprite *sprite,
              const Collision collision,
              const vector<uint8_t> itemOutputID,
-             const TextureProgData textureProgData)
-    : Sprite(sprite), m_collision(collision), m_itemOutputID(itemOutputID), m_textureProgData(textureProgData)
+             const TextureProgData textureProgData,
+             const bool saving)
+    : Sprite(sprite), m_collision(collision), m_itemOutputID(itemOutputID), m_textureProgData(textureProgData),
+      m_saveIt(saving)
 {
     if (itemOutputID.size() > 0)
         m_useable = true;
@@ -31,6 +33,16 @@ void World::UpdateTextureRect()
 bool World::GetUseable() const
 {
     return m_useable;
+}
+
+bool World::GetSaveIt() const
+{
+    return m_saveIt;
+}
+
+void World::SetSaveIt(const bool saving)
+{
+    m_saveIt = saving;
 }
 
 void World::SetUseable(const bool useable)

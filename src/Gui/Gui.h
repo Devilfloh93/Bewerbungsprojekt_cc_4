@@ -19,7 +19,8 @@ enum class BtnFunc
     Save,
     OpenLoad,
     Create,
-    Load
+    Load,
+    MainMenu
 };
 
 enum class MenuState;

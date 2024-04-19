@@ -54,10 +54,12 @@ public:
     Game(const uint16_t windowWidth, const uint16_t windowHeight);
     ~Game() = default;
 
-    void SetMenuState(MenuState state);
-
     // RUNNING
     bool GetPlaying() const;
+    void SetPlaying(const bool playing);
+
+    // UNLOAD
+    void Unload();
 
     // AREA
     uint8_t GetTileSize() const;
@@ -75,15 +77,16 @@ public:
     void UpdateZoom(const float delta);
 
     // VECTOR
-    vector<World *> GetWorld() const;
     vector<ItemCfg *> GetItemCfg() const;
-    vector<ItemGround *> GetItem() const;
     vector<Anim *> GetAnim() const;
     vector<AllTextures *> GetTexture() const;
     vector<Stats *> GetStats() const;
     vector<Input *> GetInput() const;
     vector<sf::Text *> GetSaveFiles() const;
     vector<Btn *> GetBtn() const;
+
+    vector<ItemGround *> GetItem() const;
+    vector<World *> GetWorld() const;
     vector<Creature *> GetCreature() const;
 
     // VIEW
@@ -101,6 +104,11 @@ public:
     void CreateLoadMenu();
     void SetSaveGameID(const uint8_t id);
     uint8_t GetSaveGameID() const;
+    void Saving(const bool destroy);
+    void SaveCreatures(const bool destroy);
+    void SaveWorld(const bool destroy);
+    void SaveGroundItems(const bool destroy);
+    void LoadGroundItems();
 
     // STATS
     StatDecay GetStatDecay() const;
@@ -129,11 +137,13 @@ public:
     void InitCreature();
 
     // DRAW
-    void DrawSurface(sf::RenderWindow &window, Player *player);
+    void Draw(sf::RenderWindow &window, sf::Clock &clock);
+    void DrawSurface(sf::RenderWindow &window);
     void DrawWorld(sf::RenderWindow &window);
     void DrawMenu(sf::RenderWindow &window);
     void DrawItems(sf::RenderWindow &window);
     void DrawCreature(sf::RenderWindow &window);
+    float GetDrawPuffer() const;
 
     // RESIZE
     void ResizeWindow(sf::RenderWindow &window);
@@ -145,9 +155,7 @@ public:
 
     // MENU
     void ResetInputToDefault();
-
-    // DRAW
-    float GetDrawPuffer() const;
+    void SetMenuState(MenuState state);
 
 private:
     // RUNNING
@@ -177,7 +185,6 @@ private:
     vector<Stats *> m_stats;
     vector<Input *> m_inputs;
     vector<sf::Text *> m_saveFiles;
-
 
     // VIEW
     sf::View m_view;

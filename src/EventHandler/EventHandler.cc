@@ -30,8 +30,10 @@ void EventHandler::MouseBtnPressed(sf::RenderWindow &window, Game &game)
         game.HandleViewPosition(window);
 }
 
-void EventHandler::Playing(Player *player, Game &game, const sf::Keyboard::Key &key)
+void EventHandler::Playing(Game &game, const sf::Keyboard::Key &key)
 {
+    auto player = game.GetPlayer();
+
     switch (key)
     {
     case sf::Keyboard::Key::Escape:
@@ -101,7 +103,7 @@ void EventHandler::Options(Game &game, const sf::Keyboard::Key &key)
     }
 }
 
-void EventHandler::KeyPressed(Player *player, Game &game, const sf::Keyboard::Key &key)
+void EventHandler::KeyPressed(Game &game, const sf::Keyboard::Key &key)
 {
     auto state = game.GetMenuState();
 
@@ -110,7 +112,7 @@ void EventHandler::KeyPressed(Player *player, Game &game, const sf::Keyboard::Ke
         switch (state)
         {
         case MenuState::Playing:
-            Playing(player, game, key);
+            Playing(game, key);
             break;
         case MenuState::Inventory:
             Inventory(game, key);
@@ -146,9 +148,10 @@ void EventHandler::TxtEntered(const Game &game, const sf::Uint32 character)
         }
     }
 }
-void EventHandler::KeyReleased(const Game &game, Player *player)
+void EventHandler::KeyReleased(const Game &game)
 {
     auto state = game.GetMenuState();
+    auto player = game.GetPlayer();
 
     if (game.GetPlaying() && state == MenuState::Playing)
     {
@@ -249,7 +252,7 @@ void EventHandler::BtnPressed(sf::RenderWindow &window, Game &game)
                 break;
             case BtnFunc::Save:
                 game.SetMenuState(MenuState::Save);
-                game.GetPlayer()->Save();
+                game.Saving(false);
                 m_break = true;
                 break;
             case BtnFunc::OpenLoad:
@@ -269,6 +272,10 @@ void EventHandler::BtnPressed(sf::RenderWindow &window, Game &game)
                     game.InitPlayer(window);
                     m_break = true;
                 }
+                break;
+            case BtnFunc::MainMenu:
+                game.Unload();
+                m_break = true;
                 break;
             default:
                 break;
