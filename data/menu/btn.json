@@ -3,21 +3,21 @@
         "state": [
             1
         ],
-        "name": "Create Player",
+        "languageID": 1,
         "fnc": 10
     },
     {
         "state": [
             7
         ],
-        "name": "Play",
+        "languageID": 2,
         "fnc": 1
     },
     {
         "state": [
             5
         ],
-        "name": "Load",
+        "languageID": 3,
         "fnc": 11
     },
     {
@@ -25,14 +25,14 @@
             2,
             4
         ],
-        "name": "Resume",
+        "languageID": 4,
         "fnc": 5
     },
     {
         "state": [
             2
         ],
-        "name": "Main Menu",
+        "languageID": 5,
         "fnc": 12
     },
     {
@@ -40,53 +40,75 @@
             1,
             2
         ],
-        "name": "Options",
+        "languageID": 6,
         "fnc": 3
     },
     {
         "state": [
             3
         ],
-        "name": "Resolution",
+        "languageID": 7,
         "fnc": 6
     },
     {
         "state": [
             3
         ],
-        "name": "Fullscreen",
+        "languageID": 17,
         "fnc": 7
+    },
+    {
+        "state": [
+            3
+        ],
+        "languageID": 14,
+        "fnc": 13
     },
     {
         "state": [
             1
         ],
-        "name": "Load Game",
+        "languageID": 3,
         "fnc": 9
     },
     {
         "state": [
             2
         ],
-        "name": "Save Game",
+        "languageID": 8,
         "fnc": 8
-    },
-    {
-        "state": [
-            3,
-            5,
-            6,
-            7
-        ],
-        "name": "Back",
-        "fnc": 4
     },
     {
         "state": [
             1,
             2
         ],
-        "name": "Quit",
+        "languageID": 10,
         "fnc": 2
+    },
+    {
+        "state": [
+            9
+        ],
+        "languageID": 15,
+        "fnc": 14
+    },
+    {
+        "state": [
+            9
+        ],
+        "languageID": 16,
+        "fnc": 15
+    },
+    {
+        "state": [
+            3,
+            5,
+            6,
+            7,
+            9
+        ],
+        "languageID": 9,
+        "fnc": 4
     }
 ]

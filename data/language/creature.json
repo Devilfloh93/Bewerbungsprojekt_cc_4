@@ -1,0 +1,40 @@
+[
+    {
+        "id": 1,
+        "intro": {
+            "enEN": [
+                "Hello and Welcome, Intro Dialog - 1",
+                "Hey and Welcome, Intro Dialog - 2",
+                "Hi and Welcome, Intro Dialog - 3"
+            ],
+            "deDE": [
+                "Hello and Welcome, Intro Dialog - 1",
+                "Hey and Welcome, Intro Dialog - 2",
+                "Hi and Welcome, Intro Dialog - 3"
+            ]
+        },
+        "outro": {
+            "enEN": [
+                "Bye, Outro Dialog - 1",
+                "Goodbye, Outro Dialog - 2",
+                "ciao, Outro Dialog - 3"
+            ],
+            "deDE": [
+                "Hello and Welcome, Intro Dialog - 1",
+                "Hey and Welcome, Intro Dialog - 2",
+                "Hi and Welcome, Intro Dialog - 3"
+            ]
+        },
+        "offensive": {
+            "enEN": [
+                "Go away!, Offensive Dialog - 1",
+                "Gooo!, Offensive Dialog - 2"
+            ],
+            "deDE": [
+                "Hello and Welcome, Intro Dialog - 1",
+                "Hey and Welcome, Intro Dialog - 2",
+                "Hi and Welcome, Intro Dialog - 3"
+            ]
+        }
+    }
+]

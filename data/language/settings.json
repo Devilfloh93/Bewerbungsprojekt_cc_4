@@ -1,0 +1,79 @@
+[
+    {
+        "hotkey": "interact",
+        "enEN": {
+            "title": "Interact",
+            "description": "Press this Key..."
+        },
+        "deDE": {
+            "title": "Interakieren",
+            "description": "Drücke diese Taste..."
+        }
+    },
+    {
+        "hotkey": "escape",
+        "enEN": {
+            "title": "Pause",
+            "description": "Press this Key..."
+        },
+        "deDE": {
+            "title": "Pause",
+            "description": "Drücke diese Taste..."
+        }
+    },
+    {
+        "hotkey": "inventory",
+        "enEN": {
+            "title": "Inventory",
+            "description": "Press this Key..."
+        },
+        "deDE": {
+            "title": "Inventar",
+            "description": "Drücke diese Taste..."
+        }
+    },
+    {
+        "hotkey": "leftMove",
+        "enEN": {
+            "title": "Left Move",
+            "description": "Press this Key..."
+        },
+        "deDE": {
+            "title": "Nach Links",
+            "description": "Drücke diese Taste..."
+        }
+    },
+    {
+        "hotkey": "rightMove",
+        "enEN": {
+            "title": "Right Move",
+            "description": "Press this Key..."
+        },
+        "deDE": {
+            "title": "Nach Rechts",
+            "description": "Drücke diese Taste..."
+        }
+    },
+    {
+        "hotkey": "upMove",
+        "enEN": {
+            "title": "Up Move",
+            "description": "Press this Key..."
+        },
+        "deDE": {
+            "title": "Nach Oben",
+            "description": "Drücke diese Taste..."
+        }
+    },
+    {
+        "hotkey": "downMove",
+        "enEN": {
+            "title": "Down Move",
+            "description": "Press this Key..."
+        },
+        "deDE": {
+            "title": "Nach Unten",
+            "description": "Drücke diese Taste..."
+        }
+    }
+]

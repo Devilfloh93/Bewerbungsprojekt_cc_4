@@ -1,0 +1,189 @@
+[
+    {
+        "id": 1,
+        "enEN": {
+            "title": "Create Character",
+            "description": ""
+        },
+        "deDE": {
+            "title": "Charakter erstellen",
+            "description": ""
+        }
+    },
+    {
+        "id": 2,
+        "enEN": {
+            "title": "Play",
+            "description": ""
+        },
+        "deDE": {
+            "title": "Spielen",
+            "description": ""
+        }
+    },
+    {
+        "id": 3,
+        "enEN": {
+            "title": "Load",
+            "description": ""
+        },
+        "deDE": {
+            "title": "Laden",
+            "description": ""
+        }
+    },
+    {
+        "id": 4,
+        "enEN": {
+            "title": "Resume",
+            "description": ""
+        },
+        "deDE": {
+            "title": "Weiterspielen",
+            "description": ""
+        }
+    },
+    {
+        "id": 5,
+        "enEN": {
+            "title": "Main Menu",
+            "description": ""
+        },
+        "deDE": {
+            "title": "Hauptmenü",
+            "description": ""
+        }
+    },
+    {
+        "id": 6,
+        "enEN": {
+            "title": "Options",
+            "description": ""
+        },
+        "deDE": {
+            "title": "Optionen",
+            "description": ""
+        }
+    },
+    {
+        "id": 7,
+        "enEN": {
+            "title": "Resolution",
+            "description": ""
+        },
+        "deDE": {
+            "title": "Auflösung",
+            "description": ""
+        }
+    },
+    {
+        "id": 8,
+        "enEN": {
+            "title": "Save",
+            "description": ""
+        },
+        "deDE": {
+            "title": "Speichern",
+            "description": ""
+        }
+    },
+    {
+        "id": 9,
+        "enEN": {
+            "title": "Back",
+            "description": ""
+        },
+        "deDE": {
+            "title": "Zurück",
+            "description": ""
+        }
+    },
+    {
+        "id": 10,
+        "enEN": {
+            "title": "Quit",
+            "description": ""
+        },
+        "deDE": {
+            "title": "Beenden",
+            "description": ""
+        }
+    },
+    {
+        "id": 11,
+        "enEN": {
+            "title": "Please enter a Name!",
+            "description": ""
+        },
+        "deDE": {
+            "title": "Gib deinen Namen ein!",
+            "description": ""
+        }
+    },
+    {
+        "id": 12,
+        "enEN": {
+            "title": "Paused",
+            "description": ""
+        },
+        "deDE": {
+            "title": "Pausiert",
+            "description": ""
+        }
+    },
+    {
+        "id": 13,
+        "enEN": {
+            "title": "Inventory",
+            "description": ""
+        },
+        "deDE": {
+            "title": "Inventar",
+            "description": ""
+        }
+    },
+    {
+        "id": 14,
+        "enEN": {
+            "title": "Language",
+            "description": ""
+        },
+        "deDE": {
+            "title": "Sprachenauswahl",
+            "description": ""
+        }
+    },
+    {
+        "id": 15,
+        "enEN": {
+            "title": "English",
+            "description": ""
+        },
+        "deDE": {
+            "title": "Englisch",
+            "description": ""
+        }
+    },
+    {
+        "id": 16,
+        "enEN": {
+            "title": "German",
+            "description": ""
+        },
+        "deDE": {
+            "title": "Deutsch",
+            "description": ""
+        }
+    },
+    {
+        "id": 17,
+        "enEN": {
+            "title": "Fullscreen",
+            "description": ""
+        },
+        "deDE": {
+            "title": "Vollbild",
+            "description": ""
+        }
+    }
+]

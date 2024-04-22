@@ -1,0 +1,11 @@
+{
+    "hotkeys": {
+        "interact": 5,
+        "escape": 36,
+        "inventory": 8,
+        "leftMove": 0,
+        "rightMove": 3,
+        "upMove": 22,
+        "downMove": 18
+    }
+}
