@@ -1,7 +1,7 @@
 [
     {
         "id": 1,
-        "name": "Black Wood",
+        "languageID": 1,
         "maxDrop": 3,
         "textureID": 3,
         "textureData": [
@@ -13,7 +13,7 @@
     },
     {
         "id": 2,
-        "name": "White Wood",
+        "languageID": 2,
         "maxDrop": 2,
         "textureID": 3,
         "textureData": [

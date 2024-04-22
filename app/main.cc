@@ -18,6 +18,9 @@ int main()
     // Init Game
     auto game = Game(windowWidth, windowHeight);
 
+    // EventHandler Init
+    EventHandler eventHandler;
+
     // Init Window
     sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), "Good Game",
                             sf::Style::Close); // Create window
@@ -27,8 +30,6 @@ int main()
 
     sf::Clock clock;
 
-    // EventHandler Init
-    auto eventHandler = EventHandler();
 
     game.Init();
 

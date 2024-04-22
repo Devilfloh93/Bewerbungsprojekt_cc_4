@@ -1,0 +1,24 @@
+[
+    {
+        "id": 1,
+        "enEN": {
+            "title": "Black Wood",
+            "description": ""
+        },
+        "deDE": {
+            "title": "Schwarzes Holz",
+            "description": ""
+        }
+    },
+    {
+        "id": 2,
+        "enEN": {
+            "title": "White Wood",
+            "description": ""
+        },
+        "deDE": {
+            "title": "Weißes Holz",
+            "description": ""
+        }
+    }
+]

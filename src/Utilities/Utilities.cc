@@ -1,4 +1,5 @@
 #include "Utilities.h"
+#include <SFML/Graphics.hpp>
 
 using ClockRes = chrono::microseconds;
 

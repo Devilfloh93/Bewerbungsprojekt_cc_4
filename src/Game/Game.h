@@ -1,7 +1,6 @@
 #pragma once
 #include "Anim.h"
 #include "Creature.h"
-#include "EventHandler.h"
 #include "Font.h"
 #include "Gui.h"
 #include "Item.h"
@@ -10,6 +9,7 @@
 #include "Surface.h"
 #include "Texture.h"
 #include "Thread.h"
+#include "Utilities.h"
 #include "World.h"
 #include <SFML/Graphics.hpp>
 #include <cstdint>
@@ -37,7 +37,8 @@ enum class MenuState
     OpenLoad,
     Save,
     Create,
-    Load
+    Load,
+    Language
 };
 
 
@@ -126,6 +127,10 @@ public:
     // INITS
     void Init();
     void InitFolder();
+    void InitSettings();
+    void InitGeneral();
+    void InitHotkeys();
+
     void InitViews();
     void InitTexture();
     void InitFont();
@@ -160,6 +165,10 @@ public:
     void ResetInputToDefault();
     void SetMenuState(MenuState state);
 
+    // SETTINGS
+    map<string, uint8_t> GetHotkeys() const;
+    void ChangeLanguage(const string language);
+
 private:
     // RUNNING
     bool m_playing;
@@ -188,7 +197,9 @@ private:
     vector<Stats *> m_stats;
     vector<Input *> m_inputs;
     vector<sf::Text *> m_saveFiles;
-
+    // SETTINGS
+    map<string, uint8_t> m_hotkeys;
+    string m_language;
     // VIEW
     sf::View *m_view;
     sf::View m_menuView;

@@ -328,7 +328,19 @@ void Player::DrawHotkey(sf::RenderWindow &window, Game *game)
     {
         if (m_objectInFront->GetInteractable())
         {
-            m_hotkeyDraw->setString("E");
+            auto hotkeys = game->GetHotkeys();
+
+            for (const auto &data : game->GetHotkeys())
+            {
+                if (data.first == "interact")
+                {
+                    auto hotkeyString =
+                        (sf::Keyboard::getDescription(static_cast<sf::Keyboard::Scancode>(data.second))).toAnsiString();
+
+                    m_hotkeyDraw->setString(hotkeyString);
+                }
+            }
+
             m_hotkeyDraw->setPosition((m_sprite->getPosition().x - (m_hotkeyDraw->getLocalBounds().getSize().x / 2)) +
                                           (m_sprite->getLocalBounds().getSize().x / 2),
                                       m_sprite->getPosition().y - 15);

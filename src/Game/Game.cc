@@ -1,6 +1,4 @@
 #include "Game.h"
-
-#include "Utilities.h"
 #include "nlohmann/json.hpp"
 #include <fstream>
 #include <iostream>
@@ -28,6 +26,7 @@ Game::Game(const uint16_t windowWidth, const uint16_t windowHeight)
 void Game::Init()
 {
     InitFolder();
+    InitSettings();
     InitViews();
     InitTexture();
     InitFont();
@@ -405,6 +404,50 @@ void Game::InitFolder()
         filesystem::create_directory(new_directory_path);
 }
 
+void Game::InitSettings()
+{
+    InitGeneral();
+    InitHotkeys();
+}
+
+void Game::InitGeneral()
+{
+    auto path = filesystem::current_path();
+    path /= "settings/general.json";
+
+    ifstream file(path);
+
+    if (file.is_open())
+    {
+        auto jsonData = json::parse(file);
+
+        m_language = jsonData["language"];
+        file.close();
+    }
+}
+
+void Game::InitHotkeys()
+{
+    auto path = filesystem::current_path();
+    path /= "settings/hotkeys.json";
+
+    ifstream file(path);
+
+    if (file.is_open())
+    {
+        auto jsonData = json::parse(file);
+
+        map<string, uint8_t> hotkeys = jsonData["hotkeys"];
+
+        for (const auto &data : hotkeys)
+        {
+            m_hotkeys[data.first] = data.second;
+        }
+
+        file.close();
+    }
+}
+
 void Game::InitPlayer(sf::RenderWindow &window)
 {
     bool startGame = false;
@@ -467,16 +510,20 @@ void Game::InitViews()
 
 void Game::InitItemCfg()
 {
+    ifstream fileLanguage("./data/language/menu.json");
+
     ifstream file("./data/entities/item/item.json");
 
-    if (file.is_open())
+    if (file.is_open() && fileLanguage.is_open())
     {
         auto jsonData = nlohmann::ordered_json::parse(file);
+        auto jsonDataLanguage = json::parse(fileLanguage);
 
         for (const auto &data : jsonData)
         {
+            string text;
             uint8_t ID = data["id"];
-            string name = data["name"];
+            uint8_t languageID = data["languageID"];
             uint8_t maxDrop = data["maxDrop"];
             sf::Texture *texture;
             uint8_t textureID = data["textureID"];
@@ -495,9 +542,20 @@ void Game::InitItemCfg()
                 }
             }
 
-            auto itemCfg = new ItemCfg(texture, textureData, ID, name, maxDrop);
+            for (const auto &data1 : jsonDataLanguage)
+            {
+                uint8_t jsonLanguageId = data1["id"];
+                if (jsonLanguageId == languageID)
+                {
+                    text = data1[m_language]["title"];
+                    break;
+                }
+            }
+
+            auto itemCfg = new ItemCfg(texture, textureData, ID, text, maxDrop);
             m_itemCfg.push_back(itemCfg);
         }
+        fileLanguage.close();
         file.close();
     }
 }
@@ -557,6 +615,8 @@ void Game::InitMenu()
         Input
     };
 
+    ifstream fileLanguage("./data/language/menu.json");
+
     ifstream fileTitle("./data/menu/title.json");
     ifstream fileTitleTemplate("./data/menu/titleTemplate.json");
 
@@ -567,8 +627,10 @@ void Game::InitMenu()
     ifstream fileInputTemplate("./data/menu/inputTemplate.json");
 
     if (fileTitle.is_open() && fileBtn.is_open() && fileInput.is_open() && fileTitleTemplate.is_open() &&
-        fileBtnTemplate.is_open() && fileInputTemplate.is_open())
+        fileBtnTemplate.is_open() && fileInputTemplate.is_open() && fileLanguage.is_open())
     {
+        auto jsonDataLanguage = json::parse(fileLanguage);
+
         auto jsonDataTitle = nlohmann::ordered_json::parse(fileTitle);
         auto jsonDataTitleTemplate = json::parse(fileTitleTemplate);
 
@@ -585,9 +647,9 @@ void Game::InitMenu()
 
             uint8_t fontSize = jsonDataTitleTemplate["fontSize"];
             uint8_t fontID = jsonDataTitleTemplate["fontID"];
-
+            uint8_t languageID = dataTitle["languageID"];
             MenuState state = dataTitle["state"];
-            string text = dataTitle["name"];
+            string text;
             sf::Font *font;
             Utilities utilities;
             sf::Sprite *prevBtn;
@@ -599,6 +661,16 @@ void Game::InitMenu()
                 if (fonID == fontID)
                 {
                     font = data->GetFont();
+                    break;
+                }
+            }
+
+            for (const auto &data : jsonDataLanguage)
+            {
+                uint8_t jsonLanguageId = data["id"];
+                if (jsonLanguageId == languageID)
+                {
+                    text = data[m_language]["title"];
                     break;
                 }
             }
@@ -634,7 +706,7 @@ void Game::InitMenu()
                     fontSize = jsonDataInputTemplate["fontSize"];
                     uint8_t maxChars = jsonDataInputTemplate["maxChars"];
 
-                    text = dataInput["name"];
+                    languageID = dataInput["languageID"];
 
                     for (const auto &data : m_fonts)
                     {
@@ -642,6 +714,16 @@ void Game::InitMenu()
                         if (fonID == fontID)
                         {
                             font = data->GetFont();
+                            break;
+                        }
+                    }
+
+                    for (const auto &data : jsonDataLanguage)
+                    {
+                        uint8_t jsonLanguageId = data["id"];
+                        if (jsonLanguageId == languageID)
+                        {
+                            text = data[m_language]["title"];
                             break;
                         }
                     }
@@ -685,7 +767,7 @@ void Game::InitMenu()
                                                    jsonDataBtnTemplate["textureData"][1],
                                                    jsonDataBtnTemplate["textureData"][2],
                                                    jsonDataBtnTemplate["textureData"][3]};
-                    text = dataBtn["name"];
+                    languageID = dataBtn["languageID"];
                     BtnFunc btnFnc = dataBtn["fnc"];
 
                     sf::Texture *texture;
@@ -706,6 +788,16 @@ void Game::InitMenu()
                         if (fonID == fontID)
                         {
                             font = data->GetFont();
+                            break;
+                        }
+                    }
+
+                    for (const auto &data : jsonDataLanguage)
+                    {
+                        uint8_t jsonLanguageId = data["id"];
+                        if (jsonLanguageId == languageID)
+                        {
+                            text = data[m_language]["title"];
                             break;
                         }
                     }
@@ -734,7 +826,7 @@ void Game::InitMenu()
             }
         }
 
-
+        fileLanguage.close();
         fileTitle.close();
         fileBtn.close();
         fileInput.close();
@@ -1637,9 +1729,55 @@ Thread *Game::GetThread()
     return m_thread;
 }
 
-
 // DRAW
 float Game::GetDrawPuffer() const
 {
     return m_drawPuffer;
+}
+
+// SETTINGS
+map<string, uint8_t> Game::GetHotkeys() const
+{
+    return m_hotkeys;
+}
+
+void Game::ChangeLanguage(const string language)
+{
+    if (language == m_language)
+        return;
+
+    m_language = language;
+
+    for (auto &data : m_btns)
+    {
+        delete data;
+        data = nullptr;
+    }
+    m_btns.clear();
+
+    for (auto &data : m_titles)
+    {
+        delete data;
+        data = nullptr;
+    }
+    m_titles.clear();
+
+    for (auto &data : m_inputs)
+    {
+        delete data;
+        data = nullptr;
+    }
+    m_inputs.clear();
+
+    ofstream file("./settings/general.json");
+
+    if (file.is_open())
+    {
+        json jsonData = {{"language", m_language}};
+
+        file << jsonData;
+        file.close();
+    }
+
+    InitMenu();
 }

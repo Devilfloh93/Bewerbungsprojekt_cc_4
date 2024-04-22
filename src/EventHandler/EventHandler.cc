@@ -14,6 +14,7 @@ void EventHandler::ResetBreak()
     m_break = false;
 }
 
+
 // QUIT
 void EventHandler::Quit(sf::RenderWindow &window)
 {
@@ -33,35 +34,47 @@ void EventHandler::MouseBtnPressed(sf::RenderWindow &window, Game &game)
 void EventHandler::Playing(Game &game, const sf::Keyboard::Key &key)
 {
     auto player = game.GetPlayer();
+    auto hotkeys = game.GetHotkeys();
 
-    switch (key)
+    for (const auto &data : hotkeys)
     {
-    case sf::Keyboard::Key::Escape:
-        game.SetMenuState(MenuState::Pause);
-        m_break = true;
-        break;
-    case sf::Keyboard::Key::I:
-        game.SetMenuState(MenuState::Inventory);
-        m_break = true;
-        break;
-    case sf::Keyboard::Key::A:
-        player->SetMove(PlayerMove::Left);
-        break;
-    case sf::Keyboard::Key::D:
-        player->SetMove(PlayerMove::Right);
-        break;
-    case sf::Keyboard::Key::W:
-        player->SetMove(PlayerMove::Up);
-        break;
-    case sf::Keyboard::Key::S:
-        player->SetMove(PlayerMove::Down);
-        break;
-    case sf::Keyboard::Key::E:
-        player->Interact(game);
-        m_break = true;
-        break;
-    default:
-        break;
+        auto keyString = data.first;
+        auto keyID = data.second;
+
+        if (key == keyID)
+        {
+            if (keyString == "interact")
+            {
+                player->Interact(game);
+                m_break = true;
+            }
+
+            if (keyString == "escape")
+            {
+                game.SetMenuState(MenuState::Pause);
+                m_break = true;
+            }
+
+            if (keyString == "inventory")
+            {
+                game.SetMenuState(MenuState::Inventory);
+                m_break = true;
+            }
+
+            if (keyString == "leftMove")
+                player->SetMove(PlayerMove::Left);
+
+            if (keyString == "rightMove")
+                player->SetMove(PlayerMove::Right);
+
+            if (keyString == "upMove")
+                player->SetMove(PlayerMove::Up);
+
+            if (keyString == "downMove")
+                player->SetMove(PlayerMove::Down);
+
+            break;
+        }
     }
 }
 
@@ -275,6 +288,18 @@ void EventHandler::BtnPressed(sf::RenderWindow &window, Game &game)
                 break;
             case BtnFunc::MainMenu:
                 game.Unload();
+                m_break = true;
+                break;
+            case BtnFunc::Language:
+                game.SetMenuState(MenuState::Language);
+                m_break = true;
+                break;
+            case BtnFunc::ChangeLanguageEN:
+                game.ChangeLanguage("enEN");
+                m_break = true;
+                break;
+            case BtnFunc::ChangeLanguageDE:
+                game.ChangeLanguage("deDE");
                 m_break = true;
                 break;
             default:

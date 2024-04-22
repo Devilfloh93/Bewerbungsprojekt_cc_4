@@ -20,7 +20,10 @@ enum class BtnFunc
     OpenLoad,
     Create,
     Load,
-    MainMenu
+    MainMenu,
+    Language,
+    ChangeLanguageEN,
+    ChangeLanguageDE
 };
 
 enum class MenuState;
