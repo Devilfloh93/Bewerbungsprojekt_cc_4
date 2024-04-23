@@ -105,7 +105,7 @@ void Player::CollectItem(Game *game)
 void Player::HandleMove(sf::Clock &clock, Game *game)
 {
     Utilities utilities;
-    MovementTexture moveAnim;
+    AnimTextureCombined animData;
     auto anim = game->GetAnim();
     auto tileSize = game->GetTileSize();
     auto width = game->GetGameWidth();
@@ -116,7 +116,7 @@ void Player::HandleMove(sf::Clock &clock, Game *game)
     {
         if (data->GetID() == m_animID)
         {
-            moveAnim = data->GetMoveAnim();
+            animData = data->GetAnim();
             break;
         }
     }
@@ -124,53 +124,53 @@ void Player::HandleMove(sf::Clock &clock, Game *game)
     switch (m_move)
     {
     case PlayerMove::Left:
-        utilities.PlayAnimation(m_sprite, clock, moveAnim.left00, moveAnim.left01);
+        utilities.PlayAnimation(m_sprite, clock, animData.left.notMoving, animData.left.anim01);
 
         if (playerPos.x - m_speed > 0 + (tileSize / 2) && m_moveAllowed.left)
             m_sprite->setPosition(playerPos.x - m_speed, playerPos.y);
         else
-            m_sprite->setTextureRect(moveAnim.left00);
+            m_sprite->setTextureRect(animData.left.notMoving);
         break;
     case PlayerMove::Right:
-        utilities.PlayAnimation(m_sprite, clock, moveAnim.right00, moveAnim.right01);
+        utilities.PlayAnimation(m_sprite, clock, animData.right.notMoving, animData.right.anim01);
 
         if (playerPos.x + m_speed < width - tileSize && m_moveAllowed.right)
             m_sprite->setPosition(playerPos.x + m_speed, playerPos.y);
         else
-            m_sprite->setTextureRect(moveAnim.right00);
+            m_sprite->setTextureRect(animData.right.notMoving);
         break;
     case PlayerMove::Down:
-        utilities.PlayAnimation(m_sprite, clock, moveAnim.down02, moveAnim.down01);
+        utilities.PlayAnimation(m_sprite, clock, animData.down.anim01, animData.down.anim02);
 
         if (playerPos.y + m_speed < height - tileSize && m_moveAllowed.down)
             m_sprite->setPosition(playerPos.x, playerPos.y + m_speed);
         else
-            m_sprite->setTextureRect(moveAnim.down00);
+            m_sprite->setTextureRect(animData.down.anim01);
 
         break;
     case PlayerMove::Up:
-        utilities.PlayAnimation(m_sprite, clock, moveAnim.up02, moveAnim.up01);
+        utilities.PlayAnimation(m_sprite, clock, animData.up.anim01, animData.up.anim02);
 
         if (playerPos.y - m_speed > 0 + (tileSize / 2) && m_moveAllowed.up)
             m_sprite->setPosition(playerPos.x, playerPos.y - m_speed);
         else
-            m_sprite->setTextureRect(moveAnim.up00);
+            m_sprite->setTextureRect(animData.up.anim01);
 
         break;
     case PlayerMove::NotMoving:
         switch (m_lastMove)
         {
         case PlayerMove::Down:
-            m_sprite->setTextureRect(moveAnim.down00);
+            m_sprite->setTextureRect(animData.down.notMoving);
             break;
         case PlayerMove::Up:
-            m_sprite->setTextureRect(moveAnim.up00);
+            m_sprite->setTextureRect(animData.up.notMoving);
             break;
         case PlayerMove::Left:
-            m_sprite->setTextureRect(moveAnim.left00);
+            m_sprite->setTextureRect(animData.left.notMoving);
             break;
         case PlayerMove::Right:
-            m_sprite->setTextureRect(moveAnim.right00);
+            m_sprite->setTextureRect(animData.right.notMoving);
             break;
         default:
             break;

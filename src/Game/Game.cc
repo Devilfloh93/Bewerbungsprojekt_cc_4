@@ -298,7 +298,7 @@ bool Game::LoadPlayer(const uint8_t id)
                 }
             }
 
-            sprite->setTextureRect(data->GetMoveAnim().down00);
+            sprite->setTextureRect(data->GetAnim().down.notMoving);
             break;
         }
     }
@@ -354,7 +354,7 @@ bool Game::CreatePlayer()
                 }
             }
 
-            sprite->setTextureRect(data->GetMoveAnim().down00);
+            sprite->setTextureRect(data->GetAnim().down.notMoving);
             break;
         }
     }
@@ -939,57 +939,34 @@ void Game::InitAnim()
             uint8_t id = data["id"];
             uint8_t textureId = data["textureID"];
 
-            MovementTexture animTexture = {.up00 = {data["textureUp"][0][0],
-                                                    data["textureUp"][0][1],
-                                                    data["textureUp"][0][2],
-                                                    data["textureUp"][0][3]},
-                                           .up01 = {data["textureUp"][1][0],
-                                                    data["textureUp"][1][1],
-                                                    data["textureUp"][1][2],
-                                                    data["textureUp"][1][3]},
-                                           .up02 = {data["textureUp"][2][0],
-                                                    data["textureUp"][2][1],
-                                                    data["textureUp"][2][2],
-                                                    data["textureUp"][2][3]},
-                                           .down00 = {data["textureDown"][0][0],
-                                                      data["textureDown"][0][1],
-                                                      data["textureDown"][0][2],
-                                                      data["textureDown"][0][3]},
-                                           .down01 = {data["textureDown"][1][0],
-                                                      data["textureDown"][1][1],
-                                                      data["textureDown"][1][2],
-                                                      data["textureDown"][1][3]},
-                                           .down02 = {data["textureDown"][2][0],
-                                                      data["textureDown"][2][1],
-                                                      data["textureDown"][2][2],
-                                                      data["textureDown"][2][3]},
-                                           .left00 = {data["textureLeft"][0][0],
-                                                      data["textureLeft"][0][1],
-                                                      data["textureLeft"][0][2],
-                                                      data["textureLeft"][0][3]},
-                                           .left01 = {data["textureLeft"][1][0],
-                                                      data["textureLeft"][1][1],
-                                                      data["textureLeft"][1][2],
-                                                      data["textureLeft"][1][3]},
-                                           .left02 = {data["textureLeft"][2][0],
-                                                      data["textureLeft"][2][1],
-                                                      data["textureLeft"][2][2],
-                                                      data["textureLeft"][2][3]},
-                                           .right00 = {data["textureRight"][0][0],
-                                                       data["textureRight"][0][1],
-                                                       data["textureRight"][0][2],
-                                                       data["textureRight"][0][3]},
-                                           .right01 = {data["textureRight"][1][0],
-                                                       data["textureRight"][1][1],
-                                                       data["textureRight"][1][2],
-                                                       data["textureRight"][1][3]},
-                                           .right02 = {data["textureRight"][2][0],
-                                                       data["textureRight"][2][1],
-                                                       data["textureRight"][2][2],
-                                                       data["textureRight"][2][3]}};
-
-            auto anim = new Anim(id, textureId, animTexture);
+            auto anim = new Anim(id, textureId);
             m_anim.push_back(anim);
+
+            for (const auto &data1 : data["textureRect"])
+            {
+                string state = data1["state"];
+
+                uint16_t notMovingX = data1["notMoving"]["x"];
+                uint16_t notMovingY = data1["notMoving"]["y"];
+                uint16_t notMovingSizeX = data1["notMoving"]["sizeX"];
+                uint16_t notMovingSizeY = data1["notMoving"]["sizeY"];
+
+                uint16_t anim01X = data1["anim01"]["x"];
+                uint16_t anim01Y = data1["anim01"]["y"];
+                uint16_t anim01SizeX = data1["anim01"]["sizeX"];
+                uint16_t anim01SizeY = data1["anim01"]["sizeY"];
+
+                uint16_t anim02X = data1["anim02"]["x"];
+                uint16_t anim02Y = data1["anim02"]["y"];
+                uint16_t anim02SizeX = data1["anim02"]["sizeX"];
+                uint16_t anim02SizeY = data1["anim02"]["sizeY"];
+
+                AnimTexture animTexture = {.notMoving = {notMovingX, notMovingY, notMovingSizeX, notMovingSizeY},
+                                           .anim01 = {anim01X, anim01Y, anim01SizeX, anim01SizeY},
+                                           .anim02 = {anim02X, anim02Y, anim02SizeX, anim02SizeY}};
+
+                anim->SetAnimTexture(state, animTexture);
+            }
         }
         file.close();
     }
@@ -999,7 +976,7 @@ void Game::InitCreature()
 {
     ifstream fileCreatureTemplate("./data/entities/creature/creatureTemplate.json");
     ifstream fileCreature("./data/world/creature.json");
-    ifstream fileDialog("./data/dialog/common.json");
+    ifstream fileDialog("./data/language/creature.json");
 
     if (fileCreatureTemplate.is_open() && fileCreature.is_open() && fileDialog.is_open())
     {
@@ -1013,7 +990,7 @@ void Game::InitCreature()
         {
             string name;
             uint8_t animID;
-            MovementTexture textureData;
+            AnimTextureCombined animData;
             uint8_t templateId = data["creatureTemplateID"];
             vector<string> dialogIntro;
             vector<string> dialogOutro;
@@ -1033,7 +1010,7 @@ void Game::InitCreature()
                     {
                         if (data2->GetID() == animID)
                         {
-                            textureData = data2->GetMoveAnim();
+                            animData = data2->GetAnim();
                             auto textureID = data2->GetTextureID();
 
                             for (const auto &data3 : m_textures)
@@ -1054,13 +1031,13 @@ void Game::InitCreature()
                     {
                         if (data3["id"] == dialogID)
                         {
-                            for (const auto &data4 : data3["intro"])
+                            for (const auto &data4 : data3["intro"][m_language])
                                 dialogIntro.push_back(data4);
 
-                            for (const auto &data4 : data3["outro"])
+                            for (const auto &data4 : data3["outro"][m_language])
                                 dialogOutro.push_back(data4);
 
-                            for (const auto &data4 : data3["offensive"])
+                            for (const auto &data4 : data3["offensive"][m_language])
                                 dialogOffensive.push_back(data4);
                         }
                     }
@@ -1078,7 +1055,7 @@ void Game::InitCreature()
                 auto tileSprite = new sf::Sprite();
 
                 tileSprite->setTexture(*texture);
-                tileSprite->setTextureRect(textureData.down00);
+                tileSprite->setTextureRect(animData.down.notMoving);
                 tileSprite->setPosition(posX, posY);
 
                 auto creature =
