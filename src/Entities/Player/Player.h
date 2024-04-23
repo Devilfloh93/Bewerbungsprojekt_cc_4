@@ -34,8 +34,8 @@ enum class PlayerMove
 class Player : public Unit
 {
 public:
-    Player(sf::Sprite *sprite, const uint8_t animID, const string_view name, const uint8_t id, sf::Text *hotkeyDraw);
-    Player(sf::Sprite *sprite, const uint8_t animID, const uint8_t id, sf::Text *hotkeyDraw);
+    Player(sf::Sprite *sprite, const uint8_t animID, const string_view name, const uint8_t id, sf::Text *hotkeyRender);
+    Player(sf::Sprite *sprite, const uint8_t animID, const uint8_t id, sf::Text *hotkeyRender);
     ~Player() = default;
 
     // INIT
@@ -58,13 +58,12 @@ public:
     void Interact(Game &game);
     void CollectItem(Game *game);
 
-    // DRAW
-    void DrawHotkey(sf::RenderWindow &window, Game *game);
-    void DrawStats(sf::RenderWindow &window, Game *game);
-    void DrawInventoryItems(sf::RenderWindow &window,
-                            const vector<ItemCfg *> &itemCfg,
-                            sf::Text *previousTxt,
-                            const uint16_t width);
+    // Render
+    void CheckRenderHotkey(sf::RenderWindow &window, Game *game);
+    void RenderHotkey(sf::RenderWindow &window, Game *game);
+    void RenderStats(sf::RenderWindow &window, Game *game);
+    void RenderInventoryItems(sf::RenderWindow &window, Game *game, sf::Text *previousTxt);
+    void RenderTraderItems(sf::RenderWindow &window, Game *game, sf::Text *previousTxt);
 
     // COLLISION
     void CheckCollision(Game *game);
@@ -89,10 +88,12 @@ private:
     // STATS
     SurvivalStats m_survivalStats;
     // ITEMS
-    map<uint32_t, uint16_t> m_items;
+    map<uint8_t, uint16_t> m_items;
     // COLLISION
     World *m_objectInFront;
     Creature *m_creatureInFront;
-    // Draw
-    sf::Text *m_hotkeyDraw;
+    // RENDER
+    sf::Text *m_hotkeyRender;
+    // TRADER
+    Trader *m_trader;
 };

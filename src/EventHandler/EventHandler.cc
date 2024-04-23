@@ -244,7 +244,7 @@ void EventHandler::BtnPressed(sf::RenderWindow &window, Game &game)
             case BtnFunc::Back:
                 if (game.GetPlaying())
                 {
-                    if (menuState == MenuState::Inventory)
+                    if (menuState == MenuState::Inventory || menuState == MenuState::Trader)
                         game.SetMenuState(MenuState::Playing);
                     else
                         game.SetMenuState(MenuState::Pause);

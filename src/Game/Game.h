@@ -38,7 +38,8 @@ enum class MenuState
     Save,
     Create,
     Load,
-    Language
+    Language,
+    Trader
 };
 
 
@@ -137,21 +138,21 @@ public:
     void InitAnim();
 
     void InitItemCfg();
-    void InitDrawStats();
+    void InitRenderStats();
     void InitMenu();
     void InitSurface();
     void InitWorld();
     void InitPlayer(sf::RenderWindow &window);
     void InitCreature();
 
-    // DRAW
-    void Draw(sf::RenderWindow &window, sf::Clock &clock);
-    void DrawSurface(sf::RenderWindow &window);
-    void DrawWorld(sf::RenderWindow &window);
-    void DrawMenu(sf::RenderWindow &window);
-    void DrawItems(sf::RenderWindow &window);
-    void DrawCreature(sf::RenderWindow &window);
-    float GetDrawPuffer() const;
+    // Render
+    void Render(sf::RenderWindow &window, sf::Clock &clock);
+    void RenderSurface(sf::RenderWindow &window);
+    void RenderWorld(sf::RenderWindow &window);
+    void RenderMenu(sf::RenderWindow &window);
+    void RenderItems(sf::RenderWindow &window);
+    void RenderCreature(sf::RenderWindow &window);
+    float GetRenderPuffer() const;
 
     // RESIZE
     void ResizeWindow(sf::RenderWindow &window);
@@ -212,6 +213,6 @@ private:
     StatDecay m_statDecay;
     // THREAD
     Thread *m_thread;
-    // DRAW
-    float m_drawPuffer;
+    // RENDER
+    float m_renderPuffer;
 };

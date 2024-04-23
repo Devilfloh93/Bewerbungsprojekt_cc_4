@@ -185,5 +185,16 @@
             "title": "Vollbild",
             "description": ""
         }
+    },
+    {
+        "id": 18,
+        "enEN": {
+            "title": "Trader",
+            "description": ""
+        },
+        "deDE": {
+            "title": "Händler",
+            "description": ""
+        }
     }
 ]

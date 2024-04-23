@@ -1,0 +1,40 @@
+[
+    {
+        "id": 1,
+        "selling": [
+            {
+                "itemID": 1,
+                "count": 10
+            },
+            {
+                "itemID": 2,
+                "count": 3
+            }
+        ],
+        "buying": [
+            {
+                "itemID": 2,
+                "count": 5
+            },
+            {
+                "itemID": 1,
+                "count": 80
+            }
+        ]
+    },
+    {
+        "id": 2,
+        "selling": [
+            {
+                "itemID": 1,
+                "count": 10
+            }
+        ],
+        "buying": [
+            {
+                "itemID": 2,
+                "count": 7
+            }
+        ]
+    }
+]
