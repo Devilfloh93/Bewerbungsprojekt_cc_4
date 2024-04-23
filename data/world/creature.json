@@ -1,6 +1,7 @@
 [
     {
         "creatureTemplateID": 1,
+        "traderID": 0,
         "pos": [
             [
                 200,
@@ -11,6 +12,7 @@
     },
     {
         "creatureTemplateID": 2,
+        "traderID": 0,
         "pos": [
             [
                 400,
@@ -21,6 +23,7 @@
     },
     {
         "creatureTemplateID": 3,
+        "traderID": 0,
         "pos": [
             [
                 600,
@@ -31,10 +34,22 @@
     },
     {
         "creatureTemplateID": 4,
+        "traderID": 1,
         "pos": [
             [
                 70,
                 200,
+                false
+            ]
+        ]
+    },
+    {
+        "creatureTemplateID": 4,
+        "traderID": 2,
+        "pos": [
+            [
+                70,
+                300,
                 false
             ]
         ]

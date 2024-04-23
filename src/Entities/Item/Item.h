@@ -17,31 +17,34 @@ public:
             const sf::IntRect textureData,
             const uint8_t ID,
             const string_view name,
-            const uint8_t maxDrop);
+            const uint8_t maxDrop,
+            const uint8_t fontID);
     ~ItemCfg() = default;
 
     sf::IntRect GetTextureData() const;
 
     uint8_t GetID() const;
     uint8_t GetMaxDrop() const;
+    uint8_t GetFontID() const;
 
 private:
     sf::IntRect m_textureData;
-    uint16_t m_ID;
+    uint8_t m_ID;
     string m_name;
     uint8_t m_maxDrop;
+    uint8_t m_fontID;
 };
 
 class ItemGround : public Sprite
 {
 public:
-    ItemGround(sf::Sprite *sprite, const uint16_t ID, const uint16_t count);
+    ItemGround(sf::Sprite *sprite, const uint8_t ID, const uint16_t count);
     ~ItemGround() = default;
 
-    uint16_t GetID() const;
+    uint8_t GetID() const;
     uint16_t GetCount() const;
 
 private:
-    uint16_t m_ID;
+    uint8_t m_ID;
     uint16_t m_count;
 };

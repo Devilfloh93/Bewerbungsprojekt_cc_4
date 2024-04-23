@@ -246,12 +246,12 @@ void Utilities::PerformanceTestEnd()
 
 bool Utilities::InViewRange(Game *game, const sf::Vector2f &spritePos)
 {
-    auto drawPuffer = game->GetDrawPuffer();
+    auto renderPuffer = game->GetRenderPuffer();
     auto view = game->GetView();
 
     auto viewCenter = view->getCenter();
-    auto viewSizeX = ((view->getSize().x / 2) + drawPuffer);
-    auto viewSizeY = ((view->getSize().y / 2) + drawPuffer);
+    auto viewSizeX = ((view->getSize().x / 2) + renderPuffer);
+    auto viewSizeY = ((view->getSize().y / 2) + renderPuffer);
 
     if (spritePos.x >= (viewCenter.x - viewSizeX) && spritePos.x <= (viewCenter.x + viewSizeX) &&
         spritePos.y >= (viewCenter.y - viewSizeY) && spritePos.y <= (viewCenter.y + viewSizeY))
@@ -264,10 +264,11 @@ bool Utilities::InViewRange(Game *game, const sf::Vector2f &spritePos)
 void Utilities::PlayAnimation(sf::Sprite *sprite, sf::Clock &clock, sf::IntRect &anim0, sf::IntRect &anim1)
 {
     auto elapsed = clock.getElapsedTime();
+    auto elapsedAsMs = elapsed.asMilliseconds();
 
-    if (elapsed.asMilliseconds() >= 0 && elapsed.asMilliseconds() < 200)
+    if (elapsedAsMs >= 0 && elapsedAsMs < 200)
         sprite->setTextureRect(anim1);
-    else if (elapsed.asMilliseconds() >= 200 && elapsed.asMilliseconds() < 400)
+    else if (elapsedAsMs >= 200 && elapsedAsMs < 400)
         sprite->setTextureRect(anim0);
     else
         clock.restart();

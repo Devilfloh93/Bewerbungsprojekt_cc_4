@@ -12,7 +12,7 @@ using namespace std;
 Game::Game(const uint16_t windowWidth, const uint16_t windowHeight)
     : m_windowWidth(windowWidth), m_windowHeight(windowHeight), Gui(MenuState::Main)
 {
-    m_drawPuffer = 200.0F;
+    m_renderPuffer = 200.0F;
     m_maxZoom = 3U;
     m_playing = false;
     m_defaultAnimID = 0;
@@ -33,7 +33,7 @@ void Game::Init()
     InitAnim();
 
     InitItemCfg();
-    InitDrawStats();
+    InitRenderStats();
     InitMenu();
     InitSurface();
 
@@ -309,11 +309,11 @@ bool Game::LoadPlayer(const uint8_t id)
         font = data->GetFont();
     }
 
-    auto hotkeyDraw = new sf::Text();
-    hotkeyDraw->setFont(*font);
-    hotkeyDraw->setCharacterSize(10U);
+    auto hotkeyRender = new sf::Text();
+    hotkeyRender->setFont(*font);
+    hotkeyRender->setCharacterSize(10U);
 
-    m_player = new Player(sprite, m_defaultAnimID, id, hotkeyDraw);
+    m_player = new Player(sprite, m_defaultAnimID, id, hotkeyRender);
 
     return true;
 }
@@ -365,11 +365,11 @@ bool Game::CreatePlayer()
         font = data->GetFont();
     }
 
-    auto hotkeyDraw = new sf::Text();
-    hotkeyDraw->setFont(*font);
-    hotkeyDraw->setCharacterSize(10U);
+    auto hotkeyRender = new sf::Text();
+    hotkeyRender->setFont(*font);
+    hotkeyRender->setCharacterSize(10U);
 
-    m_player = new Player(sprite, m_defaultAnimID, playerName, countFolders, hotkeyDraw);
+    m_player = new Player(sprite, m_defaultAnimID, playerName, countFolders, hotkeyRender);
     return true;
 }
 
@@ -512,14 +512,17 @@ void Game::InitItemCfg()
 {
     ifstream fileLanguage("./data/language/menu.json");
 
-    ifstream file("./data/entities/item/item.json");
+    ifstream fileItem("./data/entities/item/item.json");
+    ifstream fileItemTemplate("./data/entities/item/itemTemplate.json");
 
-    if (file.is_open() && fileLanguage.is_open())
+    if (fileItem.is_open() && fileLanguage.is_open() && fileItemTemplate.is_open())
     {
-        auto jsonData = nlohmann::ordered_json::parse(file);
+        auto jsonDataItem = nlohmann::ordered_json::parse(fileItem);
+        auto jsonDataItemTemplate = json::parse(fileItemTemplate);
+
         auto jsonDataLanguage = json::parse(fileLanguage);
 
-        for (const auto &data : jsonData)
+        for (const auto &data : jsonDataItem)
         {
             string text;
             uint8_t ID = data["id"];
@@ -527,6 +530,8 @@ void Game::InitItemCfg()
             uint8_t maxDrop = data["maxDrop"];
             sf::Texture *texture;
             uint8_t textureID = data["textureID"];
+            uint8_t fontID = jsonDataItemTemplate["fontID"];
+
             auto textureData = sf::IntRect(data["textureData"][0],
                                            data["textureData"][1],
                                            data["textureData"][2],
@@ -552,11 +557,12 @@ void Game::InitItemCfg()
                 }
             }
 
-            auto itemCfg = new ItemCfg(texture, textureData, ID, text, maxDrop);
+            auto itemCfg = new ItemCfg(texture, textureData, ID, text, maxDrop, fontID);
             m_itemCfg.push_back(itemCfg);
         }
+        fileItemTemplate.close();
         fileLanguage.close();
-        file.close();
+        fileItem.close();
     }
 }
 
@@ -977,24 +983,30 @@ void Game::InitCreature()
     ifstream fileCreatureTemplate("./data/entities/creature/creatureTemplate.json");
     ifstream fileCreature("./data/world/creature.json");
     ifstream fileDialog("./data/language/creature.json");
+    ifstream fileTrader("./data/entities/trader/trader.json");
 
-    if (fileCreatureTemplate.is_open() && fileCreature.is_open() && fileDialog.is_open())
+    if (fileCreatureTemplate.is_open() && fileCreature.is_open() && fileDialog.is_open() && fileTrader.is_open())
     {
         auto jsonDataCreatureTemplate = json::parse(fileCreatureTemplate);
         auto jsonDataCreature = json::parse(fileCreature);
         auto jsonDataDialog = json::parse(fileDialog);
+        auto jsonDataTrader = json::parse(fileTrader);
 
         sf::Texture *texture;
 
         for (const auto &data : jsonDataCreature)
         {
+            bool interactable = false;
             string name;
             uint8_t animID;
             AnimTextureCombined animData;
             uint8_t templateId = data["creatureTemplateID"];
+            uint8_t traderID = data["traderID"];
             vector<string> dialogIntro;
             vector<string> dialogOutro;
             vector<string> dialogOffensive;
+            map<uint8_t, uint16_t> sellingItem;
+            map<uint8_t, uint16_t> buyingItem;
 
             for (const auto &data1 : jsonDataCreatureTemplate)
             {
@@ -1044,6 +1056,26 @@ void Game::InitCreature()
                 }
             }
 
+
+            for (const auto &data1 : jsonDataTrader)
+            {
+                if (data1["id"] == traderID)
+                {
+                    for (const auto &data2 : data1["selling"])
+                    {
+                        sellingItem[data2["itemID"]] = data2["count"];
+                    }
+
+                    for (const auto &data2 : data1["buying"])
+                    {
+                        buyingItem[data2["itemID"]] = data2["count"];
+                    }
+
+                    interactable = true;
+                    break;
+                }
+            }
+
             vector<vector<float>> pos = data["pos"];
 
             for (const auto &data1 : pos)
@@ -1058,12 +1090,41 @@ void Game::InitCreature()
                 tileSprite->setTextureRect(animData.down.notMoving);
                 tileSprite->setPosition(posX, posY);
 
-                auto creature =
-                    new Creature(tileSprite, 100.0F, 1.0F, animID, moving, dialogIntro, dialogOutro, dialogOffensive);
-                m_creature.push_back(creature);
+                if (sellingItem.size() > 0 || buyingItem.size() > 0)
+                {
+                    auto trader = new Trader(tileSprite,
+                                             100.0F,
+                                             1.0F,
+                                             animID,
+                                             moving,
+                                             dialogIntro,
+                                             dialogOutro,
+                                             dialogOffensive,
+                                             interactable,
+                                             sellingItem,
+                                             buyingItem);
+
+                    m_creature.push_back(trader);
+                }
+                else
+                {
+                    auto creature = new Creature(tileSprite,
+                                                 100.0F,
+                                                 1.0F,
+                                                 animID,
+                                                 moving,
+                                                 dialogIntro,
+                                                 dialogOutro,
+                                                 dialogOffensive,
+                                                 interactable);
+
+                    m_creature.push_back(creature);
+                }
             }
         }
 
+        fileDialog.close();
+        fileTrader.close();
         fileCreatureTemplate.close();
         fileCreature.close();
     }
@@ -1199,7 +1260,7 @@ void Game::InitWorld()
     }
 }
 
-void Game::InitDrawStats()
+void Game::InitRenderStats()
 {
     ifstream file("./data/entities/player/stat.json");
 
@@ -1243,28 +1304,28 @@ void Game::InitDrawStats()
     }
 }
 
-// DRAW
-void Game::Draw(sf::RenderWindow &window, sf::Clock &clock)
+// Render
+void Game::Render(sf::RenderWindow &window, sf::Clock &clock)
 {
     window.setView(*m_view);
 
-    DrawSurface(window);
+    RenderSurface(window);
     m_player->HandleMove(clock, this);
 
-    DrawItems(window);
+    RenderItems(window);
     window.draw(*(m_player->GetSprite()));
-    DrawCreature(window);
+    RenderCreature(window);
 
-    DrawWorld(window);
+    RenderWorld(window);
 
     m_player->CheckCollision(this);
 
-    m_player->DrawHotkey(window, this);
+    m_player->CheckRenderHotkey(window, this);
 
-    m_player->DrawStats(window, this);
+    m_player->RenderStats(window, this);
 }
 
-void Game::DrawItems(sf::RenderWindow &window)
+void Game::RenderItems(sf::RenderWindow &window)
 {
     Utilities utilities;
     for (const auto &data : m_items)
@@ -1277,7 +1338,7 @@ void Game::DrawItems(sf::RenderWindow &window)
     }
 }
 
-void Game::DrawSurface(sf::RenderWindow &window)
+void Game::RenderSurface(sf::RenderWindow &window)
 {
     Utilities utilities;
     auto playerSprite = m_player->GetSprite();
@@ -1304,7 +1365,7 @@ void Game::DrawSurface(sf::RenderWindow &window)
     }
 }
 
-void Game::DrawWorld(sf::RenderWindow &window)
+void Game::RenderWorld(sf::RenderWindow &window)
 {
     Utilities utilities;
     for (auto &data : m_world)
@@ -1317,7 +1378,7 @@ void Game::DrawWorld(sf::RenderWindow &window)
     }
 }
 
-void Game::DrawCreature(sf::RenderWindow &window)
+void Game::RenderCreature(sf::RenderWindow &window)
 {
     Utilities utilities;
     for (auto &data : m_creature)
@@ -1330,7 +1391,7 @@ void Game::DrawCreature(sf::RenderWindow &window)
     }
 }
 
-void Game::DrawMenu(sf::RenderWindow &window)
+void Game::RenderMenu(sf::RenderWindow &window)
 {
     window.setView(m_menuView);
     Utilities utilities;
@@ -1345,7 +1406,10 @@ void Game::DrawMenu(sf::RenderWindow &window)
             window.draw(*previousTxt);
 
         if (m_menuState == MenuState::Inventory)
-            m_player->DrawInventoryItems(window, m_itemCfg, previousTxt, m_windowWidth);
+            m_player->RenderInventoryItems(window, this, previousTxt);
+
+        if (m_menuState == MenuState::Trader)
+            m_player->RenderTraderItems(window, this, previousTxt);
 
         for (const auto &data1 : m_inputs)
         {
@@ -1706,10 +1770,10 @@ Thread *Game::GetThread()
     return m_thread;
 }
 
-// DRAW
-float Game::GetDrawPuffer() const
+// Render
+float Game::GetRenderPuffer() const
 {
-    return m_drawPuffer;
+    return m_renderPuffer;
 }
 
 // SETTINGS

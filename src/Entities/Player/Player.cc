@@ -8,14 +8,18 @@
 #include <memory>
 #include <random>
 
-Player::Player(sf::Sprite *sprite, const uint8_t animID, const string_view name, const uint8_t id, sf::Text *hotkeyDraw)
-    : Unit(sprite, 100.0F, 1.0F, animID), m_name(name), m_ID(id), m_hotkeyDraw(hotkeyDraw)
+Player::Player(sf::Sprite *sprite,
+               const uint8_t animID,
+               const string_view name,
+               const uint8_t id,
+               sf::Text *hotkeyRender)
+    : Unit(sprite, 100.0F, 1.0F, animID), m_name(name), m_ID(id), m_hotkeyRender(hotkeyRender)
 {
     Init();
 }
 
-Player::Player(sf::Sprite *sprite, const uint8_t animID, const uint8_t id, sf::Text *hotkeyDraw)
-    : Unit(sprite, 100.0F, 1.0F, animID), m_ID(id), m_hotkeyDraw(hotkeyDraw)
+Player::Player(sf::Sprite *sprite, const uint8_t animID, const uint8_t id, sf::Text *hotkeyRender)
+    : Unit(sprite, 100.0F, 1.0F, animID), m_ID(id), m_hotkeyRender(hotkeyRender)
 {
     Init();
 }
@@ -28,6 +32,7 @@ void Player::Init()
 
     m_move = PlayerMove::NotMoving;
     m_lastMove = m_move;
+    m_trader = nullptr;
     m_objectInFront = nullptr;
     m_creatureInFront = nullptr;
 }
@@ -230,13 +235,23 @@ void Player::UpdateStats(Game *game)
     }
 }
 
-
 // ITEMS
 void Player::Interact(Game &game)
 {
     auto itemCfg = game.GetItemCfg();
     auto playerPos = m_sprite->getPosition();
     sf::Vector2f itemPos = {0.0F, 0.0F};
+
+    if (m_creatureInFront != nullptr)
+    {
+        auto tradeable = m_creatureInFront->GetInteractable();
+
+        if (tradeable)
+        {
+            m_trader = static_cast<Trader *>(m_creatureInFront);
+            game.SetMenuState(MenuState::Trader);
+        }
+    }
 
     if (m_objectInFront != nullptr)
     {
@@ -321,36 +336,49 @@ void Player::Interact(Game &game)
     }
 }
 
-// DRAW
-void Player::DrawHotkey(sf::RenderWindow &window, Game *game)
+// Render
+void Player::CheckRenderHotkey(sf::RenderWindow &window, Game *game)
 {
     if (m_objectInFront != nullptr)
     {
         if (m_objectInFront->GetInteractable())
         {
-            auto hotkeys = game->GetHotkeys();
+            RenderHotkey(window, game);
+        }
+    }
 
-            for (const auto &data : game->GetHotkeys())
-            {
-                if (data.first == "interact")
-                {
-                    auto hotkeyString =
-                        (sf::Keyboard::getDescription(static_cast<sf::Keyboard::Scancode>(data.second))).toAnsiString();
-
-                    m_hotkeyDraw->setString(hotkeyString);
-                }
-            }
-
-            m_hotkeyDraw->setPosition((m_sprite->getPosition().x - (m_hotkeyDraw->getLocalBounds().getSize().x / 2)) +
-                                          (m_sprite->getLocalBounds().getSize().x / 2),
-                                      m_sprite->getPosition().y - 15);
-
-            window.draw(*m_hotkeyDraw);
+    if (m_creatureInFront != nullptr)
+    {
+        if (m_creatureInFront->GetInteractable())
+        {
+            RenderHotkey(window, game);
         }
     }
 }
 
-void Player::DrawStats(sf::RenderWindow &window, Game *game)
+void Player::RenderHotkey(sf::RenderWindow &window, Game *game)
+{
+    auto hotkeys = game->GetHotkeys();
+
+    for (const auto &data : game->GetHotkeys())
+    {
+        if (data.first == "interact")
+        {
+            auto hotkeyString =
+                (sf::Keyboard::getDescription(static_cast<sf::Keyboard::Scancode>(data.second))).toAnsiString();
+
+            m_hotkeyRender->setString(hotkeyString);
+        }
+    }
+
+    m_hotkeyRender->setPosition((m_sprite->getPosition().x - (m_hotkeyRender->getLocalBounds().getSize().x / 2)) +
+                                    (m_sprite->getLocalBounds().getSize().x / 2),
+                                m_sprite->getPosition().y - 15);
+
+    window.draw(*m_hotkeyRender);
+}
+
+void Player::RenderStats(sf::RenderWindow &window, Game *game)
 {
     auto width = (game->GetView()->getCenter().x - (game->GetView()->getSize().x / 2)) + 5.0F;
 
@@ -390,30 +418,41 @@ void Player::DrawStats(sf::RenderWindow &window, Game *game)
     }
 }
 
-void Player::DrawInventoryItems(sf::RenderWindow &window,
-                                const vector<ItemCfg *> &itemCfg,
-                                sf::Text *previousTxt,
-                                const uint16_t width)
+/***
+ * TODO: REWORK RENDER TRADER ITEMS
+*/
+void Player::RenderTraderItems(sf::RenderWindow &window, Game *game, sf::Text *previousTxt)
 {
     bool firstIcon = true;
     Utilities utilities;
     sf::Sprite prevSprite;
+    auto itemCfg = game->GetItemCfg();
+    auto fonts = game->GetFont();
+    auto width = game->GetWindowWidth();
+    auto sellingItems = m_trader->GetSellingItem();
+    auto buyingItems = m_trader->GetBuyingItem();
 
-    sf::Font font;
-    font.loadFromFile("ressources/font/Round9x13.ttf");
-
-    for (size_t i = 0; const auto &[key, value] : m_items)
+    for (const auto &[key, value] : sellingItems)
     {
-        sf::Sprite itemSprite;
-        sf::Text itemText;
         for (const auto &data : itemCfg)
         {
-            auto texture = data->GetTexture();
-            auto textureData = data->GetTextureData();
             auto ID = data->GetID();
             if (key == ID)
             {
-                itemText.setFont(font);
+                sf::Sprite itemSprite;
+                sf::Text itemText;
+                auto texture = data->GetTexture();
+                auto textureData = data->GetTextureData();
+                auto fontID = data->GetFontID();
+
+                sf::Font *font;
+                for (const auto &data1 : fonts)
+                {
+                    if (fontID == data1->GetID())
+                        font = data1->GetFont();
+                }
+
+                itemText.setFont(*font);
                 itemText.setCharacterSize(15);
                 itemText.setString(format("{}", value));
 
@@ -423,18 +462,121 @@ void Player::DrawInventoryItems(sf::RenderWindow &window,
                 if (firstIcon)
                 {
                     utilities.SetTextBeforeIcon(width, previousTxt, itemSprite, itemText);
-                    prevSprite = itemSprite;
                     firstIcon = false;
                 }
                 else
                     utilities.SetTextBeforeIcon(itemSprite, itemText, prevSprite);
 
-
+                prevSprite = itemSprite;
+                window.draw(itemText);
+                window.draw(itemSprite);
                 break;
             }
         }
-        window.draw(itemText);
-        window.draw(itemSprite);
+    }
+
+
+    for (const auto &[key, value] : buyingItems)
+    {
+        for (const auto &[key1, value1] : m_items)
+        {
+            if (key == key1)
+            {
+                for (const auto &data : itemCfg)
+                {
+                    auto ID = data->GetID();
+                    if (key == ID)
+                    {
+                        sf::Sprite itemSprite;
+                        sf::Text itemText;
+                        auto texture = data->GetTexture();
+                        auto textureData = data->GetTextureData();
+                        auto fontID = data->GetFontID();
+
+                        sf::Font *font;
+                        for (const auto &data1 : fonts)
+                        {
+                            if (fontID == data1->GetID())
+                                font = data1->GetFont();
+                        }
+
+                        itemText.setFont(*font);
+                        itemText.setCharacterSize(15);
+                        itemText.setString(format("{}", value));
+
+                        itemSprite.setTexture(*texture);
+                        itemSprite.setTextureRect(textureData);
+
+                        if (firstIcon)
+                        {
+                            utilities.SetTextBeforeIcon(width, previousTxt, itemSprite, itemText);
+                            firstIcon = false;
+                        }
+                        else
+                            utilities.SetTextBeforeIcon(itemSprite, itemText, prevSprite);
+
+                        prevSprite = itemSprite;
+                        window.draw(itemText);
+                        window.draw(itemSprite);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+void Player::RenderInventoryItems(sf::RenderWindow &window, Game *game, sf::Text *previousTxt)
+{
+    bool firstIcon = true;
+    Utilities utilities;
+    sf::Sprite prevSprite;
+    auto itemCfg = game->GetItemCfg();
+    auto fonts = game->GetFont();
+    auto width = game->GetWindowWidth();
+
+    for (const auto &[key, value] : m_items)
+    {
+        for (const auto &data : itemCfg)
+        {
+            auto ID = data->GetID();
+            if (key == ID)
+            {
+                sf::Sprite itemSprite;
+                sf::Text itemText;
+                auto texture = data->GetTexture();
+                auto textureData = data->GetTextureData();
+                auto fontID = data->GetFontID();
+
+                sf::Font *font;
+                for (const auto &data1 : fonts)
+                {
+                    if (fontID == data1->GetID())
+                        font = data1->GetFont();
+                }
+
+                itemText.setFont(*font);
+                itemText.setCharacterSize(15);
+                itemText.setString(format("{}", value));
+
+                itemSprite.setTexture(*texture);
+                itemSprite.setTextureRect(textureData);
+
+                if (firstIcon)
+                {
+                    utilities.SetTextBeforeIcon(width, previousTxt, itemSprite, itemText);
+                    firstIcon = false;
+                }
+                else
+                    utilities.SetTextBeforeIcon(itemSprite, itemText, prevSprite);
+
+                prevSprite = itemSprite;
+                window.draw(itemText);
+                window.draw(itemSprite);
+                break;
+            }
+        }
     }
 }
 
@@ -480,7 +622,7 @@ void Player::CheckCollision(Game *game)
         if (utilities.InViewRange(game, objPos))
         {
             auto objSize = data->GetSprite()->getLocalBounds().getSize();
-            auto interactable = data->GetUseable();
+            auto interactable = data->GetInteractable();
 
             objectInFront = CheckInFront(interactable, objPos, objSize);
 
@@ -660,7 +802,7 @@ void Player::Save(const bool destroy, Game *game)
 
     if (destroy)
     {
-        delete m_hotkeyDraw;
-        m_hotkeyDraw = nullptr;
+        delete m_hotkeyRender;
+        m_hotkeyRender = nullptr;
     }
 }

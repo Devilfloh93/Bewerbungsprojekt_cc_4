@@ -70,11 +70,11 @@ int main()
 
         if (game.GetPlaying() && game.GetMenuState() == MenuState::Playing)
         {
-            game.Draw(window, clock);
+            game.Render(window, clock);
         }
         else
         {
-            game.DrawMenu(window);
+            game.RenderMenu(window);
         }
 
         window.display();
