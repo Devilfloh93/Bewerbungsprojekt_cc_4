@@ -1,36 +1,47 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <cstdint>
+#include <string>
 
-struct MovementTexture
+using namespace std;
+
+struct AnimTexture
 {
-    sf::IntRect up00; // Not Moving
-    sf::IntRect up01; // Left Moving Feet
-    sf::IntRect up02; // Right Moving Feet
-    sf::IntRect down00;
-    sf::IntRect down01;
-    sf::IntRect down02;
-    sf::IntRect left00;
-    sf::IntRect left01;
-    sf::IntRect left02;
-    sf::IntRect right00;
-    sf::IntRect right01;
-    sf::IntRect right02;
+    sf::IntRect notMoving; // Not Moving
+    sf::IntRect anim01;    // Moving Feet 01
+    sf::IntRect anim02;    // Moving Feet 02
+};
+
+struct AnimTextureCombined
+{
+    AnimTexture up;
+    AnimTexture down;
+    AnimTexture left;
+    AnimTexture right;
 };
 
 class Anim
 {
 
 public:
-    Anim(const uint8_t id, const uint8_t textureID, const MovementTexture moveAnim);
+    Anim(const uint8_t id, const uint8_t textureID);
     ~Anim() = default;
 
     uint8_t GetID() const;
     uint8_t GetTextureID() const;
-    MovementTexture GetMoveAnim() const;
+    AnimTexture GetAnimUp() const;
+    AnimTexture GetAnimDown() const;
+    AnimTexture GetAnimLeft() const;
+    AnimTexture GetAnimRight() const;
+    AnimTextureCombined GetAnim() const;
+
+    void SetAnimTexture(const string_view state, const AnimTexture &animTexture);
 
 private:
     uint8_t m_ID;
     uint8_t m_textureID;
-    MovementTexture m_moveAnim;
+    AnimTexture m_animUp;
+    AnimTexture m_animDown;
+    AnimTexture m_animLeft;
+    AnimTexture m_animRight;
 };
