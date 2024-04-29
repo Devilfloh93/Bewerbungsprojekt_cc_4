@@ -273,3 +273,128 @@ void Utilities::PlayAnimation(sf::Sprite *sprite, sf::Clock &clock, sf::IntRect 
     else
         clock.restart();
 }
+
+void Utilities::SetSFText(sf::Text *text, sf::Font *font, const uint8_t size, const string value)
+{
+    text->setFont(*font);
+    text->setCharacterSize(size);
+    text->setString(format("{}", value));
+}
+
+void Utilities::SetSFText(sf::Text *text, sf::Font *font, const uint8_t size)
+{
+    text->setFont(*font);
+    text->setCharacterSize(size);
+}
+
+void Utilities::SetSFSprite(sf::Sprite *sprite, sf::Texture *texture, const sf::IntRect &rectangle)
+{
+    sprite->setTexture(*texture);
+    sprite->setTextureRect(rectangle);
+}
+
+void Utilities::SetSFSprite(sf::Sprite *sprite, sf::Texture *texture, const sf::IntRect &rectangle, float x, float y)
+{
+    sprite->setTexture(*texture);
+    sprite->setTextureRect(rectangle);
+    sprite->setPosition(x, y);
+}
+
+void Utilities::SetSFSprite(sf::Sprite *sprite,
+                            sf::Texture *texture,
+                            const sf::IntRect &rectangle,
+                            const sf::Vector2f &factors)
+{
+    sprite->setTexture(*texture);
+    sprite->setTextureRect(rectangle);
+    sprite->setScale(factors);
+}
+
+sf::Font *Utilities::GetFont(const std::vector<Font *> &fonts, const uint8_t fontID)
+{
+    sf::Font *font;
+    for (const auto &data : fonts)
+    {
+        if (fontID == data->GetID())
+        {
+            font = data->GetFont();
+            break;
+        }
+    }
+    return font;
+}
+
+sf::Texture *Utilities::GetTexture(const std::vector<AllTextures *> &textures, const uint8_t textureID)
+{
+    sf::Texture *texture;
+    for (const auto &data : textures)
+    {
+        if (data->GetID() == textureID)
+        {
+            texture = data->GetTexture();
+            break;
+        }
+    }
+    return texture;
+}
+
+AnimTextureCombined Utilities::GetAnim(const std::vector<Anim *> &anim, const uint8_t animID)
+{
+    AnimTextureCombined animData;
+    for (const auto &data : anim)
+    {
+        if (data->GetID() == animID)
+        {
+            animData = data->GetAnim();
+            break;
+        }
+    }
+    return animData;
+}
+
+sf::Texture *Utilities::GetAnimTexture(const std::vector<Anim *> &anim,
+                                       const std::vector<AllTextures *> &textures,
+                                       const uint8_t animID)
+{
+    sf::Texture *texture;
+    for (const auto &data : anim)
+    {
+        if (data->GetID() == animID)
+        {
+            auto textureID = data->GetTextureID();
+
+            texture = GetTexture(textures, textureID);
+            break;
+        }
+    }
+    return texture;
+}
+
+string Utilities::GetLanguageText(const json &jsonData, const uint8_t languageID, string_view language)
+{
+    string text;
+    for (const auto &data : jsonData)
+    {
+        uint8_t jsonLanguageId = data["id"];
+        if (jsonLanguageId == languageID)
+        {
+            text = data[language]["title"];
+            break;
+        }
+    }
+    return text;
+}
+
+bool Utilities::CheckMenuState(const std::vector<MenuState> &menuState, const MenuState currentState)
+{
+    bool check = false;
+    for (const auto &data : menuState)
+    {
+        if (currentState == data)
+        {
+            check = true;
+            break;
+        }
+    }
+    return check;
+}

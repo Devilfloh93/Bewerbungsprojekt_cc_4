@@ -279,39 +279,18 @@ void Game::SetPlayer(Player *player)
 
 bool Game::LoadPlayer(const uint8_t id)
 {
+    Utilities utilities;
     auto sprite = new sf::Sprite();
 
-    for (const auto &data : m_anim)
-    {
-        auto id = data->GetID();
-        auto textureID = data->GetTextureID();
+    auto animData = utilities.GetAnim(m_anim, m_defaultAnimID);
+    auto texture = utilities.GetAnimTexture(m_anim, m_textures, m_defaultAnimID);
 
-        if (id == m_defaultAnimID)
-        {
-            for (const auto &data1 : m_textures)
-            {
-                auto texID = data1->GetID();
-                if (texID == textureID)
-                {
-                    sprite->setTexture(*(data1->GetTexture()));
-                    break;
-                }
-            }
+    utilities.SetSFSprite(sprite, texture, animData.down.notMoving);
 
-            sprite->setTextureRect(data->GetAnim().down.notMoving);
-            break;
-        }
-    }
-
-    sf::Font *font;
-    for (const auto &data : m_fonts)
-    {
-        font = data->GetFont();
-    }
+    auto font = utilities.GetFont(m_fonts, 0);
 
     auto hotkeyRender = new sf::Text();
-    hotkeyRender->setFont(*font);
-    hotkeyRender->setCharacterSize(10U);
+    utilities.SetSFText(hotkeyRender, font, 10);
 
     m_player = new Player(sprite, m_defaultAnimID, id, hotkeyRender);
 
@@ -320,6 +299,7 @@ bool Game::LoadPlayer(const uint8_t id)
 
 bool Game::CreatePlayer()
 {
+    Utilities utilities;
     auto countFolders = CountSaveFolders();
     if (countFolders <= 0 || countFolders > 6)
         return false;
@@ -337,37 +317,15 @@ bool Game::CreatePlayer()
 
     auto sprite = new sf::Sprite();
 
-    for (const auto &data : m_anim)
-    {
-        auto id = data->GetID();
-        auto textureID = data->GetTextureID();
+    auto animData = utilities.GetAnim(m_anim, m_defaultAnimID);
+    auto texture = utilities.GetAnimTexture(m_anim, m_textures, m_defaultAnimID);
 
-        if (id == m_defaultAnimID)
-        {
-            for (const auto &data1 : m_textures)
-            {
-                auto texID = data1->GetID();
-                if (texID == textureID)
-                {
-                    sprite->setTexture(*(data1->GetTexture()));
-                    break;
-                }
-            }
+    utilities.SetSFSprite(sprite, texture, animData.down.notMoving);
 
-            sprite->setTextureRect(data->GetAnim().down.notMoving);
-            break;
-        }
-    }
-
-    sf::Font *font;
-    for (const auto &data : m_fonts)
-    {
-        font = data->GetFont();
-    }
+    auto font = utilities.GetFont(m_fonts, 0);
 
     auto hotkeyRender = new sf::Text();
-    hotkeyRender->setFont(*font);
-    hotkeyRender->setCharacterSize(10U);
+    utilities.SetSFText(hotkeyRender, font, 10);
 
     m_player = new Player(sprite, m_defaultAnimID, playerName, countFolders, hotkeyRender);
     return true;
@@ -510,6 +468,7 @@ void Game::InitViews()
 
 void Game::InitItemCfg()
 {
+    Utilities utilities;
     ifstream fileLanguage("./data/language/menu.json");
 
     ifstream fileItem("./data/entities/item/item.json");
@@ -524,11 +483,9 @@ void Game::InitItemCfg()
 
         for (const auto &data : jsonDataItem)
         {
-            string text;
             uint8_t ID = data["id"];
             uint8_t languageID = data["languageID"];
             uint8_t maxDrop = data["maxDrop"];
-            sf::Texture *texture;
             uint8_t textureID = data["textureID"];
             uint8_t fontID = jsonDataItemTemplate["fontID"];
 
@@ -537,25 +494,9 @@ void Game::InitItemCfg()
                                            data["textureData"][2],
                                            data["textureData"][3]);
 
-            for (const auto &data1 : m_textures)
-            {
-                auto texID = data1->GetID();
-                if (texID == textureID)
-                {
-                    texture = data1->GetTexture();
-                    break;
-                }
-            }
+            auto texture = utilities.GetTexture(m_textures, textureID);
 
-            for (const auto &data1 : jsonDataLanguage)
-            {
-                uint8_t jsonLanguageId = data1["id"];
-                if (jsonLanguageId == languageID)
-                {
-                    text = data1[m_language]["title"];
-                    break;
-                }
-            }
+            auto text = utilities.GetLanguageText(jsonDataLanguage, languageID, m_language);
 
             auto itemCfg = new ItemCfg(texture, textureData, ID, text, maxDrop, fontID);
             m_itemCfg.push_back(itemCfg);
@@ -655,35 +596,15 @@ void Game::InitMenu()
             uint8_t fontID = jsonDataTitleTemplate["fontID"];
             uint8_t languageID = dataTitle["languageID"];
             MenuState state = dataTitle["state"];
-            string text;
-            sf::Font *font;
             Utilities utilities;
             sf::Sprite *prevBtn;
             sf::Text *inputText;
 
-            for (const auto &data : m_fonts)
-            {
-                auto fonID = data->GetID();
-                if (fonID == fontID)
-                {
-                    font = data->GetFont();
-                    break;
-                }
-            }
+            auto font = utilities.GetFont(m_fonts, fontID);
 
-            for (const auto &data : jsonDataLanguage)
-            {
-                uint8_t jsonLanguageId = data["id"];
-                if (jsonLanguageId == languageID)
-                {
-                    text = data[m_language]["title"];
-                    break;
-                }
-            }
+            auto text = utilities.GetLanguageText(jsonDataLanguage, languageID, m_language);
 
-            titleText->setFont(*font);
-            titleText->setCharacterSize(fontSize);
-            titleText->setString(text);
+            utilities.SetSFText(titleText, font, fontSize, text);
 
             utilities.SetTitlePos(m_windowWidth, titleText);
 
@@ -692,19 +613,11 @@ void Game::InitMenu()
 
             for (const auto &dataInput : jsonDataInput)
             {
-                bool addInput = false;
                 vector<MenuState> inputState = dataInput["state"];
 
-                for (const auto &data : inputState)
-                {
-                    if (state == data)
-                    {
-                        addInput = true;
-                        break;
-                    }
-                }
+                auto canAdd = utilities.CheckMenuState(inputState, state);
 
-                if (addInput)
+                if (canAdd)
                 {
                     inputText = new sf::Text();
 
@@ -714,28 +627,11 @@ void Game::InitMenu()
 
                     languageID = dataInput["languageID"];
 
-                    for (const auto &data : m_fonts)
-                    {
-                        auto fonID = data->GetID();
-                        if (fonID == fontID)
-                        {
-                            font = data->GetFont();
-                            break;
-                        }
-                    }
+                    auto font = utilities.GetFont(m_fonts, fontID);
 
-                    for (const auto &data : jsonDataLanguage)
-                    {
-                        uint8_t jsonLanguageId = data["id"];
-                        if (jsonLanguageId == languageID)
-                        {
-                            text = data[m_language]["title"];
-                            break;
-                        }
-                    }
+                    auto text = utilities.GetLanguageText(jsonDataLanguage, languageID, m_language);
 
-                    inputText->setFont(*font);
-                    inputText->setCharacterSize(fontSize);
+                    utilities.SetSFText(inputText, font, fontSize);
 
                     utilities.SetTitlePos(m_windowWidth, titleText, inputText);
 
@@ -748,18 +644,11 @@ void Game::InitMenu()
 
             for (const auto &dataBtn : jsonDataBtn)
             {
-                bool addBtn = false;
                 vector<MenuState> btnState = dataBtn["state"];
-                for (const auto &data : btnState)
-                {
-                    if (state == data)
-                    {
-                        addBtn = true;
-                        break;
-                    }
-                }
 
-                if (addBtn)
+                auto canAdd = utilities.CheckMenuState(btnState, btnState);
+
+                if (canAdd)
                 {
                     auto btnText = new sf::Text();
                     auto btn = new sf::Sprite();
@@ -776,45 +665,15 @@ void Game::InitMenu()
                     languageID = dataBtn["languageID"];
                     BtnFunc btnFnc = dataBtn["fnc"];
 
-                    sf::Texture *texture;
+                    auto texture = utilities.GetTexture(m_textures, textureID);
 
-                    for (const auto &data : m_textures)
-                    {
-                        auto texID = data->GetID();
-                        if (texID == textureID)
-                        {
-                            texture = data->GetTexture();
-                            break;
-                        }
-                    }
+                    auto font = utilities.GetFont(m_fonts, fontID);
 
-                    for (const auto &data : m_fonts)
-                    {
-                        auto fonID = data->GetID();
-                        if (fonID == fontID)
-                        {
-                            font = data->GetFont();
-                            break;
-                        }
-                    }
+                    auto text = utilities.GetLanguageText(jsonDataLanguage, languageID, m_language);
 
-                    for (const auto &data : jsonDataLanguage)
-                    {
-                        uint8_t jsonLanguageId = data["id"];
-                        if (jsonLanguageId == languageID)
-                        {
-                            text = data[m_language]["title"];
-                            break;
-                        }
-                    }
+                    utilities.SetSFSprite(btn, texture, textureRect, scale);
 
-                    btn->setTexture(*texture);
-                    btn->setTextureRect(textureRect);
-                    btn->setScale(scale);
-
-                    btnText->setFont(*font);
-                    btnText->setCharacterSize(fontSize);
-                    btnText->setString(text);
+                    utilities.SetSFText(btnText, font, fontSize, text);
 
                     if (element == Element::Title)
                         utilities.SetBtnAndTextPos(m_windowWidth, btn, titleText, btnText);
@@ -844,6 +703,7 @@ void Game::InitMenu()
 
 void Game::InitSurface()
 {
+    Utilities utilities;
     random_device rd;  // a seed source for the random number engine
     mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
 
@@ -882,15 +742,7 @@ void Game::InitSurface()
                 textureData = sf::IntRect(data["textureData"][0], data["textureData"][1], m_tileSize, m_tileSize);
                 speed = data["speed"];
 
-                for (const auto &data1 : m_textures)
-                {
-                    auto texID = data1->GetID();
-                    if (texID == textureID)
-                    {
-                        texture = data1->GetTexture();
-                        break;
-                    }
-                }
+                auto texture = utilities.GetTexture(m_textures, textureID);
 
                 if (id == 0 && j == 0 && k == 0 || (j * m_tileSize == (m_gameWidth - m_tileSize) && k == 0) ||
                     (k * m_tileSize == (m_gameHeight - m_tileSize) && j == 0) ||
@@ -917,9 +769,7 @@ void Game::InitSurface()
                 {
                     auto tileSprite = new sf::Sprite();
 
-                    tileSprite->setTextureRect(textureData);
-                    tileSprite->setTexture(*texture);
-                    tileSprite->setPosition(j * m_tileSize, k * m_tileSize);
+                    utilities.SetSFSprite(tileSprite, texture, textureData, j * m_tileSize, k * m_tileSize);
 
                     auto surfaces = new Surface(tileSprite, speed);
                     m_surfaces.push_back(surfaces);
@@ -980,6 +830,7 @@ void Game::InitAnim()
 
 void Game::InitCreature()
 {
+    Utilities utilities;
     ifstream fileCreatureTemplate("./data/entities/creature/creatureTemplate.json");
     ifstream fileCreature("./data/world/creature.json");
     ifstream fileDialog("./data/language/creature.json");
@@ -992,13 +843,12 @@ void Game::InitCreature()
         auto jsonDataDialog = json::parse(fileDialog);
         auto jsonDataTrader = json::parse(fileTrader);
 
-        sf::Texture *texture;
-
         for (const auto &data : jsonDataCreature)
         {
             bool interactable = false;
             string name;
             uint8_t animID;
+            sf::Texture *texture;
             AnimTextureCombined animData;
             uint8_t templateId = data["creatureTemplateID"];
             uint8_t traderID = data["traderID"];
@@ -1018,26 +868,9 @@ void Game::InitCreature()
                     animID = data1["animID"];
                     uint8_t dialogID = data1["dialogID"];
 
-                    for (const auto &data2 : m_anim)
-                    {
-                        if (data2->GetID() == animID)
-                        {
-                            animData = data2->GetAnim();
-                            auto textureID = data2->GetTextureID();
+                    animData = utilities.GetAnim(m_anim, animID);
 
-                            for (const auto &data3 : m_textures)
-                            {
-                                auto texID = data3->GetID();
-
-                                if (texID == textureID)
-                                {
-                                    texture = data3->GetTexture();
-                                    break;
-                                }
-                            }
-                            break;
-                        }
-                    }
+                    texture = utilities.GetAnimTexture(m_anim, m_textures, animID);
 
                     for (const auto &data3 : jsonDataDialog)
                     {
@@ -1086,9 +919,7 @@ void Game::InitCreature()
 
                 auto tileSprite = new sf::Sprite();
 
-                tileSprite->setTexture(*texture);
-                tileSprite->setTextureRect(animData.down.notMoving);
-                tileSprite->setPosition(posX, posY);
+                utilities.SetSFSprite(tileSprite, texture, animData.down.notMoving, posX, posY);
 
                 if (sellingItem.size() > 0 || buyingItem.size() > 0)
                 {
@@ -1133,6 +964,7 @@ void Game::InitCreature()
 
 void Game::InitWorld()
 {
+    Utilities utilities;
     ifstream fileWorld("./data/world/world.json");
     ifstream fileWorldTemplate("./data/world/worldTemplate.json");
 
@@ -1191,15 +1023,8 @@ void Game::InitWorld()
 
                     uint8_t textureID = data1["textureID"];
 
-                    for (const auto &data2 : m_textures)
-                    {
-                        auto texID = data2->GetID();
-                        if (texID == textureID)
-                        {
-                            texture = data2->GetTexture();
-                            break;
-                        }
-                    }
+                    texture = utilities.GetTexture(m_textures, textureID);
+
                     break;
                 }
             }
@@ -1233,21 +1058,20 @@ void Game::InitWorld()
                 }
 
                 auto tileSprite = new sf::Sprite();
-
-                tileSprite->setTexture(*texture);
+                sf::IntRect rectangle;
 
                 if (load)
                 {
-                    tileSprite->setTextureRect(textureProgData.rect);
+                    rectangle = textureProgData.rect;
                     collision = {.x = textureProgData.collision.x, .y = textureProgData.collision.y};
                 }
                 else
                 {
-                    tileSprite->setTextureRect(textureData);
+                    rectangle = textureData;
                     collision = templateCollision;
                 }
 
-                tileSprite->setPosition(posX, posY);
+                utilities.SetSFSprite(tileSprite, texture, rectangle, posX, posY);
 
                 auto world = new World(tileSprite, worldId, collision, itemOutputID, textureProgData, load);
                 m_world.push_back(world);
@@ -1262,6 +1086,7 @@ void Game::InitWorld()
 
 void Game::InitRenderStats()
 {
+    Utilities utilities;
     ifstream file("./data/entities/player/stat.json");
 
     if (file.is_open())
@@ -1270,7 +1095,6 @@ void Game::InitRenderStats()
 
         for (const auto &data : jsonData)
         {
-            sf::Texture *texture;
             uint8_t add = data["add"];
             uint8_t textureID = data["textureID"];
             auto textureRect = sf::IntRect{data["textureData"][0],
@@ -1279,21 +1103,14 @@ void Game::InitRenderStats()
                                            data["textureData"][3]};
             StatType type = data["type"];
 
-            for (const auto &data1 : m_textures)
-            {
-                if (data1->GetID() == textureID)
-                {
-                    texture = data1->GetTexture();
-                    break;
-                }
-            }
+            auto texture = utilities.GetTexture(m_textures, textureID);
 
             for (size_t i = 0; i < add; ++i)
             {
                 auto sprite = new sf::Sprite();
 
-                sprite->setTexture(*texture);
-                sprite->setTextureRect(textureRect);
+                utilities.SetSFSprite(sprite, texture, textureRect);
+
                 auto textureSize = textureRect.getSize();
 
                 auto stats = new Stats(sprite, textureSize, type);
@@ -1458,6 +1275,7 @@ void Game::RenderMenu(sf::RenderWindow &window)
 // LOAD SAVE FILE
 void Game::CreateLoadMenu()
 {
+    Utilities utilities;
     for (auto &data : m_saveFiles)
     {
         delete data;
@@ -1465,14 +1283,9 @@ void Game::CreateLoadMenu()
     }
     m_saveFiles.clear();
 
-    sf::Font *font;
     auto count = CountSaveFolders();
 
-    for (const auto &data : m_fonts)
-    {
-        if (data->GetID() == 0)
-            font = data->GetFont();
-    }
+    auto font = utilities.GetFont(m_fonts, 0);
 
     for (size_t i = 1; i < count; ++i)
     {
@@ -1592,6 +1405,7 @@ void Game::SaveWorld(const bool destroy)
 
 void Game::LoadGroundItems()
 {
+    Utilities utilities;
     auto saveId = m_player->GetID();
     auto path = format("./save/{}/groundItems.json", saveId);
 
@@ -1617,9 +1431,7 @@ void Game::LoadGroundItems()
                 if (id == itemID)
                 {
                     auto itemSprite = new sf::Sprite();
-                    itemSprite->setTexture(*texture);
-                    itemSprite->setTextureRect(textureData);
-                    itemSprite->setPosition(posX, posY);
+                    utilities.SetSFSprite(itemSprite, texture, textureData, posX, posY);
 
                     auto item = new ItemGround(itemSprite, id, count);
                     m_items.push_back(item);

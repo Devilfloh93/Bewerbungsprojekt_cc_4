@@ -110,21 +110,13 @@ void Player::CollectItem(Game *game)
 void Player::HandleMove(sf::Clock &clock, Game *game)
 {
     Utilities utilities;
-    AnimTextureCombined animData;
     auto anim = game->GetAnim();
     auto tileSize = game->GetTileSize();
     auto width = game->GetGameWidth();
     auto height = game->GetGameHeight();
     auto playerPos = m_sprite->getPosition();
 
-    for (const auto &data : anim)
-    {
-        if (data->GetID() == m_animID)
-        {
-            animData = data->GetAnim();
-            break;
-        }
-    }
+    auto animData = utilities.GetAnim(anim, m_animID);
 
     switch (m_move)
     {
@@ -238,6 +230,7 @@ void Player::UpdateStats(Game *game)
 // ITEMS
 void Player::Interact(Game &game)
 {
+    Utilities utilities;
     auto itemCfg = game.GetItemCfg();
     auto playerPos = m_sprite->getPosition();
     sf::Vector2f itemPos = {0.0F, 0.0F};
@@ -323,9 +316,7 @@ void Player::Interact(Game &game)
                         }
 
                         auto itemSprite = new sf::Sprite();
-                        itemSprite->setTexture(*texture);
-                        itemSprite->setTextureRect(textureData);
-                        itemSprite->setPosition(itemPos.x, itemPos.y);
+                        utilities.SetSFSprite(itemSprite, texture, textureData, itemPos.x, itemPos.y);
 
                         auto item = new ItemGround(itemSprite, itemID, dist(gen));
                         game.SetItems(item);
@@ -445,13 +436,9 @@ void Player::RenderTraderItems(sf::RenderWindow &window, Game *game, sf::Text *p
                 auto textureData = data->GetTextureData();
                 auto fontID = data->GetFontID();
 
-                sf::Font *font;
-                for (const auto &data1 : fonts)
-                {
-                    if (fontID == data1->GetID())
-                        font = data1->GetFont();
-                }
+                auto font = utilities.GetFont(fonts, fontID);
 
+                // utilities.SetSFText(itemText, font, 15, value);
                 itemText.setFont(*font);
                 itemText.setCharacterSize(15);
                 itemText.setString(format("{}", value));
@@ -493,12 +480,7 @@ void Player::RenderTraderItems(sf::RenderWindow &window, Game *game, sf::Text *p
                         auto textureData = data->GetTextureData();
                         auto fontID = data->GetFontID();
 
-                        sf::Font *font;
-                        for (const auto &data1 : fonts)
-                        {
-                            if (fontID == data1->GetID())
-                                font = data1->GetFont();
-                        }
+                        auto font = utilities.GetFont(fonts, fontID);
 
                         itemText.setFont(*font);
                         itemText.setCharacterSize(15);
@@ -549,12 +531,7 @@ void Player::RenderInventoryItems(sf::RenderWindow &window, Game *game, sf::Text
                 auto textureData = data->GetTextureData();
                 auto fontID = data->GetFontID();
 
-                sf::Font *font;
-                for (const auto &data1 : fonts)
-                {
-                    if (fontID == data1->GetID())
-                        font = data1->GetFont();
-                }
+                auto font = utilities.GetFont(fonts, fontID);
 
                 itemText.setFont(*font);
                 itemText.setCharacterSize(15);
