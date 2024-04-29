@@ -58,6 +58,7 @@ void EventHandler::Playing(Game &game, const sf::Keyboard::Key &key)
             if (keyString == "inventory")
             {
                 game.SetMenuState(MenuState::Inventory);
+                player->InitInventoryItems(game);
                 m_break = true;
             }
 
@@ -245,7 +246,10 @@ void EventHandler::BtnPressed(sf::RenderWindow &window, Game &game)
                 if (game.GetPlaying())
                 {
                     if (menuState == MenuState::Inventory || menuState == MenuState::Trader)
+                    {
                         game.SetMenuState(MenuState::Playing);
+                        game.ClearDialog();
+                    }
                     else
                         game.SetMenuState(MenuState::Pause);
                 }

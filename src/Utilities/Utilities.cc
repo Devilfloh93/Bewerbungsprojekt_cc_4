@@ -73,11 +73,10 @@ void Utilities::SetBtnAndTextPos(const uint16_t width, sf::Sprite *btnObj, sf::S
                                       btnObjPos.y + ((btnObjSize.y / 2U) - (btnTextLSize.y / 2U))));
 }
 
-void Utilities::SetTextBeforeIcon(sf::Sprite &icon, sf::Text &text, sf::Sprite &prevIcon)
+void Utilities::SetTextBeforeIcon(sf::Sprite &icon, sf::Text &text, const sf::Vector2f &prevPos)
 {
-    auto prevIconPos = prevIcon.getGlobalBounds().getPosition();
     auto iconLSize = icon.getLocalBounds().getSize();
-    icon.setPosition(prevIconPos.x, prevIconPos.y + iconLSize.y);
+    icon.setPosition(prevPos.x, prevPos.y + iconLSize.y);
 
     iconLSize = icon.getLocalBounds().getSize();
     auto textLSize = text.getLocalBounds().getSize();

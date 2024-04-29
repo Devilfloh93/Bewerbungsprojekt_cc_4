@@ -198,6 +198,11 @@ vector<Font *> Game::GetFont() const
     return m_fonts;
 }
 
+vector<Title *> Game::GetTitles() const
+{
+    return m_titles;
+}
+
 // VIEW
 sf::View *Game::GetView()
 {
@@ -646,7 +651,7 @@ void Game::InitMenu()
             {
                 vector<MenuState> btnState = dataBtn["state"];
 
-                auto canAdd = utilities.CheckMenuState(btnState, btnState);
+                auto canAdd = utilities.CheckMenuState(btnState, state);
 
                 if (canAdd)
                 {
@@ -1222,11 +1227,8 @@ void Game::RenderMenu(sf::RenderWindow &window)
         if (m_menuState == data->GetMenuState())
             window.draw(*previousTxt);
 
-        if (m_menuState == MenuState::Inventory)
-            m_player->RenderInventoryItems(window, this, previousTxt);
-
-        if (m_menuState == MenuState::Trader)
-            m_player->RenderTraderItems(window, this, previousTxt);
+        if (m_menuState == MenuState::Inventory || m_menuState == MenuState::Trader)
+            RenderDialog(window);
 
         for (const auto &data1 : m_inputs)
         {
@@ -1633,4 +1635,34 @@ void Game::ChangeLanguage(const string language)
     }
 
     InitMenu();
+}
+
+// UNIQUE PTR
+void Game::SetDialogSprite(unique_ptr<sf::Sprite> sprite)
+{
+    m_dialogSprites.push_back(move(sprite));
+}
+
+void Game::SetDialogText(unique_ptr<sf::Text> text)
+{
+    m_dialogTexts.push_back(move(text));
+}
+
+void Game::ClearDialog()
+{
+    m_dialogSprites.clear();
+    m_dialogTexts.clear();
+}
+
+void Game::RenderDialog(sf::RenderWindow &window)
+{
+    for (const auto &data : m_dialogSprites)
+    {
+        window.draw(*data);
+    }
+
+    for (const auto &data : m_dialogTexts)
+    {
+        window.draw(*data);
+    }
 }
