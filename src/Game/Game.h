@@ -88,6 +88,7 @@ public:
     vector<Input *> GetInput() const;
     vector<sf::Text *> GetSaveFiles() const;
     vector<Btn *> GetBtn() const;
+    vector<Title *> GetTitles() const;
     vector<Font *> GetFont() const;
 
     vector<ItemGround *> GetItem() const;
@@ -170,6 +171,12 @@ public:
     map<string, uint8_t> GetHotkeys() const;
     void ChangeLanguage(const string language);
 
+    // UNIQUE PTR
+    void SetDialogSprite(unique_ptr<sf::Sprite> sprite);
+    void SetDialogText(unique_ptr<sf::Text> text);
+    void ClearDialog();
+    void RenderDialog(sf::RenderWindow &window);
+
 private:
     // RUNNING
     bool m_playing;
@@ -198,6 +205,9 @@ private:
     vector<Stats *> m_stats;
     vector<Input *> m_inputs;
     vector<sf::Text *> m_saveFiles;
+
+    vector<unique_ptr<sf::Sprite>> m_dialogSprites;
+    vector<unique_ptr<sf::Text>> m_dialogTexts;
     // SETTINGS
     map<string, uint8_t> m_hotkeys;
     string m_language;

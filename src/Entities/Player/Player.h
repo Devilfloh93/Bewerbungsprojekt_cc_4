@@ -62,8 +62,8 @@ public:
     void CheckRenderHotkey(sf::RenderWindow &window, Game *game);
     void RenderHotkey(sf::RenderWindow &window, Game *game);
     void RenderStats(sf::RenderWindow &window, Game *game);
-    void RenderInventoryItems(sf::RenderWindow &window, Game *game, sf::Text *previousTxt);
-    void RenderTraderItems(sf::RenderWindow &window, Game *game, sf::Text *previousTxt);
+    void InitInventoryItems(Game &game);
+    void InitTraderItems(Game &game);
 
     // COLLISION
     void CheckCollision(Game *game);
