@@ -82,6 +82,29 @@ public:
 
     bool InViewRange(Game *game, const sf::Vector2f &spritePos);
 
+    void SetSFText(sf::Text *text, sf::Font *font, const uint8_t size, const string value);
+    void SetSFText(sf::Text *text, sf::Font *font, const uint8_t size);
+
+    void SetSFSprite(sf::Sprite *sprite, sf::Texture *texture, const sf::IntRect &rectangle);
+    void SetSFSprite(sf::Sprite *sprite, sf::Texture *texture, const sf::IntRect &rectangle, float x, float y);
+    void SetSFSprite(sf::Sprite *sprite,
+                     sf::Texture *texture,
+                     const sf::IntRect &rectangle,
+                     const sf::Vector2f &factors);
+
+    sf::Font *GetFont(const std::vector<Font *> &fonts, const uint8_t fontID);
+    sf::Texture *GetTexture(const std::vector<AllTextures *> &textures, const uint8_t textureID);
+
+
+    AnimTextureCombined GetAnim(const std::vector<Anim *> &anim, const uint8_t animID);
+    sf::Texture *GetAnimTexture(const std::vector<Anim *> &anim,
+                                const std::vector<AllTextures *> &textures,
+                                const uint8_t animID);
+
+    string GetLanguageText(const json &jsonData, const uint8_t languageID, string_view language);
+
+    bool CheckMenuState(const std::vector<MenuState> &menuState, const MenuState currentState);
+
 private:
     ClockType::time_point m_startTime;
     ClockType::time_point m_endTime;
