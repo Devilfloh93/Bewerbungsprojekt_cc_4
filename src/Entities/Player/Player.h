@@ -58,8 +58,8 @@ public:
     void CollectItem(Game *game);
 
     // Render
-    void CheckRenderHotkey(sf::RenderWindow &window, Game *game);
-    void RenderHotkey(sf::RenderWindow &window, Game *game);
+    void CheckRenderHotkey(Game *game);
+    void RenderHotkey(Game *game);
 
     void InitInventoryItems(Game &game);
     void InitTraderItems(Game &game);

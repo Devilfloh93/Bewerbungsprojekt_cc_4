@@ -18,19 +18,19 @@ void EventHandler::ResetBreak()
 
 
 // QUIT
-void EventHandler::Quit(sf::RenderWindow &window)
+void EventHandler::Quit(Game &game)
 {
-    window.close();
+    game.GetWindow()->close();
 }
 
-void EventHandler::MouseBtnPressed(sf::RenderWindow &window, Game &game)
+void EventHandler::MouseBtnPressed(Game &game)
 {
     auto state = game.GetMenuState();
 
     if (state != MenuState::Playing)
-        BtnPressed(window, game);
+        BtnPressed(game);
     else if (game.GetPlaying() && state == MenuState::Playing)
-        game.HandleViewPosition(window);
+        game.HandleViewPosition();
 }
 
 void EventHandler::Playing(Game &game, const sf::Keyboard::Key &key)
@@ -192,12 +192,13 @@ void EventHandler::MouseWheelScrolled(Game &game, float delta)
         game.UpdateZoom(delta);
 }
 
-void EventHandler::BtnPressed(sf::RenderWindow &window, Game &game)
+void EventHandler::BtnPressed(Game &game)
 {
+    auto window = game.GetWindow();
     // get the current mouse position in the window
-    auto pixelPos = sf::Mouse::getPosition(window);
+    auto pixelPos = sf::Mouse::getPosition(*window);
     // convert it to world coordinates
-    auto worldPos = window.mapPixelToCoords(pixelPos);
+    auto worldPos = window->mapPixelToCoords(pixelPos);
 
     auto saveFiles = game.GetSaveFiles();
     auto menuState = game.GetMenuState();
@@ -235,7 +236,7 @@ void EventHandler::BtnPressed(sf::RenderWindow &window, Game &game)
             switch (data->GetBtnFnc())
             {
             case BtnFunc::Play:
-                game.InitPlayer(window);
+                game.InitPlayer();
                 m_break = true;
                 break;
             case BtnFunc::Resume:
@@ -243,7 +244,7 @@ void EventHandler::BtnPressed(sf::RenderWindow &window, Game &game)
                 m_break = true;
                 break;
             case BtnFunc::Quit:
-                Quit(window);
+                Quit(game);
                 break;
             case BtnFunc::Options:
                 game.SetMenuState(MenuState::Options);
@@ -268,7 +269,7 @@ void EventHandler::BtnPressed(sf::RenderWindow &window, Game &game)
             case BtnFunc::Resolution:
                 game.SetWindowHeight(1080U);
                 game.SetWindowWidth(1920U);
-                game.ResizeWindow(window);
+                game.ResizeWindow();
                 m_break = true;
                 break;
             case BtnFunc::Fullscreen:
@@ -293,7 +294,7 @@ void EventHandler::BtnPressed(sf::RenderWindow &window, Game &game)
                 if (game.GetSaveGameID() > 0)
                 {
                     game.SetMenuState(MenuState::Load);
-                    game.InitPlayer(window);
+                    game.InitPlayer();
                     m_break = true;
                 }
                 break;
