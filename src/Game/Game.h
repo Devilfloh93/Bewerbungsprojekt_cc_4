@@ -29,7 +29,7 @@ class Thread;
 class Game : public Gui
 {
 public:
-    Game(const uint16_t windowWidth, const uint16_t windowHeight);
+    Game();
     ~Game() = default;
 
     // RUNNING
@@ -48,6 +48,7 @@ public:
     uint16_t GetWindowWidth() const;
     void SetWindowHeight(uint16_t width);
     void SetWindowWidth(uint16_t height);
+    sf::RenderWindow *GetWindow();
 
     // ZOOM
     void SetZoom(const uint8_t zoom);
@@ -74,7 +75,7 @@ public:
     // VIEW
     sf::View *GetView();
     void UpdateView(const sf::Vector2f &size);
-    void HandleViewPosition(const sf::RenderWindow &window);
+    void HandleViewPosition();
 
     // PLAYER
     void SetPlayer(Player *player);
@@ -95,7 +96,7 @@ public:
     // STATS
     StatDecay GetStatDecay() const;
     void ResizeStats();
-    void RenderStats(sf::RenderWindow &window);
+    void RenderStats();
 
     // THREAD
     Thread *GetThread();
@@ -121,20 +122,21 @@ public:
     void InitMenu();
     void InitSurface();
     void InitWorld();
-    void InitPlayer(sf::RenderWindow &window);
+    void InitPlayer();
     void InitCreature();
+    void InitWindow();
 
     // Render
-    void Render(sf::RenderWindow &window, sf::Clock &clock);
-    void RenderSurface(sf::RenderWindow &window);
-    void RenderWorld(sf::RenderWindow &window);
-    void RenderMenu(sf::RenderWindow &window);
-    void RenderItems(sf::RenderWindow &window);
-    void RenderCreature(sf::RenderWindow &window);
+    void Render(sf::Clock &clock);
+    void RenderSurface();
+    void RenderWorld();
+    void RenderMenu();
+    void RenderItems();
+    void RenderCreature();
     float GetRenderPuffer() const;
 
     // RESIZE
-    void ResizeWindow(sf::RenderWindow &window);
+    void ResizeWindow();
     void ResizeMenu();
 
     // FOLDER
@@ -153,7 +155,7 @@ public:
     void SetDialogSprite(unique_ptr<sf::Sprite> sprite);
     void SetDialogText(unique_ptr<sf::Text> text);
     void ClearDialog();
-    void RenderDialog(sf::RenderWindow &window);
+    void RenderDialog();
 
 private:
     // RUNNING
@@ -191,8 +193,7 @@ private:
     string m_language;
     // VIEW
     sf::View *m_view;
-    sf::View m_menuView;
-    sf::Vector2f m_defaultCenter;
+    sf::View *m_menuView;
     // PLAYER
     uint8_t m_defaultAnimID;
     Player *m_player;
@@ -203,4 +204,6 @@ private:
     Thread *m_thread;
     // RENDER
     float m_renderPuffer;
+    // WINDOW
+    sf::RenderWindow *m_window;
 };

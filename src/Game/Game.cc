@@ -11,8 +11,7 @@
 using json = nlohmann::json;
 using namespace std;
 
-Game::Game(const uint16_t windowWidth, const uint16_t windowHeight)
-    : m_windowWidth(windowWidth), m_windowHeight(windowHeight), Gui(MenuState::Main)
+Game::Game() : Gui(MenuState::Main)
 {
     m_renderPuffer = 200.0F;
     m_maxZoom = 3U;
@@ -27,6 +26,12 @@ Game::Game(const uint16_t windowWidth, const uint16_t windowHeight)
 
 void Game::Init()
 {
+    m_windowWidth = 1280U;
+    m_windowHeight = 720U;
+    // m_windowWidth = sf::VideoMode::getDesktopMode().width;
+    // m_windowHeight = sf::VideoMode::getDesktopMode().height;
+
+    InitWindow();
     InitFolder();
     InitSettings();
     InitViews();
@@ -104,6 +109,11 @@ void Game::SetWindowHeight(uint16_t height)
 void Game::SetWindowWidth(uint16_t width)
 {
     m_windowWidth = width;
+}
+
+sf::RenderWindow *Game::GetWindow()
+{
+    return m_window;
 }
 
 // ZOOM
@@ -228,12 +238,12 @@ void Game::UpdateView(const sf::Vector2f &size)
     ResizeStats();
 }
 
-void Game::HandleViewPosition(const sf::RenderWindow &window)
+void Game::HandleViewPosition()
 {
     // get the current mouse position in the window
-    sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+    sf::Vector2i pixelPos = sf::Mouse::getPosition(*m_window);
     // convert it to world coordinates
-    sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+    sf::Vector2f worldPos = m_window->mapPixelToCoords(pixelPos);
 
     auto center = m_view->getCenter();
     auto size = m_view->getSize();
@@ -376,7 +386,7 @@ void Game::ResizeStats()
     }
 }
 
-void Game::RenderStats(sf::RenderWindow &window)
+void Game::RenderStats()
 {
     for (const auto &data : m_stats)
     {
@@ -401,7 +411,7 @@ void Game::RenderStats(sf::RenderWindow &window)
             }
         }
 
-        window.draw(*sprite);
+        m_window->draw(*sprite);
     }
 }
 
@@ -474,7 +484,7 @@ void Game::InitHotkeys()
     }
 }
 
-void Game::InitPlayer(sf::RenderWindow &window)
+void Game::InitPlayer()
 {
     bool startGame = false;
     if (m_menuState == MenuState::Create)
@@ -508,7 +518,7 @@ void Game::InitPlayer(sf::RenderWindow &window)
         m_menuState = MenuState::Playing;
 
         // Thread Init
-        m_thread = new Thread(window, this);
+        m_thread = new Thread(this);
         cout << "Thread Init Done!" << endl;
 
         Saving(false);
@@ -517,15 +527,10 @@ void Game::InitPlayer(sf::RenderWindow &window)
 
 void Game::InitViews()
 {
-    m_view = new sf::View();
+    sf::FloatRect visibleArea(0, 0, m_windowWidth, m_windowHeight);
 
-    m_defaultCenter = sf::Vector2f(m_windowWidth / 2U, m_windowHeight / 2U);
-
-    m_menuView.setSize(sf::Vector2f(m_windowWidth, m_windowHeight));
-    m_menuView.setCenter(m_defaultCenter);
-
-    m_view->setSize(sf::Vector2f(m_windowWidth, m_windowHeight));
-    m_view->setCenter(m_defaultCenter);
+    m_view = new sf::View(visibleArea);
+    m_menuView = new sf::View(visibleArea);
 
     auto center = m_view->getCenter();
 
@@ -897,6 +902,14 @@ void Game::InitAnim()
     }
 }
 
+void Game::InitWindow()
+{
+    m_window = new sf::RenderWindow(sf::VideoMode(m_windowWidth, m_windowHeight), "Good Game", sf::Style::Close);
+    m_window->setVerticalSyncEnabled(true);
+    m_window->setFramerateLimit(60U);
+    m_window->setKeyRepeatEnabled(false);
+}
+
 void Game::InitCreature()
 {
     Utilities utilities;
@@ -1191,27 +1204,27 @@ void Game::InitRenderStats()
 }
 
 // Render
-void Game::Render(sf::RenderWindow &window, sf::Clock &clock)
+void Game::Render(sf::Clock &clock)
 {
-    window.setView(*m_view);
+    m_window->setView(*m_view);
 
-    RenderSurface(window);
+    RenderSurface();
     m_player->HandleMove(clock, this);
 
-    RenderItems(window);
-    window.draw(*(m_player->GetSprite()));
-    RenderCreature(window);
+    RenderItems();
+    m_window->draw(*(m_player->GetSprite()));
+    RenderCreature();
 
-    RenderWorld(window);
+    RenderWorld();
 
     m_player->CheckCollision(this);
 
-    m_player->CheckRenderHotkey(window, this);
+    m_player->CheckRenderHotkey(this);
 
-    RenderStats(window);
+    RenderStats();
 }
 
-void Game::RenderItems(sf::RenderWindow &window)
+void Game::RenderItems()
 {
     Collision collision;
     for (const auto &data : m_items)
@@ -1220,11 +1233,11 @@ void Game::RenderItems(sf::RenderWindow &window)
         auto spritePos = sprite->getPosition();
 
         if (collision.InViewRange(this, spritePos))
-            window.draw(*sprite);
+            m_window->draw(*sprite);
     }
 }
 
-void Game::RenderSurface(sf::RenderWindow &window)
+void Game::RenderSurface()
 {
     Collision collision;
     auto playerSprite = m_player->GetSprite();
@@ -1246,12 +1259,12 @@ void Game::RenderSurface(sf::RenderWindow &window)
                 m_player->SetSpeed(speed);
             }
 
-            window.draw(*sprite);
+            m_window->draw(*sprite);
         }
     }
 }
 
-void Game::RenderWorld(sf::RenderWindow &window)
+void Game::RenderWorld()
 {
     Collision collision;
     for (auto &data : m_world)
@@ -1260,11 +1273,11 @@ void Game::RenderWorld(sf::RenderWindow &window)
         auto spritePos = sprite->getPosition();
 
         if (collision.InViewRange(this, spritePos))
-            window.draw(*sprite);
+            m_window->draw(*sprite);
     }
 }
 
-void Game::RenderCreature(sf::RenderWindow &window)
+void Game::RenderCreature()
 {
     Collision collision;
     for (auto &data : m_creature)
@@ -1273,13 +1286,13 @@ void Game::RenderCreature(sf::RenderWindow &window)
         auto spritePos = sprite->getPosition();
 
         if (collision.InViewRange(this, spritePos))
-            window.draw(*sprite);
+            m_window->draw(*sprite);
     }
 }
 
-void Game::RenderMenu(sf::RenderWindow &window)
+void Game::RenderMenu()
 {
-    window.setView(m_menuView);
+    m_window->setView(*m_menuView);
     Utilities utilities;
     sf::Sprite *lastbtn;
 
@@ -1289,15 +1302,15 @@ void Game::RenderMenu(sf::RenderWindow &window)
         auto previousTxt = data->GetText();
 
         if (m_menuState == data->GetMenuState())
-            window.draw(*previousTxt);
+            m_window->draw(*previousTxt);
 
         if (m_menuState == MenuState::Inventory || m_menuState == MenuState::Trader)
-            RenderDialog(window);
+            RenderDialog();
 
         for (const auto &data1 : m_inputs)
         {
             if (m_menuState == data1->GetMenuState())
-                window.draw(*(data1->GetText()));
+                m_window->draw(*(data1->GetText()));
         }
 
         for (const auto &data1 : m_saveFiles)
@@ -1305,7 +1318,7 @@ void Game::RenderMenu(sf::RenderWindow &window)
             if (m_menuState == MenuState::OpenLoad)
             {
                 utilities.SetTitlePos(m_windowWidth, previousTxt, data1);
-                window.draw(*data1);
+                m_window->draw(*data1);
                 previousTxt = data1;
             }
         }
@@ -1331,8 +1344,8 @@ void Game::RenderMenu(sf::RenderWindow &window)
                         utilities.SetBtnAndTextPos(m_windowWidth, btnObj, lastbtn, btnText);
                 }
 
-                window.draw(*btnObj);
-                window.draw(*btnText);
+                m_window->draw(*btnObj);
+                m_window->draw(*btnText);
             }
         }
     }
@@ -1550,14 +1563,18 @@ void Game::SaveGroundItems(const bool destroy)
 }
 
 // RESIZE
-void Game::ResizeWindow(sf::RenderWindow &window)
+void Game::ResizeWindow()
 {
-    window.setSize(sf::Vector2u(m_windowWidth, m_windowHeight));
+    sf::FloatRect visibleArea(0, 0, m_windowWidth, m_windowHeight);
 
-    m_defaultCenter = sf::Vector2f(m_windowWidth / 2U, m_windowHeight / 2U);
+    delete m_menuView;
+    m_menuView = nullptr;
+    delete m_view;
+    m_view = nullptr;
 
-    m_menuView.setSize(sf::Vector2f(m_windowWidth, m_windowHeight));
-    m_menuView.setCenter(m_defaultCenter);
+    m_menuView = new sf::View(visibleArea);
+    m_view = new sf::View(visibleArea);
+    m_window->setSize({m_windowWidth, m_windowHeight});
 
     ResizeMenu();
     ResizeStats();
@@ -1719,15 +1736,15 @@ void Game::ClearDialog()
     m_dialogTexts.clear();
 }
 
-void Game::RenderDialog(sf::RenderWindow &window)
+void Game::RenderDialog()
 {
     for (const auto &data : m_dialogSprites)
     {
-        window.draw(*data);
+        m_window->draw(*data);
     }
 
     for (const auto &data : m_dialogTexts)
     {
-        window.draw(*data);
+        m_window->draw(*data);
     }
 }

@@ -1,10 +1,10 @@
 #include "Thread.h"
 
 
-Thread::Thread(const sf::RenderWindow &window, Game *game)
+Thread::Thread(Game *game)
 {
-    m_threads.push_back(thread(&Thread::UpdateStats, this, ref(window), game));
-    m_threads.push_back(thread(&Thread::SaveGame, this, ref(window), game));
+    m_threads.push_back(thread(&Thread::UpdateStats, this, game));
+    m_threads.push_back(thread(&Thread::SaveGame, this, game));
 }
 
 void Thread::Join()
@@ -32,20 +32,20 @@ bool Thread::WaitFor(Duration duration)
     return !m_conditionVar.wait_for(l, duration, [this]() { return m_stop; });
 }
 
-void Thread::UpdateStats(const sf::RenderWindow &window, Game *game)
+void Thread::UpdateStats(Game *game)
 {
     auto player = game->GetPlayer();
 
-    while (window.isOpen() && game->GetPlaying())
+    while (game->GetWindow()->isOpen() && game->GetPlaying())
     {
         this_thread::sleep_for(chrono::seconds(1));
         player->UpdateStats(game);
     }
 }
 
-void Thread::SaveGame(const sf::RenderWindow &window, Game *game)
+void Thread::SaveGame(Game *game)
 {
-    while (window.isOpen() && game->GetPlaying())
+    while (game->GetWindow()->isOpen() && game->GetPlaying())
     {
         while (WaitFor(chrono::minutes(1)))
             game->Saving(false);

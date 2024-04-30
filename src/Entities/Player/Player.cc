@@ -329,13 +329,13 @@ void Player::Interact(Game &game)
 }
 
 // Render
-void Player::CheckRenderHotkey(sf::RenderWindow &window, Game *game)
+void Player::CheckRenderHotkey(Game *game)
 {
     if (m_objectInFront != nullptr)
     {
         if (m_objectInFront->GetInteractable())
         {
-            RenderHotkey(window, game);
+            RenderHotkey(game);
         }
     }
 
@@ -343,13 +343,14 @@ void Player::CheckRenderHotkey(sf::RenderWindow &window, Game *game)
     {
         if (m_creatureInFront->GetInteractable())
         {
-            RenderHotkey(window, game);
+            RenderHotkey(game);
         }
     }
 }
 
-void Player::RenderHotkey(sf::RenderWindow &window, Game *game)
+void Player::RenderHotkey(Game *game)
 {
+    auto window = game->GetWindow();
     auto hotkeys = game->GetHotkeys();
 
     for (const auto &data : game->GetHotkeys())
@@ -367,7 +368,7 @@ void Player::RenderHotkey(sf::RenderWindow &window, Game *game)
                                     (m_sprite->getLocalBounds().getSize().x / 2),
                                 m_sprite->getPosition().y - 15);
 
-    window.draw(*m_hotkeyRender);
+    window->draw(*m_hotkeyRender);
 }
 
 /***

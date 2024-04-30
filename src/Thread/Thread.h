@@ -14,13 +14,13 @@ class Game;
 class Thread
 {
 public:
-    Thread(const sf::RenderWindow &window, Game *game);
+    Thread(Game *game);
     ~Thread() = default;
 
     void Join();
 
-    void UpdateStats(const sf::RenderWindow &window, Game *game);
-    void SaveGame(const sf::RenderWindow &window, Game *game);
+    void UpdateStats(Game *game);
+    void SaveGame(Game *game);
 
     // Function to returns false when
     // the thread is stopped
