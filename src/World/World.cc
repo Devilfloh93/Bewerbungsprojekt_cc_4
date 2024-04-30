@@ -2,7 +2,7 @@
 
 World::World(sf::Sprite *sprite,
              const uint8_t id,
-             const Collision collision,
+             const CollisionData collision,
              const vector<uint8_t> itemOutputID,
              const TextureProgData textureProgData,
              const bool saving)
@@ -15,7 +15,7 @@ World::World(sf::Sprite *sprite,
         m_interactable = false;
 }
 
-Collision World::GetCollision() const
+CollisionData World::GetCollision() const
 {
     return m_collision;
 }

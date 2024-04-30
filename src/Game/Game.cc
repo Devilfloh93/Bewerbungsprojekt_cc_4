@@ -1,10 +1,12 @@
 #include "Game.h"
+#include "Collision.h"
 #include "nlohmann/json.hpp"
 #include <fstream>
 #include <iostream>
 #include <iterator>
 #include <map>
 #include <random>
+
 
 using json = nlohmann::json;
 using namespace std;
@@ -222,6 +224,8 @@ void Game::UpdateView(const sf::Vector2f &size)
 
     if (m_view->getCenter().y >= m_gameHeight - (size.y / 2U))
         m_view->setCenter({m_view->getCenter().x, m_gameHeight - (size.y / 2U)});
+
+    ResizeStats();
 }
 
 void Game::HandleViewPosition(const sf::RenderWindow &window)
@@ -269,6 +273,8 @@ void Game::HandleViewPosition(const sf::RenderWindow &window)
         else
             m_view->move({0U, moveY});
     }
+
+    ResizeStats();
 }
 
 // PLAYER
@@ -340,6 +346,63 @@ bool Game::CreatePlayer()
 StatDecay Game::GetStatDecay() const
 {
     return m_statDecay;
+}
+
+void Game::ResizeStats()
+{
+    auto width = (m_view->getCenter().x - (m_view->getSize().x / 2)) + 5.0F;
+
+    size_t i = 1;
+    size_t j = 1;
+
+    for (const auto &data : m_stats)
+    {
+        auto type = data->GetType();
+        auto sprite = data->GetSprite();
+        auto height = (m_view->getCenter().y + (m_view->getSize().y / 2)) - 10.0F;
+
+        if (type == StatType::Empty)
+        {
+            height -= i * 10;
+            ++i;
+        }
+        else
+        {
+            height -= j * 10;
+            ++j;
+        }
+
+        sprite->setPosition(sf::Vector2f{width, height});
+    }
+}
+
+void Game::RenderStats(sf::RenderWindow &window)
+{
+    for (const auto &data : m_stats)
+    {
+        auto textureSize = data->GetTextureSize();
+        auto type = data->GetType();
+        auto sprite = data->GetSprite();
+        auto textureRectSize = sprite->getTextureRect().getSize();
+        auto textureRectPos = sprite->getTextureRect().getPosition();
+
+        if (type == StatType::Empty)
+        {
+        }
+        else
+        {
+            auto statValue = m_player->GetStatValue(type);
+            uint8_t newTextureRectSizeX = (statValue * textureSize.x) / 100;
+            if (textureRectSize.x > 0)
+            {
+                auto textureRect =
+                    sf::IntRect{textureRectPos.x, textureRectPos.y, newTextureRectSizeX, textureRectSize.y};
+                sprite->setTextureRect(textureRect);
+            }
+        }
+
+        window.draw(*sprite);
+    }
 }
 
 // ITEMS
@@ -439,6 +502,7 @@ void Game::InitPlayer(sf::RenderWindow &window)
     {
         InitWorld();
         InitCreature();
+        ResizeStats();
 
         m_playing = true;
         m_menuState = MenuState::Playing;
@@ -995,8 +1059,8 @@ void Game::InitWorld()
 
         for (const auto &data : jsonDataWorld)
         {
-            Collision templateCollision;
-            Collision collision;
+            CollisionData templateCollision;
+            CollisionData collision;
             vector<uint8_t> itemOutputID;
             sf::IntRect textureData;
             TextureProgData textureProgData;
@@ -1024,7 +1088,7 @@ void Game::InitWorld()
                                             data1["textureProgData"][1],
                                             data1["textureProgData"][2],
                                             data1["textureProgData"][3]},
-                        .collision = Collision{.x = data1["textureProgData"][4], .y = data1["textureProgData"][5]}};
+                        .collision = CollisionData{.x = data1["textureProgData"][4], .y = data1["textureProgData"][5]}};
 
                     uint8_t textureID = data1["textureID"];
 
@@ -1144,25 +1208,25 @@ void Game::Render(sf::RenderWindow &window, sf::Clock &clock)
 
     m_player->CheckRenderHotkey(window, this);
 
-    m_player->RenderStats(window, this);
+    RenderStats(window);
 }
 
 void Game::RenderItems(sf::RenderWindow &window)
 {
-    Utilities utilities;
+    Collision collision;
     for (const auto &data : m_items)
     {
         auto sprite = data->GetSprite();
         auto spritePos = sprite->getPosition();
 
-        if (utilities.InViewRange(this, spritePos))
+        if (collision.InViewRange(this, spritePos))
             window.draw(*sprite);
     }
 }
 
 void Game::RenderSurface(sf::RenderWindow &window)
 {
-    Utilities utilities;
+    Collision collision;
     auto playerSprite = m_player->GetSprite();
     auto playerPos = playerSprite->getPosition();
 
@@ -1171,7 +1235,7 @@ void Game::RenderSurface(sf::RenderWindow &window)
         auto sprite = data->GetSprite();
         auto spritePos = sprite->getPosition();
 
-        if (utilities.InViewRange(this, spritePos))
+        if (collision.InViewRange(this, spritePos))
         {
             auto tileSize = m_tileSize / 2;
 
@@ -1189,26 +1253,26 @@ void Game::RenderSurface(sf::RenderWindow &window)
 
 void Game::RenderWorld(sf::RenderWindow &window)
 {
-    Utilities utilities;
+    Collision collision;
     for (auto &data : m_world)
     {
         auto sprite = data->GetSprite();
         auto spritePos = sprite->getPosition();
 
-        if (utilities.InViewRange(this, spritePos))
+        if (collision.InViewRange(this, spritePos))
             window.draw(*sprite);
     }
 }
 
 void Game::RenderCreature(sf::RenderWindow &window)
 {
-    Utilities utilities;
+    Collision collision;
     for (auto &data : m_creature)
     {
         auto sprite = data->GetSprite();
         auto spritePos = sprite->getPosition();
 
-        if (utilities.InViewRange(this, spritePos))
+        if (collision.InViewRange(this, spritePos))
             window.draw(*sprite);
     }
 }
@@ -1496,6 +1560,7 @@ void Game::ResizeWindow(sf::RenderWindow &window)
     m_menuView.setCenter(m_defaultCenter);
 
     ResizeMenu();
+    ResizeStats();
 }
 
 void Game::ResizeMenu()

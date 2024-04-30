@@ -4,7 +4,6 @@
 #include <SFML/Graphics.hpp>
 #include <World.h>
 #include <cstdint>
-#include <memory>
 #include <string>
 
 class Game;
@@ -61,7 +60,7 @@ public:
     // Render
     void CheckRenderHotkey(sf::RenderWindow &window, Game *game);
     void RenderHotkey(sf::RenderWindow &window, Game *game);
-    void RenderStats(sf::RenderWindow &window, Game *game);
+
     void InitInventoryItems(Game &game);
     void InitTraderItems(Game &game);
 
@@ -71,7 +70,7 @@ public:
     bool CheckInFront(const bool interactable,
                       const sf::Vector2f &objPos,
                       const sf::Vector2f &objSize,
-                      const Collision objCollision);
+                      const CollisionData objCollision);
 
     // DATASTORE
     void Load(const uint8_t id, Game *game);

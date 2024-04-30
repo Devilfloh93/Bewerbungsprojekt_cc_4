@@ -1,19 +1,22 @@
 #pragma once
+#include "AllTextures.h"
 #include "Anim.h"
+#include "Btn.h"
 #include "Creature.h"
 #include "Font.h"
 #include "Gui.h"
-#include "Item.h"
+#include "Input.h"
+#include "ItemCfg.h"
+#include "ItemGround.h"
 #include "Player.h"
 #include "Stats.h"
 #include "Surface.h"
-#include "Texture.h"
 #include "Thread.h"
+#include "Title.h"
 #include "Utilities.h"
 #include "World.h"
 #include <SFML/Graphics.hpp>
 #include <cstdint>
-#include <memory>
 
 struct StatDecay
 {
@@ -21,34 +24,7 @@ struct StatDecay
     float water;
 };
 
-struct ReturnView
-{
-    sf::Vector2f viewCenter;
-    sf::Vector2f viewSize;
-};
-
-enum class MenuState
-{
-    Playing = 0,
-    Main,
-    Pause,
-    Options,
-    Inventory,
-    OpenLoad,
-    Save,
-    Create,
-    Load,
-    Language,
-    Trader
-};
-
-
-class Player;
-class Title;
-class Btn;
-class Input;
 class Thread;
-class EventHandler;
 
 class Game : public Gui
 {
@@ -118,6 +94,8 @@ public:
 
     // STATS
     StatDecay GetStatDecay() const;
+    void ResizeStats();
+    void RenderStats(sf::RenderWindow &window);
 
     // THREAD
     Thread *GetThread();

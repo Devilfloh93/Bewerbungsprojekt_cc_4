@@ -1,11 +1,11 @@
 #include "Player.h"
+#include "Collision.h"
 #include "Stats.h"
 #include "Utilities.h"
 #include <filesystem>
 #include <format>
 #include <fstream>
 #include <iostream>
-#include <memory>
 #include <random>
 
 Player::Player(sf::Sprite *sprite,
@@ -370,46 +370,6 @@ void Player::RenderHotkey(sf::RenderWindow &window, Game *game)
     window.draw(*m_hotkeyRender);
 }
 
-void Player::RenderStats(sf::RenderWindow &window, Game *game)
-{
-    auto width = (game->GetView()->getCenter().x - (game->GetView()->getSize().x / 2)) + 5.0F;
-
-    size_t i = 1;
-    size_t j = 1;
-
-    for (const auto &data : game->GetStats())
-    {
-        auto textureSize = data->GetTextureSize();
-        auto type = data->GetType();
-        auto sprite = data->GetSprite();
-        auto height = (game->GetView()->getCenter().y + (game->GetView()->getSize().y / 2)) - 10.0F;
-        auto textureRectSize = sprite->getTextureRect().getSize();
-        auto textureRectPos = sprite->getTextureRect().getPosition();
-
-        if (type == StatType::Empty)
-        {
-            height -= i * 10;
-            ++i;
-        }
-        else
-        {
-            auto statValue = GetStatValue(type);
-            uint8_t newTextureRectSizeX = (statValue * textureSize.x) / 100;
-            if (textureRectSize.x > 0)
-            {
-                auto textureRect =
-                    sf::IntRect{textureRectPos.x, textureRectPos.y, newTextureRectSizeX, textureRectSize.y};
-                sprite->setTextureRect(textureRect);
-            }
-            height -= j * 10;
-            ++j;
-        }
-
-        sprite->setPosition(sf::Vector2f{width, height});
-        window.draw(*sprite);
-    }
-}
-
 /***
  * TODO: REWORK RENDER TRADER ITEMS
 */
@@ -586,7 +546,7 @@ void Player::InitInventoryItems(Game &game)
 // COLLISION
 void Player::CheckCollision(Game *game)
 {
-    Utilities utilities;
+    Collision collision;
     auto world = game->GetWorld();
     auto creature = game->GetCreature();
 
@@ -595,7 +555,7 @@ void Player::CheckCollision(Game *game)
         bool objectInFront = false;
         auto objPos = data->GetSprite()->getPosition();
 
-        if (utilities.InViewRange(game, objPos))
+        if (collision.InViewRange(game, objPos))
         {
             auto objCollision = data->GetCollision();
             auto objSize = data->GetSprite()->getLocalBounds().getSize();
@@ -622,7 +582,7 @@ void Player::CheckCollision(Game *game)
 
         auto objPos = data->GetSprite()->getPosition();
 
-        if (utilities.InViewRange(game, objPos))
+        if (collision.InViewRange(game, objPos))
         {
             auto objSize = data->GetSprite()->getLocalBounds().getSize();
             auto interactable = data->GetInteractable();
@@ -643,45 +603,44 @@ void Player::CheckCollision(Game *game)
 bool Player::CheckInFront(const bool interactable,
                           const sf::Vector2f &objPos,
                           const sf::Vector2f &objSize,
-                          const Collision objCollision)
+                          const CollisionData objCollision)
 {
-    Utilities utilities;
+    Collision collision;
     auto playerPos = m_sprite->getPosition();
     auto playerSize = m_sprite->getLocalBounds().getSize();
 
-    auto canMoveDownUpCollisionX = utilities.CanMoveDownUpCollisionX(playerPos.x, objPos.x, objCollision.x);
-    auto canMoveUpCollisionY = utilities.CanMoveUpCollisionY(playerPos.y, objPos.y, objSize.y, objCollision.y, m_speed);
+    auto canMoveDownUpX = collision.CanMoveDownUpX(playerPos.x, objPos.x, objCollision.x);
+    auto canMoveUpY = collision.CanMoveUpY(playerPos.y, objPos.y, objSize.y, objCollision.y, m_speed);
 
-    if (!canMoveDownUpCollisionX && !canMoveUpCollisionY)
+    if (!canMoveDownUpX && !canMoveUpY)
     {
         m_moveAllowed.up = false;
         if (interactable && (m_lastMove == PlayerMove::Up || m_move == PlayerMove::Up))
             return true;
     }
 
-    auto canMoveDownCollisionY = utilities.CanMoveDownCollisionY(playerPos.y, objPos.y, objCollision.y, m_speed);
+    auto canMoveDownY = collision.CanMoveDownY(playerPos.y, objPos.y, objCollision.y, m_speed);
 
-    if (!canMoveDownUpCollisionX && !canMoveDownCollisionY)
+    if (!canMoveDownUpX && !canMoveDownY)
     {
         m_moveAllowed.down = false;
         if (interactable && (m_lastMove == PlayerMove::Down || m_move == PlayerMove::Down))
             return true;
     }
 
-    auto canMoveLeftCollisionX = utilities.CanMoveLeftCollisionX(playerPos.x, objPos.x, objCollision.x, m_speed);
-    auto canMoveRightLeftCollisionY =
-        utilities.CanMoveRightLeftCollisionY(playerPos.y, objPos.y, objSize.y, objCollision.y);
+    auto canMoveLeftX = collision.CanMoveLeftX(playerPos.x, objPos.x, objCollision.x, m_speed);
+    auto canMoveRightLeftY = collision.CanMoveRightLeftY(playerPos.y, objPos.y, objSize.y, objCollision.y);
 
-    if (!canMoveLeftCollisionX && !canMoveRightLeftCollisionY)
+    if (!canMoveLeftX && !canMoveRightLeftY)
     {
         m_moveAllowed.left = false;
         if (interactable && (m_lastMove == PlayerMove::Left || m_move == PlayerMove::Left))
             return true;
     }
 
-    auto canMoveRightCollisionX = utilities.CanMoveRightCollisionX(playerPos.x, objPos.x, m_speed);
+    auto canMoveRightX = collision.CanMoveRightX(playerPos.x, objPos.x, m_speed);
 
-    if (!canMoveRightCollisionX && !canMoveRightLeftCollisionY)
+    if (!canMoveRightX && !canMoveRightLeftY)
     {
         m_moveAllowed.right = false;
         if (interactable && (m_lastMove == PlayerMove::Right || m_move == PlayerMove::Right))
@@ -693,12 +652,12 @@ bool Player::CheckInFront(const bool interactable,
 
 bool Player::CheckInFront(const bool interactable, const sf::Vector2f &objPos, const sf::Vector2f &objSize)
 {
-    Utilities utilities;
+    Collision collision;
     auto playerPos = m_sprite->getPosition();
     auto playerSize = m_sprite->getLocalBounds().getSize();
 
-    auto canMoveDownUpX = utilities.CanMoveDownUpX(playerPos.x, playerSize.x, objPos.x, objSize.x);
-    auto canMoveUpY = utilities.CanMoveUpY(playerPos.y, playerSize.y, objPos.y, objSize.y, m_speed);
+    auto canMoveDownUpX = collision.CanMoveDownUpX(playerPos.x, playerSize.x, objPos.x, objSize.x);
+    auto canMoveUpY = collision.CanMoveUpY(playerPos.y, playerSize.y, objPos.y, objSize.y, m_speed);
 
     if (!canMoveDownUpX && !canMoveUpY)
     {
@@ -707,7 +666,7 @@ bool Player::CheckInFront(const bool interactable, const sf::Vector2f &objPos, c
             return true;
     }
 
-    auto canMoveDownY = utilities.CanMoveDownY(playerPos.y, playerSize.y, objPos.y, objSize.y, m_speed);
+    auto canMoveDownY = collision.CanMoveDownY(playerPos.y, playerSize.y, objPos.y, objSize.y, m_speed);
 
     if (!canMoveDownUpX && !canMoveDownY)
     {
@@ -716,8 +675,8 @@ bool Player::CheckInFront(const bool interactable, const sf::Vector2f &objPos, c
             return true;
     }
 
-    auto canMoveLeftX = utilities.CanMoveLeftX(playerPos.x, objPos.x, objSize.x, m_speed);
-    auto canMoveRightLeftY = utilities.CanMoveRightLeftY(playerPos.y, playerSize.y, objSize.y, objPos.y);
+    auto canMoveLeftX = collision.CanMoveLeftX(playerPos.x, objPos.x, objSize.x, m_speed);
+    auto canMoveRightLeftY = collision.CanMoveRightLeftY(playerPos.y, playerSize.y, objSize.y, objPos.y);
 
     if (!canMoveLeftX && !canMoveRightLeftY)
     {
@@ -726,7 +685,7 @@ bool Player::CheckInFront(const bool interactable, const sf::Vector2f &objPos, c
             return true;
     }
 
-    auto canMoveRightX = utilities.CanMoveRightX(playerPos.x, playerSize.x, objPos.x, m_speed);
+    auto canMoveRightX = collision.CanMoveRightX(playerPos.x, playerSize.x, objPos.x, m_speed);
 
     if (!canMoveRightX && !canMoveRightLeftY)
     {
