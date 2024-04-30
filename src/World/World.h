@@ -1,6 +1,6 @@
 #pragma once
+#include "AllTextures.h"
 #include "Sprite.h"
-#include "Texture.h"
 #include <SFML/Graphics.hpp>
 #include <cstdint>
 #include <vector>
@@ -13,13 +13,13 @@ class World : public Sprite
 public:
     World(sf::Sprite *sprite,
           const uint8_t id,
-          const Collision collision,
+          const CollisionData collision,
           const vector<uint8_t> itemOutputID,
           const TextureProgData textureProgData,
           const bool saving);
     ~World() = default;
 
-    Collision GetCollision() const;
+    CollisionData GetCollision() const;
     vector<uint8_t> GetItemOutputID() const;
     bool GetInteractable() const;
     uint8_t GetID() const;
@@ -33,7 +33,7 @@ public:
 
 private:
     uint8_t m_ID;
-    Collision m_collision;
+    CollisionData m_collision;
     vector<uint8_t> m_itemOutputID;
     TextureProgData m_textureProgData;
     bool m_saveIt;

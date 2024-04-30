@@ -1,7 +1,8 @@
 #pragma once
+#include "Texture.h"
 #include <SFML/Graphics.hpp>
 
-struct Collision
+struct CollisionData
 {
     uint8_t x;
     uint8_t y;
@@ -10,19 +11,7 @@ struct Collision
 struct TextureProgData
 {
     sf::IntRect rect;
-    Collision collision;
-};
-
-class Texture
-{
-public:
-    Texture(sf::Texture *texture);
-    ~Texture() = default;
-
-    sf::Texture *GetTexture() const;
-
-protected:
-    sf::Texture *m_texture;
+    CollisionData collision;
 };
 
 class AllTextures : public Texture

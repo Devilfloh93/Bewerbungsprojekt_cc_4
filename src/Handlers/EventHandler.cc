@@ -1,4 +1,6 @@
 #include "EventHandler.h"
+#include "Collision.h"
+#include "Gui.h"
 
 EventHandler::EventHandler()
 {
@@ -33,8 +35,10 @@ void EventHandler::MouseBtnPressed(sf::RenderWindow &window, Game &game)
 
 void EventHandler::Playing(Game &game, const sf::Keyboard::Key &key)
 {
+    Collision collision;
     auto player = game.GetPlayer();
     auto hotkeys = game.GetHotkeys();
+    auto playerPos = player->GetSprite()->getPosition();
 
     for (const auto &data : hotkeys)
     {
@@ -62,17 +66,20 @@ void EventHandler::Playing(Game &game, const sf::Keyboard::Key &key)
                 m_break = true;
             }
 
-            if (keyString == "leftMove")
-                player->SetMove(PlayerMove::Left);
+            if (collision.InViewRange(&game, {playerPos.x, playerPos.y}))
+            {
+                if (keyString == "leftMove")
+                    player->SetMove(PlayerMove::Left);
 
-            if (keyString == "rightMove")
-                player->SetMove(PlayerMove::Right);
+                if (keyString == "rightMove")
+                    player->SetMove(PlayerMove::Right);
 
-            if (keyString == "upMove")
-                player->SetMove(PlayerMove::Up);
+                if (keyString == "upMove")
+                    player->SetMove(PlayerMove::Up);
 
-            if (keyString == "downMove")
-                player->SetMove(PlayerMove::Down);
+                if (keyString == "downMove")
+                    player->SetMove(PlayerMove::Down);
+            }
 
             break;
         }

@@ -30,7 +30,6 @@ int main()
 
     sf::Clock clock;
 
-
     game.Init();
 
     while (window.isOpen())
