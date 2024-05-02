@@ -59,13 +59,9 @@ int main()
         window->clear(sf::Color(50U, 50U, 50U));
 
         if (game.GetPlaying() && game.GetMenuState() == MenuState::Playing)
-        {
             game.Render(clock);
-        }
         else
-        {
             game.RenderMenu();
-        }
 
         window->display();
     }
