@@ -26,14 +26,9 @@ Game::Game() : Gui(MenuState::Main)
 
 void Game::Init()
 {
-    m_windowWidth = 1280U;
-    m_windowHeight = 720U;
-    // m_windowWidth = sf::VideoMode::getDesktopMode().width;
-    // m_windowHeight = sf::VideoMode::getDesktopMode().height;
-
-    InitWindow();
     InitFolder();
     InitSettings();
+    InitWindow();
     InitViews();
     InitTexture();
     InitFont();
@@ -146,7 +141,7 @@ void Game::UpdateZoom(const float delta)
             SetZoom(-1, 2.0F);
     }
 
-    UpdateView(m_view->getSize());
+    UpdateView();
 }
 
 uint8_t Game::GetZoom() const
@@ -221,8 +216,10 @@ sf::View *Game::GetView()
     return m_view;
 }
 
-void Game::UpdateView(const sf::Vector2f &size)
+void Game::UpdateView()
 {
+    auto size = m_view->getSize();
+
     if (m_view->getCenter().x >= m_gameWidth - (size.x / 2U))
         m_view->setCenter({m_gameWidth - (size.x / 2U), m_view->getCenter().y});
 
@@ -458,7 +455,20 @@ void Game::InitGeneral()
         auto jsonData = json::parse(file);
 
         m_language = jsonData["language"];
+        m_windowWidth = jsonData["resolutionWidth"];
+        m_windowHeight = jsonData["resolutionHeight"];
+        m_windowStyle = jsonData["resolutionStyle"];
+
         file.close();
+    }
+    else
+    {
+        m_language = "enEN";
+        // m_windowWidth = sf::VideoMode::getDesktopMode().width;
+        // m_windowHeight = sf::VideoMode::getDesktopMode().height;
+        m_windowWidth = 1280U;
+        m_windowHeight = 720U;
+        m_windowStyle = 4;
     }
 }
 
@@ -532,6 +542,11 @@ void Game::InitViews()
     m_view = new sf::View(visibleArea);
     m_menuView = new sf::View(visibleArea);
 
+    InitZoom();
+}
+
+void Game::InitZoom()
+{
     auto center = m_view->getCenter();
 
     m_view->zoom(0.5F);
@@ -629,13 +644,6 @@ void Game::InitFont()
 
 void Game::InitMenu()
 {
-    enum class Element
-    {
-        Nothing = 0,
-        Title,
-        Input
-    };
-
     ifstream fileLanguage("./data/language/menu.json");
 
     ifstream fileTitle("./data/menu/title.json");
@@ -904,7 +912,7 @@ void Game::InitAnim()
 
 void Game::InitWindow()
 {
-    m_window = new sf::RenderWindow(sf::VideoMode(m_windowWidth, m_windowHeight), "Good Game", sf::Style::Close);
+    m_window = new sf::RenderWindow(sf::VideoMode(m_windowWidth, m_windowHeight), "Good Game", m_windowStyle);
     m_window->setVerticalSyncEnabled(true);
     m_window->setFramerateLimit(60U);
     m_window->setKeyRepeatEnabled(false);
@@ -1563,35 +1571,87 @@ void Game::SaveGroundItems(const bool destroy)
 }
 
 // RESIZE
-void Game::ResizeWindow()
+void Game::ResizeWindow(const uint16_t width, const uint16_t height)
 {
-    sf::FloatRect visibleArea(0, 0, m_windowWidth, m_windowHeight);
+    if (m_windowWidth != width || m_windowHeight != height)
+    {
+        m_windowWidth = width;
+        m_windowHeight = height;
 
-    delete m_menuView;
-    m_menuView = nullptr;
-    delete m_view;
-    m_view = nullptr;
+        delete m_window;
+        m_window = nullptr;
 
-    m_menuView = new sf::View(visibleArea);
-    m_view = new sf::View(visibleArea);
-    m_window->setSize({m_windowWidth, m_windowHeight});
+        m_window = new sf::RenderWindow(sf::VideoMode(m_windowWidth, m_windowHeight), "Good Game", m_windowStyle);
+        SetWindowProperties();
 
-    ResizeMenu();
-    ResizeStats();
+        sf::FloatRect visibleArea(0, 0, m_windowWidth, m_windowHeight);
+
+        delete m_menuView;
+        m_menuView = nullptr;
+        delete m_view;
+        m_view = nullptr;
+
+        m_menuView = new sf::View(visibleArea);
+        m_view = new sf::View(visibleArea);
+        m_window->setSize({m_windowWidth, m_windowHeight});
+
+        SaveGeneral();
+        InitZoom();
+        UpdateView();
+        ResizeMenu();
+        ResizeStats();
+    }
+}
+
+void Game::FullscreenWindow()
+{
+    if (m_windowStyle != sf::Style::Fullscreen)
+    {
+        m_windowStyle = sf::Style::Fullscreen;
+
+        delete m_window;
+        m_window = nullptr;
+
+        m_window = new sf::RenderWindow(sf::VideoMode(m_windowWidth, m_windowHeight), "Good Game", m_windowStyle);
+        SetWindowProperties();
+        SaveGeneral();
+    }
+}
+
+void Game::SetWindowProperties()
+{
+    m_window->setVerticalSyncEnabled(true);
+    m_window->setFramerateLimit(60U);
+    m_window->setKeyRepeatEnabled(false);
 }
 
 void Game::ResizeMenu()
 {
     Utilities utilities;
-    sf::Sprite *prevBtn;
 
     for (const auto &data : m_titles)
     {
+        Element element = Element::Title;
+        sf::Sprite *prevBtn;
+        sf::Text *inputText;
         auto titleState = data->GetMenuState();
-        bool firstBtn = true;
 
         auto text = data->GetText();
         utilities.SetTitlePos(m_windowWidth, text);
+
+        for (const auto &dataInput : m_inputs)
+        {
+            auto inputState = dataInput->GetMenuState();
+
+            if (titleState == inputState)
+            {
+                inputText = dataInput->GetText();
+
+                utilities.SetTitlePos(m_windowWidth, text, inputText);
+
+                element = Element::Input;
+            }
+        }
 
         for (const auto &data2 : m_btns)
         {
@@ -1601,13 +1661,16 @@ void Game::ResizeMenu()
             {
                 auto sprite = data2->GetSprite();
                 auto btnText = data2->GetText();
-                if (firstBtn)
+
+                if (element == Element::Title)
                     utilities.SetBtnAndTextPos(m_windowWidth, sprite, text, btnText);
+                else if (element == Element::Input)
+                    utilities.SetBtnAndTextPos(m_windowWidth, sprite, inputText, btnText);
                 else
                     utilities.SetBtnAndTextPos(m_windowWidth, sprite, prevBtn, btnText);
 
                 prevBtn = sprite;
-                firstBtn = false;
+                element = Element::Nothing;
             }
         }
     }
@@ -1706,17 +1769,24 @@ void Game::ChangeLanguage(const string language)
     }
     m_inputs.clear();
 
+    SaveGeneral();
+    InitMenu();
+}
+
+void Game::SaveGeneral()
+{
     ofstream file("./settings/general.json");
 
     if (file.is_open())
     {
-        json jsonData = {{"language", m_language}};
+        json jsonData = {{"language", m_language},
+                         {"resolutionWidth", m_windowWidth},
+                         {"resolutionHeight", m_windowHeight},
+                         {"resolutionStyle", m_windowStyle}};
 
         file << jsonData;
         file.close();
     }
-
-    InitMenu();
 }
 
 // UNIQUE PTR
