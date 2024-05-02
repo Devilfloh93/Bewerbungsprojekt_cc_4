@@ -33,8 +33,8 @@ enum class PlayerMove
 class Player : public Unit
 {
 public:
-    Player(sf::Sprite *sprite, const uint8_t animID, const string_view name, const uint8_t id, sf::Text *hotkeyRender);
-    Player(sf::Sprite *sprite, const uint8_t animID, const uint8_t id, sf::Text *hotkeyRender);
+    Player(sf::Sprite *sprite, const uint8_t animID, const string_view name, const uint8_t id);
+    Player(sf::Sprite *sprite, const uint8_t animID, const uint8_t id);
     ~Player() = default;
 
     // INIT
@@ -59,7 +59,6 @@ public:
 
     // Render
     void CheckRenderHotkey(Game *game);
-    void RenderHotkey(Game *game);
 
     void InitInventoryItems(Game &game);
     void InitTraderItems(Game &game);
@@ -74,7 +73,7 @@ public:
 
     // DATASTORE
     void Load(const uint8_t id, Game *game);
-    void Save(const bool destroy, Game *game);
+    void Save(Game *game);
 
 private:
     // INFO
@@ -91,8 +90,6 @@ private:
     // COLLISION
     World *m_objectInFront;
     Creature *m_creatureInFront;
-    // RENDER
-    sf::Text *m_hotkeyRender;
     // TRADER
     Trader *m_trader;
 };

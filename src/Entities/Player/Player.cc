@@ -8,18 +8,14 @@
 #include <iostream>
 #include <random>
 
-Player::Player(sf::Sprite *sprite,
-               const uint8_t animID,
-               const string_view name,
-               const uint8_t id,
-               sf::Text *hotkeyRender)
-    : Unit(sprite, 100.0F, 1.0F, animID), m_name(name), m_ID(id), m_hotkeyRender(hotkeyRender)
+Player::Player(sf::Sprite *sprite, const uint8_t animID, const string_view name, const uint8_t id)
+    : Unit(sprite, 100.0F, 1.0F, animID), m_name(name), m_ID(id)
 {
     Init();
 }
 
-Player::Player(sf::Sprite *sprite, const uint8_t animID, const uint8_t id, sf::Text *hotkeyRender)
-    : Unit(sprite, 100.0F, 1.0F, animID), m_ID(id), m_hotkeyRender(hotkeyRender)
+Player::Player(sf::Sprite *sprite, const uint8_t animID, const uint8_t id)
+    : Unit(sprite, 100.0F, 1.0F, animID), m_ID(id)
 {
     Init();
 }
@@ -29,7 +25,6 @@ void Player::Init()
 {
     m_sprite->setPosition(80.0F, 80.0F);
     m_survivalStats = {.water = 100.0F, .food = 100.0F};
-
     m_move = PlayerMove::NotMoving;
     m_lastMove = m_move;
     m_trader = nullptr;
@@ -121,37 +116,41 @@ void Player::HandleMove(sf::Clock &clock, Game *game)
     switch (m_move)
     {
     case PlayerMove::Left:
-        utilities.PlayAnimation(m_sprite, clock, animData.left.notMoving, animData.left.anim01);
-
         if (playerPos.x - m_speed > 0 + (tileSize / 2) && m_moveAllowed.left)
+        {
+            utilities.PlayAnimation(m_sprite, clock, animData.left.notMoving, animData.left.anim01);
             m_sprite->setPosition(playerPos.x - m_speed, playerPos.y);
+        }
         else
             m_sprite->setTextureRect(animData.left.notMoving);
         break;
     case PlayerMove::Right:
-        utilities.PlayAnimation(m_sprite, clock, animData.right.notMoving, animData.right.anim01);
-
         if (playerPos.x + m_speed < width - tileSize && m_moveAllowed.right)
+        {
+            utilities.PlayAnimation(m_sprite, clock, animData.right.notMoving, animData.right.anim01);
             m_sprite->setPosition(playerPos.x + m_speed, playerPos.y);
+        }
         else
             m_sprite->setTextureRect(animData.right.notMoving);
         break;
     case PlayerMove::Down:
-        utilities.PlayAnimation(m_sprite, clock, animData.down.anim01, animData.down.anim02);
-
         if (playerPos.y + m_speed < height - tileSize && m_moveAllowed.down)
+        {
+            utilities.PlayAnimation(m_sprite, clock, animData.down.anim01, animData.down.anim02);
             m_sprite->setPosition(playerPos.x, playerPos.y + m_speed);
+        }
         else
-            m_sprite->setTextureRect(animData.down.anim01);
+            m_sprite->setTextureRect(animData.down.notMoving);
 
         break;
     case PlayerMove::Up:
-        utilities.PlayAnimation(m_sprite, clock, animData.up.anim01, animData.up.anim02);
-
         if (playerPos.y - m_speed > 0 + (tileSize / 2) && m_moveAllowed.up)
+        {
+            utilities.PlayAnimation(m_sprite, clock, animData.up.anim01, animData.up.anim02);
             m_sprite->setPosition(playerPos.x, playerPos.y - m_speed);
+        }
         else
-            m_sprite->setTextureRect(animData.up.anim01);
+            m_sprite->setTextureRect(animData.up.notMoving);
 
         break;
     case PlayerMove::NotMoving:
@@ -335,7 +334,7 @@ void Player::CheckRenderHotkey(Game *game)
     {
         if (m_objectInFront->GetInteractable())
         {
-            RenderHotkey(game);
+            game->RenderHotkey();
         }
     }
 
@@ -343,32 +342,9 @@ void Player::CheckRenderHotkey(Game *game)
     {
         if (m_creatureInFront->GetInteractable())
         {
-            RenderHotkey(game);
+            game->RenderHotkey();
         }
     }
-}
-
-void Player::RenderHotkey(Game *game)
-{
-    auto window = game->GetWindow();
-    auto hotkeys = game->GetHotkeys();
-
-    for (const auto &data : game->GetHotkeys())
-    {
-        if (data.first == "interact")
-        {
-            auto hotkeyString =
-                (sf::Keyboard::getDescription(static_cast<sf::Keyboard::Scancode>(data.second))).toAnsiString();
-
-            m_hotkeyRender->setString(hotkeyString);
-        }
-    }
-
-    m_hotkeyRender->setPosition((m_sprite->getPosition().x - (m_hotkeyRender->getLocalBounds().getSize().x / 2)) +
-                                    (m_sprite->getLocalBounds().getSize().x / 2),
-                                m_sprite->getPosition().y - 15);
-
-    window->draw(*m_hotkeyRender);
 }
 
 /***
@@ -548,12 +524,12 @@ void Player::InitInventoryItems(Game &game)
 void Player::CheckCollision(Game *game)
 {
     Collision collision;
+    bool objectInFront = false;
     auto world = game->GetWorld();
     auto creature = game->GetCreature();
 
     for (const auto &data : world)
     {
-        bool objectInFront = false;
         auto objPos = data->GetSprite()->getPosition();
 
         if (collision.InViewRange(game, objPos))
@@ -579,8 +555,6 @@ void Player::CheckCollision(Game *game)
 
     for (const auto &data : creature)
     {
-        bool objectInFront = false;
-
         auto objPos = data->GetSprite()->getPosition();
 
         if (collision.InViewRange(game, objPos))
@@ -742,7 +716,7 @@ void Player::Load(const uint8_t id, Game *game)
     game->UpdateView();
 }
 
-void Player::Save(const bool destroy, Game *game)
+void Player::Save(Game *game)
 {
     auto path = format("./save/{}/player.json", m_ID);
 
@@ -763,11 +737,5 @@ void Player::Save(const bool destroy, Game *game)
 
         file << jsonData;
         file.close();
-    }
-
-    if (destroy)
-    {
-        delete m_hotkeyRender;
-        m_hotkeyRender = nullptr;
     }
 }

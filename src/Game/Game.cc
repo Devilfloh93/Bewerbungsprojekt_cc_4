@@ -13,6 +13,7 @@ using namespace std;
 
 Game::Game() : Gui(MenuState::Main)
 {
+    m_saveGameID = 0;
     m_renderPuffer = 200.0F;
     m_maxZoom = 3U;
     m_playing = false;
@@ -24,20 +25,36 @@ Game::Game() : Gui(MenuState::Main)
     m_maxTiles = ((m_gameWidth * m_gameHeight) / m_tileSize) / m_tileSize;
 }
 
+// BE CAREFUL WITH CHANGING INITIALIZING ORDER
 void Game::Init()
 {
     InitFolder();
     InitSettings();
-    InitWindow();
-    InitViews();
-    InitTexture();
-    InitFont();
-    InitAnim();
 
+    InitFont();
+    InitTexture();
+    InitAnim();
     InitItemCfg();
+    InitSurface();
     InitRenderStats();
     InitMenu();
-    InitSurface();
+
+    InitWindow();
+    InitViews();
+
+    /***
+     * TODO: MOVE THIS TO CHANGE HOTKEY OPTIONS LATER
+    */
+
+    Utilities utilities;
+    auto font = utilities.GetFont(m_fonts, 0);
+    m_hotkeyRender = new sf::Text();
+    utilities.SetSFText(m_hotkeyRender, font, 10);
+
+    auto interact = m_hotkeys["interact"];
+    auto hotkeyString = (sf::Keyboard::getDescription(static_cast<sf::Keyboard::Scancode>(interact))).toAnsiString();
+
+    m_hotkeyRender->setString(hotkeyString);
 
     cout << "Game Init Done!" << endl;
 }
@@ -305,12 +322,7 @@ bool Game::LoadPlayer(const uint8_t id)
 
     utilities.SetSFSprite(sprite, texture, animData.down.notMoving);
 
-    auto font = utilities.GetFont(m_fonts, 0);
-
-    auto hotkeyRender = new sf::Text();
-    utilities.SetSFText(hotkeyRender, font, 10);
-
-    m_player = new Player(sprite, m_defaultAnimID, id, hotkeyRender);
+    m_player = new Player(sprite, m_defaultAnimID, id);
 
     return true;
 }
@@ -345,7 +357,7 @@ bool Game::CreatePlayer()
     auto hotkeyRender = new sf::Text();
     utilities.SetSFText(hotkeyRender, font, 10);
 
-    m_player = new Player(sprite, m_defaultAnimID, playerName, countFolders, hotkeyRender);
+    m_player = new Player(sprite, m_defaultAnimID, playerName, countFolders);
     return true;
 }
 
@@ -1298,6 +1310,22 @@ void Game::RenderCreature()
     }
 }
 
+float Game::GetRenderPuffer() const
+{
+    return m_renderPuffer;
+}
+
+void Game::RenderHotkey()
+{
+    auto playerPos = m_player->GetSprite()->getPosition();
+    auto playerSize = m_player->GetSprite()->getLocalBounds().getSize();
+
+    m_hotkeyRender->setPosition((playerPos.x - (m_hotkeyRender->getLocalBounds().getSize().x / 2)) + (playerSize.x / 2),
+                                playerPos.y - 15);
+
+    m_window->draw(*m_hotkeyRender);
+}
+
 void Game::RenderMenu()
 {
     m_window->setView(*m_menuView);
@@ -1393,7 +1421,7 @@ void Game::SetSaveGameID(const uint8_t id)
 
 void Game::Saving(const bool destroy)
 {
-    m_player->Save(destroy, this);
+    m_player->Save(this);
     SaveCreatures(destroy);
     SaveWorld(destroy);
     SaveGroundItems(destroy);
@@ -1729,11 +1757,6 @@ Thread *Game::GetThread()
     return m_thread;
 }
 
-// Render
-float Game::GetRenderPuffer() const
-{
-    return m_renderPuffer;
-}
 
 // SETTINGS
 map<string, uint8_t> Game::GetHotkeys() const

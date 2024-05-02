@@ -135,6 +135,7 @@ public:
     void RenderItems();
     void RenderCreature();
     float GetRenderPuffer() const;
+    void RenderHotkey();
 
     // RESIZE
     void ResizeWindow(const uint16_t width, const uint16_t height);
@@ -208,6 +209,7 @@ private:
     Thread *m_thread;
     // RENDER
     float m_renderPuffer;
+    sf::Text *m_hotkeyRender;
     // WINDOW
     sf::RenderWindow *m_window;
     uint8_t m_windowStyle;
