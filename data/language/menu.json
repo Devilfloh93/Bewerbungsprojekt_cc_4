@@ -196,5 +196,27 @@
             "title": "Händler",
             "description": ""
         }
+    },
+    {
+        "id": 19,
+        "enEN": {
+            "title": "1920x1080",
+            "description": ""
+        },
+        "deDE": {
+            "title": "1920x1080",
+            "description": ""
+        }
+    },
+    {
+        "id": 20,
+        "enEN": {
+            "title": "1280x720",
+            "description": ""
+        },
+        "deDE": {
+            "title": "1280x720",
+            "description": ""
+        }
     }
 ]

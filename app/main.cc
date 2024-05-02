@@ -19,10 +19,10 @@ int main()
     sf::Clock clock;
 
     game.Init();
+    auto window = game.GetWindow();
 
     while (game.GetWindow()->isOpen())
     {
-        auto window = game.GetWindow();
         eventHandler.ResetBreak();
 
         for (auto event = sf::Event{}; window->pollEvent(event);)
@@ -54,6 +54,7 @@ int main()
             if (eventHandler.GetBreak())
                 break;
         }
+        window = game.GetWindow();
 
         window->clear(sf::Color(50U, 50U, 50U));
 

@@ -738,6 +738,8 @@ void Player::Load(const uint8_t id, Game *game)
 
         file.close();
     }
+
+    game->UpdateView();
 }
 
 void Player::Save(const bool destroy, Game *game)

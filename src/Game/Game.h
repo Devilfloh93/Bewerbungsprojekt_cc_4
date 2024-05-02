@@ -74,7 +74,7 @@ public:
 
     // VIEW
     sf::View *GetView();
-    void UpdateView(const sf::Vector2f &size);
+    void UpdateView();
     void HandleViewPosition();
 
     // PLAYER
@@ -113,6 +113,7 @@ public:
     void InitHotkeys();
 
     void InitViews();
+    void InitZoom();
     void InitTexture();
     void InitFont();
     void InitAnim();
@@ -136,8 +137,10 @@ public:
     float GetRenderPuffer() const;
 
     // RESIZE
-    void ResizeWindow();
+    void ResizeWindow(const uint16_t width, const uint16_t height);
     void ResizeMenu();
+    void FullscreenWindow();
+    void SetWindowProperties();
 
     // FOLDER
     void CreateSaveFolder(const uint8_t id);
@@ -150,6 +153,7 @@ public:
     // SETTINGS
     map<string, uint8_t> GetHotkeys() const;
     void ChangeLanguage(const string language);
+    void SaveGeneral();
 
     // UNIQUE PTR
     void SetDialogSprite(unique_ptr<sf::Sprite> sprite);
@@ -206,4 +210,5 @@ private:
     float m_renderPuffer;
     // WINDOW
     sf::RenderWindow *m_window;
+    uint8_t m_windowStyle;
 };

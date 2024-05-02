@@ -2,19 +2,20 @@
 
 ## Vorwort
 
-* Dieses Projekt dient zu Übungszwecken und als beigabe für Bewerbungen auf einen Praktikumsplatz zum Fachinformatiker für Anwendungsentwicklung, für das 9 monatige Pflichtpraktikum der IHK.
-* Dieses Projekt ist in der Entwicklung und noch nicht abgeschlossen.
+* Dieses Projekt dient zu Übungszwecken und als Beigabe für Bewerbungen auf einen Praktikumsplatz zum Fachinformatiker für Anwendungsentwicklung, für das 9-monatige Pflichtpraktikum der IHK.
+* Dieses Projekt ist in einer frühen Phase der Entwicklung und noch nicht abgeschlossen.
 
 ## Projektübersicht
 
-### Projektstunden: 80h
+### Projektstunden: ~80h
 
 ### Warum ein Spiel?
 
 * Zuallererst durch meine Leidenschaft für Videospiele
 * Ein Spiel kann schnell zu einer Komplexen Anwendung werden und erfordert oft performante Lösungen für verschiedene Features
+* Die zu erstellende Logik ist umfangreich und teilweise Komplex
 
-### Welche Librarys wurden verwendet?
+### Welche Libraries wurden verwendet?
 
 * SFML <https://www.sfml-dev.org/>
 * Nlohmann/json <https://github.com/nlohmann/json>

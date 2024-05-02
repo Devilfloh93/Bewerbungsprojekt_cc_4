@@ -3,6 +3,13 @@
 
 using namespace std;
 
+enum class Element
+{
+    Nothing = 0,
+    Title,
+    Input
+};
+
 enum class BtnFunc
 {
     Nothing = 0,
@@ -20,7 +27,10 @@ enum class BtnFunc
     MainMenu,
     Language,
     ChangeLanguageEN,
-    ChangeLanguageDE
+    ChangeLanguageDE,
+    OpenResolution,
+    Resolution1920x1080,
+    Resolution1280x720
 };
 
 enum class MenuState
@@ -35,7 +45,8 @@ enum class MenuState
     Create,
     Load,
     Language,
-    Trader
+    Trader,
+    Resolution
 };
 
 class Gui

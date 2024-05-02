@@ -19,6 +19,7 @@
 ## Textures
 
 * Change Textures for Grass and Water so they fit more the Tree Textures
+* Add Animations for Button press
 
 ## Multithreading
 

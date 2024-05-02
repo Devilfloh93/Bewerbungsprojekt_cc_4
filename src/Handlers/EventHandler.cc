@@ -266,13 +266,20 @@ void EventHandler::BtnPressed(Game &game)
 
                 m_break = true;
                 break;
-            case BtnFunc::Resolution:
-                game.SetWindowHeight(1080U);
-                game.SetWindowWidth(1920U);
-                game.ResizeWindow();
+            case BtnFunc::OpenResolution:
+                game.SetMenuState(MenuState::Resolution);
+                m_break = true;
+                break;
+            case BtnFunc::Resolution1280x720:
+                game.ResizeWindow(1280U, 720U);
+                m_break = true;
+                break;
+            case BtnFunc::Resolution1920x1080:
+                game.ResizeWindow(1920U, 1080U);
                 m_break = true;
                 break;
             case BtnFunc::Fullscreen:
+                game.FullscreenWindow();
                 m_break = true;
                 break;
             case BtnFunc::Save:
