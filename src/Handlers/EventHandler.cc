@@ -42,45 +42,44 @@ void EventHandler::Playing(Game &game, const sf::Keyboard::Key &key)
 
     for (const auto &data : hotkeys)
     {
-        auto keyString = data.first;
+        auto hotkey = static_cast<Hotkey>(data.first);
         auto keyID = data.second;
 
         if (key == keyID)
         {
-            if (keyString == "interact")
+            switch (hotkey)
             {
+            case Hotkey::Interact:
                 player->Interact(game);
                 m_break = true;
-            }
-
-            if (keyString == "escape")
-            {
+                break;
+            case Hotkey::Escape:
                 game.SetMenuState(MenuState::Pause);
                 m_break = true;
-            }
-
-            if (keyString == "inventory")
-            {
+                break;
+            case Hotkey::Inventory:
                 game.SetMenuState(MenuState::Inventory);
                 player->InitInventoryItems(game);
                 m_break = true;
-            }
-
-            if (collision.InViewRange(&game, {playerPos.x, playerPos.y}))
-            {
-                if (keyString == "leftMove")
+                break;
+                if (collision.InViewRange(&game, {playerPos.x, playerPos.y}))
+                {
+                case Hotkey::LeftMove:
                     player->SetMove(PlayerMove::Left);
-
-                if (keyString == "rightMove")
+                    break;
+                case Hotkey::RightMove:
                     player->SetMove(PlayerMove::Right);
-
-                if (keyString == "upMove")
+                    break;
+                case Hotkey::UpMove:
                     player->SetMove(PlayerMove::Up);
-
-                if (keyString == "downMove")
+                    break;
+                case Hotkey::DownMove:
                     player->SetMove(PlayerMove::Down);
+                    break;
+                }
+            default:
+                break;
             }
-
             break;
         }
     }
@@ -318,6 +317,10 @@ void EventHandler::BtnPressed(Game &game)
                 break;
             case BtnFunc::ChangeLanguageDE:
                 game.ChangeLanguage("deDE");
+                m_break = true;
+                break;
+            case BtnFunc::OpenHotkeys:
+                game.SetMenuState(MenuState::Hotkeys);
                 m_break = true;
                 break;
             default:
