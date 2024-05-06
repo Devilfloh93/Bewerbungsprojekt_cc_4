@@ -1,6 +1,6 @@
 #pragma once
-#include "AllTextures.h"
 #include "Sprite.h"
+#include "Texture.h"
 #include <SFML/Graphics.hpp>
 #include <cstdint>
 #include <vector>
@@ -11,7 +11,7 @@ class World : public Sprite
 {
 
 public:
-    World(sf::Sprite *sprite,
+    World(unique_ptr<sf::Sprite> sprite,
           const uint8_t id,
           const CollisionData collision,
           const vector<uint8_t> itemOutputID,

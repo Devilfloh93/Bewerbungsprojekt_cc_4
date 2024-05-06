@@ -1,15 +1,14 @@
 #pragma once
-#include "Texture.h"
 #include <SFML/Graphics.hpp>
 #include <cstdint>
 #include <string>
 
 using namespace std;
 
-class ItemCfg : public Texture
+class ItemCfg
 {
 public:
-    ItemCfg(sf::Texture *texture,
+    ItemCfg(const uint8_t textureID,
             const sf::IntRect textureData,
             const uint8_t ID,
             const string_view name,
@@ -20,12 +19,14 @@ public:
     sf::IntRect GetTextureData() const;
 
     uint8_t GetID() const;
+    uint8_t GetTextureID() const;
     uint8_t GetMaxDrop() const;
     uint8_t GetFontID() const;
 
 private:
     sf::IntRect m_textureData;
     uint8_t m_ID;
+    uint8_t m_textureID;
     string m_name;
     uint8_t m_maxDrop;
     uint8_t m_fontID;

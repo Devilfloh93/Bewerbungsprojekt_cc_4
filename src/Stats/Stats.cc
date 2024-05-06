@@ -1,7 +1,7 @@
 #include "Stats.h"
 
-Stats::Stats(sf::Sprite *sprite, const sf::Vector2i textureSize, const StatType type)
-    : Sprite(sprite), m_textureSize(textureSize), m_type(type)
+Stats::Stats(unique_ptr<sf::Sprite> sprite, const sf::Vector2i textureSize, const StatType type)
+    : Sprite(move(sprite)), m_textureSize(textureSize), m_type(type)
 {
 }
 

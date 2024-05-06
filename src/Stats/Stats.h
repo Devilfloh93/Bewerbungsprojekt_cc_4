@@ -14,7 +14,7 @@ class Stats : public Sprite
 {
 
 public:
-    Stats(sf::Sprite *sprite, const sf::Vector2i textureSize, const StatType type);
+    Stats(unique_ptr<sf::Sprite> sprite, const sf::Vector2i textureSize, const StatType type);
     ~Stats() = default;
 
     StatType GetType() const;

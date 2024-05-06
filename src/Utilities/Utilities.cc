@@ -124,26 +124,30 @@ void Utilities::PlayAnimation(sf::Sprite *sprite, sf::Clock &clock, sf::IntRect 
         clock.restart();
 }
 
-void Utilities::SetSFText(sf::Text *text, sf::Font *font, const uint8_t size, const string value)
+void Utilities::SetSFText(sf::Text *text, const sf::Font *font, const uint8_t size, const string value)
 {
     text->setFont(*font);
     text->setCharacterSize(size);
     text->setString(format("{}", value));
 }
 
-void Utilities::SetSFText(sf::Text *text, sf::Font *font, const uint8_t size)
+void Utilities::SetSFText(sf::Text *text, const sf::Font *font, const uint8_t size)
 {
     text->setFont(*font);
     text->setCharacterSize(size);
 }
 
-void Utilities::SetSFSprite(sf::Sprite *sprite, sf::Texture *texture, const sf::IntRect &rectangle)
+void Utilities::SetSFSprite(sf::Sprite *sprite, const sf::Texture *texture, const sf::IntRect &rectangle)
 {
     sprite->setTexture(*texture);
     sprite->setTextureRect(rectangle);
 }
 
-void Utilities::SetSFSprite(sf::Sprite *sprite, sf::Texture *texture, const sf::IntRect &rectangle, float x, float y)
+void Utilities::SetSFSprite(sf::Sprite *sprite,
+                            const sf::Texture *texture,
+                            const sf::IntRect &rectangle,
+                            float x,
+                            float y)
 {
     sprite->setTexture(*texture);
     sprite->setTextureRect(rectangle);
@@ -151,7 +155,7 @@ void Utilities::SetSFSprite(sf::Sprite *sprite, sf::Texture *texture, const sf::
 }
 
 void Utilities::SetSFSprite(sf::Sprite *sprite,
-                            sf::Texture *texture,
+                            const sf::Texture *texture,
                             const sf::IntRect &rectangle,
                             const sf::Vector2f &factors)
 {
@@ -160,32 +164,28 @@ void Utilities::SetSFSprite(sf::Sprite *sprite,
     sprite->setScale(factors);
 }
 
-sf::Font *Utilities::GetFont(const vector<Font *> &fonts, const uint8_t fontID)
+const sf::Font *Utilities::GetFont(const vector<Font *> &fonts, const uint8_t fontID) const
 {
-    sf::Font *font;
     for (const auto &data : fonts)
     {
         if (fontID == data->GetID())
         {
-            font = data->GetFont();
-            break;
+            return data->GetFont();
         }
     }
-    return font;
+    return nullptr;
 }
 
-sf::Texture *Utilities::GetTexture(const vector<AllTextures *> &textures, const uint8_t textureID)
+const sf::Texture *Utilities::GetTexture(const vector<Texture *> &textures, const uint8_t textureID) const
 {
-    sf::Texture *texture;
     for (const auto &data : textures)
     {
         if (data->GetID() == textureID)
         {
-            texture = data->GetTexture();
-            break;
+            return data->GetTexture();
         }
     }
-    return texture;
+    return nullptr;
 }
 
 AnimTextureCombined Utilities::GetAnim(const vector<Anim *> &anim, const uint8_t animID)
@@ -202,22 +202,20 @@ AnimTextureCombined Utilities::GetAnim(const vector<Anim *> &anim, const uint8_t
     return animData;
 }
 
-sf::Texture *Utilities::GetAnimTexture(const vector<Anim *> &anim,
-                                       const vector<AllTextures *> &textures,
-                                       const uint8_t animID)
+const sf::Texture *Utilities::GetAnimTexture(const vector<Anim *> &anim,
+                                             const vector<Texture *> &textures,
+                                             const uint8_t animID) const
 {
-    sf::Texture *texture;
     for (const auto &data : anim)
     {
         if (data->GetID() == animID)
         {
             auto textureID = data->GetTextureID();
 
-            texture = GetTexture(textures, textureID);
-            break;
+            return GetTexture(textures, textureID);
         }
     }
-    return texture;
+    return nullptr;
 }
 
 string Utilities::GetLanguageText(const json &jsonData, const uint8_t languageID, string_view language)

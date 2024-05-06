@@ -1,7 +1,7 @@
 #include "ItemGround.h"
 
-ItemGround::ItemGround(sf::Sprite *sprite, const uint8_t ID, const uint16_t count)
-    : Sprite(sprite), m_ID(ID), m_count(count)
+ItemGround::ItemGround(unique_ptr<sf::Sprite> sprite, const uint8_t ID, const uint16_t count)
+    : Sprite(move(sprite)), m_ID(ID), m_count(count)
 {
 }
 

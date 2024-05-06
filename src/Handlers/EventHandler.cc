@@ -256,7 +256,6 @@ void EventHandler::BtnPressed(Game &game)
                     if (menuState == MenuState::Inventory || menuState == MenuState::Trader)
                     {
                         game.SetMenuState(MenuState::Playing);
-                        game.ClearDialog();
                     }
                     else
                         game.SetMenuState(MenuState::Pause);

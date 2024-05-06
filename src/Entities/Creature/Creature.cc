@@ -1,6 +1,6 @@
 #include "Creature.h"
 
-Creature::Creature(sf::Sprite *sprite,
+Creature::Creature(unique_ptr<sf::Sprite> sprite,
                    const float health,
                    const float speed,
                    const uint8_t animID,
@@ -9,8 +9,8 @@ Creature::Creature(sf::Sprite *sprite,
                    const vector<string> dialogOutro,
                    const vector<string> dialogOffensive,
                    const bool interactable)
-    : Unit(sprite, health, speed, animID), m_moving(moving), m_dialogIntro(dialogIntro), m_dialogOutro(dialogOutro),
-      m_dialogOffensive(dialogOffensive), m_interactable(interactable)
+    : Unit(move(sprite), health, speed, animID), m_moving(moving), m_dialogIntro(dialogIntro),
+      m_dialogOutro(dialogOutro), m_dialogOffensive(dialogOffensive), m_interactable(interactable)
 {
 }
 
@@ -39,7 +39,7 @@ vector<string> Creature::GetDialogOffensive() const
     return m_dialogOffensive;
 }
 
-Trader::Trader(sf::Sprite *sprite,
+Trader::Trader(unique_ptr<sf::Sprite> sprite,
                const float health,
                const float speed,
                const uint8_t animID,
@@ -50,7 +50,7 @@ Trader::Trader(sf::Sprite *sprite,
                const bool interactable,
                const map<uint8_t, uint16_t> sellingItem,
                const map<uint8_t, uint16_t> buyingItem)
-    : Creature(sprite, health, speed, animID, moving, dialogIntro, dialogOutro, dialogOffensive, interactable),
+    : Creature(move(sprite), health, speed, animID, moving, dialogIntro, dialogOutro, dialogOffensive, interactable),
       m_sellingItem(sellingItem), m_buyingItem(buyingItem)
 {
 }

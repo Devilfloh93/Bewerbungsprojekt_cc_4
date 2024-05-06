@@ -29,18 +29,37 @@ Game::Game() : Gui(MenuState::Main)
 void Game::Init()
 {
     InitFolder();
+    cout << "InitFolder Done!" << endl;
+
     InitSettings();
+    cout << "InitSettings Done!" << endl;
 
     InitFont();
+    cout << "InitFont Done!" << endl;
+
     InitTexture();
+    cout << "InitTexture Done!" << endl;
+
     InitAnim();
+    cout << "InitAnim Done!" << endl;
+
     InitItemCfg();
+    cout << "InitItemCfg Done!" << endl;
+
     InitSurface();
+    cout << "InitSurface Done!" << endl;
+
     InitRenderStats();
+    cout << "InitRenderStats Done!" << endl;
+
     InitMenu();
+    cout << "InitMenu Done!" << endl;
 
     InitWindow();
+    cout << "InitWindow Done!" << endl;
+
     InitViews();
+    cout << "InitViews Done!" << endl;
 
     /***
      * TODO: MOVE THIS TO CHANGE HOTKEY OPTIONS LATER
@@ -167,7 +186,7 @@ uint8_t Game::GetZoom() const
 }
 
 // VECTOR
-vector<AllTextures *> Game::GetTexture() const
+vector<Texture *> Game::GetTexture() const
 {
     return m_textures;
 }
@@ -315,14 +334,14 @@ void Game::SetPlayer(Player *player)
 bool Game::LoadPlayer(const uint8_t id)
 {
     Utilities utilities;
-    auto sprite = new sf::Sprite();
+    auto sprite = make_unique<sf::Sprite>();
 
     auto animData = utilities.GetAnim(m_anim, m_defaultAnimID);
     auto texture = utilities.GetAnimTexture(m_anim, m_textures, m_defaultAnimID);
 
-    utilities.SetSFSprite(sprite, texture, animData.down.notMoving);
+    utilities.SetSFSprite(sprite.get(), texture, animData.down.notMoving);
 
-    m_player = new Player(sprite, m_defaultAnimID, id);
+    m_player = new Player(move(sprite), m_defaultAnimID, id);
 
     return true;
 }
@@ -345,19 +364,16 @@ bool Game::CreatePlayer()
         return false;
 
 
-    auto sprite = new sf::Sprite();
+    auto sprite = make_unique<sf::Sprite>();
 
     auto animData = utilities.GetAnim(m_anim, m_defaultAnimID);
     auto texture = utilities.GetAnimTexture(m_anim, m_textures, m_defaultAnimID);
 
-    utilities.SetSFSprite(sprite, texture, animData.down.notMoving);
+    utilities.SetSFSprite(sprite.get(), texture, animData.down.notMoving);
 
     auto font = utilities.GetFont(m_fonts, 0);
 
-    auto hotkeyRender = new sf::Text();
-    utilities.SetSFText(hotkeyRender, font, 10);
-
-    m_player = new Player(sprite, m_defaultAnimID, playerName, countFolders);
+    m_player = new Player(move(sprite), m_defaultAnimID, playerName, countFolders);
     return true;
 }
 
@@ -595,11 +611,9 @@ void Game::InitItemCfg()
                                            data["textureData"][2],
                                            data["textureData"][3]);
 
-            auto texture = utilities.GetTexture(m_textures, textureID);
-
             auto text = utilities.GetLanguageText(jsonDataLanguage, languageID, m_language);
 
-            auto itemCfg = new ItemCfg(texture, textureData, ID, text, maxDrop, fontID);
+            auto itemCfg = new ItemCfg(textureID, textureData, ID, text, maxDrop, fontID);
             m_itemCfg.push_back(itemCfg);
         }
         fileItemTemplate.close();
@@ -618,13 +632,13 @@ void Game::InitTexture()
 
         for (const auto &data : jsonData)
         {
-            auto texture = new sf::Texture();
+            auto texture = make_unique<sf::Texture>();
             uint8_t ID = data["id"];
             string path = data["path"];
 
             texture->loadFromFile(path);
 
-            auto textures = new AllTextures(texture, ID);
+            auto textures = new Texture(move(texture), ID);
             m_textures.push_back(textures);
         }
         file.close();
@@ -641,13 +655,13 @@ void Game::InitFont()
 
         for (const auto &data : jsonData)
         {
-            auto font = new sf::Font();
+            auto font = make_unique<sf::Font>();
             uint8_t ID = data["id"];
             string path = data["path"];
 
             font->loadFromFile(path);
 
-            auto fonts = new Font(ID, font);
+            auto fonts = new Font(ID, move(font));
             m_fonts.push_back(fonts);
         }
         file.close();
@@ -683,7 +697,7 @@ void Game::InitMenu()
 
         for (const auto &dataTitle : jsonDataTitle)
         {
-            auto titleText = new sf::Text();
+            auto titleText = make_unique<sf::Text>();
             Element element = Element::Title;
 
             uint8_t fontSize = jsonDataTitleTemplate["fontSize"];
@@ -692,18 +706,20 @@ void Game::InitMenu()
             MenuState state = dataTitle["state"];
             Utilities utilities;
             sf::Sprite *prevBtn;
-            sf::Text *inputText;
+            sf::Text *prevInputText;
+            sf::Text *prevTitleText;
 
             auto font = utilities.GetFont(m_fonts, fontID);
 
             auto text = utilities.GetLanguageText(jsonDataLanguage, languageID, m_language);
 
-            utilities.SetSFText(titleText, font, fontSize, text);
+            utilities.SetSFText(titleText.get(), font, fontSize, text);
 
-            utilities.SetTitlePos(m_windowWidth, titleText);
+            utilities.SetTitlePos(m_windowWidth, titleText.get());
 
-            auto titles = new Title(state, titleText);
+            auto titles = new Title(state, move(titleText));
             m_titles.push_back(titles);
+            prevTitleText = titles->GetText();
 
             for (const auto &dataInput : jsonDataInput)
             {
@@ -713,7 +729,7 @@ void Game::InitMenu()
 
                 if (canAdd)
                 {
-                    inputText = new sf::Text();
+                    auto inputText = make_unique<sf::Text>();
 
                     fontID = jsonDataInputTemplate["fontID"];
                     fontSize = jsonDataInputTemplate["fontSize"];
@@ -725,14 +741,15 @@ void Game::InitMenu()
 
                     auto text = utilities.GetLanguageText(jsonDataLanguage, languageID, m_language);
 
-                    utilities.SetSFText(inputText, font, fontSize);
+                    utilities.SetSFText(inputText.get(), font, fontSize);
 
-                    utilities.SetTitlePos(m_windowWidth, titleText, inputText);
+                    utilities.SetTitlePos(m_windowWidth, prevTitleText, inputText.get());
 
                     element = Element::Input;
 
-                    auto inputs = new Input(state, inputText, maxChars, text);
+                    auto inputs = new Input(state, move(inputText), maxChars, text);
                     m_inputs.push_back(inputs);
+                    prevInputText = inputs->GetText();
                 }
             }
 
@@ -744,8 +761,8 @@ void Game::InitMenu()
 
                 if (canAdd)
                 {
-                    auto btnText = new sf::Text();
-                    auto btn = new sf::Sprite();
+                    auto btnText = make_unique<sf::Text>();
+                    auto btn = make_unique<sf::Sprite>();
 
                     auto scale = sf::Vector2f{jsonDataBtnTemplate["scale"][0], jsonDataBtnTemplate["scale"][1]};
                     fontSize = jsonDataBtnTemplate["fontSize"];
@@ -765,22 +782,23 @@ void Game::InitMenu()
 
                     auto text = utilities.GetLanguageText(jsonDataLanguage, languageID, m_language);
 
-                    utilities.SetSFSprite(btn, texture, textureRect, scale);
+                    utilities.SetSFSprite(btn.get(), texture, textureRect, scale);
 
-                    utilities.SetSFText(btnText, font, fontSize, text);
+                    utilities.SetSFText(btnText.get(), font, fontSize, text);
 
                     if (element == Element::Title)
-                        utilities.SetBtnAndTextPos(m_windowWidth, btn, titleText, btnText);
+                        utilities.SetBtnAndTextPos(m_windowWidth, btn.get(), prevTitleText, btnText.get());
                     else if (element == Element::Input)
-                        utilities.SetBtnAndTextPos(m_windowWidth, btn, inputText, btnText);
+                        utilities.SetBtnAndTextPos(m_windowWidth, btn.get(), prevInputText, btnText.get());
                     else
-                        utilities.SetBtnAndTextPos(m_windowWidth, btn, prevBtn, btnText);
+                        utilities.SetBtnAndTextPos(m_windowWidth, btn.get(), prevBtn, btnText.get());
 
-                    prevBtn = btn;
                     element = Element::Nothing;
 
-                    auto btns = new Btn(state, btnFnc, btnText, btn);
+
+                    auto btns = new Btn(state, btnFnc, move(btnText), move(btn));
                     m_btns.push_back(btns);
+                    prevBtn = btns->GetSprite();
                 }
             }
         }
@@ -861,11 +879,11 @@ void Game::InitSurface()
 
                 if (canCreate)
                 {
-                    auto tileSprite = new sf::Sprite();
+                    auto tileSprite = make_unique<sf::Sprite>();
 
-                    utilities.SetSFSprite(tileSprite, texture, textureData, j * m_tileSize, k * m_tileSize);
+                    utilities.SetSFSprite(tileSprite.get(), texture, textureData, j * m_tileSize, k * m_tileSize);
 
-                    auto surfaces = new Surface(tileSprite, speed);
+                    auto surfaces = new Surface(move(tileSprite), speed);
                     m_surfaces.push_back(surfaces);
                     ++j;
                     break;
@@ -950,7 +968,7 @@ void Game::InitCreature()
             bool interactable = false;
             string name;
             uint8_t animID;
-            sf::Texture *texture;
+            const sf::Texture *texture;
             AnimTextureCombined animData;
             uint8_t templateId = data["creatureTemplateID"];
             uint8_t traderID = data["traderID"];
@@ -1019,13 +1037,13 @@ void Game::InitCreature()
                 float posY = data1[1];
                 bool moving = data1[2];
 
-                auto tileSprite = new sf::Sprite();
+                auto tileSprite = make_unique<sf::Sprite>();
 
-                utilities.SetSFSprite(tileSprite, texture, animData.down.notMoving, posX, posY);
+                utilities.SetSFSprite(tileSprite.get(), texture, animData.down.notMoving, posX, posY);
 
                 if (sellingItem.size() > 0 || buyingItem.size() > 0)
                 {
-                    auto trader = new Trader(tileSprite,
+                    auto trader = new Trader(move(tileSprite),
                                              100.0F,
                                              1.0F,
                                              animID,
@@ -1041,7 +1059,7 @@ void Game::InitCreature()
                 }
                 else
                 {
-                    auto creature = new Creature(tileSprite,
+                    auto creature = new Creature(move(tileSprite),
                                                  100.0F,
                                                  1.0F,
                                                  animID,
@@ -1088,7 +1106,7 @@ void Game::InitWorld()
             saveFileFound = true;
         }
 
-        sf::Texture *texture;
+        const sf::Texture *texture;
 
         for (const auto &data : jsonDataWorld)
         {
@@ -1159,7 +1177,7 @@ void Game::InitWorld()
                     }
                 }
 
-                auto tileSprite = new sf::Sprite();
+                auto tileSprite = make_unique<sf::Sprite>();
                 sf::IntRect rectangle;
 
                 if (load)
@@ -1173,9 +1191,9 @@ void Game::InitWorld()
                     collision = templateCollision;
                 }
 
-                utilities.SetSFSprite(tileSprite, texture, rectangle, posX, posY);
+                utilities.SetSFSprite(tileSprite.get(), texture, rectangle, posX, posY);
 
-                auto world = new World(tileSprite, worldId, collision, itemOutputID, textureProgData, load);
+                auto world = new World(move(tileSprite), worldId, collision, itemOutputID, textureProgData, load);
                 m_world.push_back(world);
                 ++i;
             }
@@ -1209,13 +1227,13 @@ void Game::InitRenderStats()
 
             for (size_t i = 0; i < add; ++i)
             {
-                auto sprite = new sf::Sprite();
+                auto sprite = make_unique<sf::Sprite>();
 
-                utilities.SetSFSprite(sprite, texture, textureRect);
+                utilities.SetSFSprite(sprite.get(), texture, textureRect);
 
                 auto textureSize = textureRect.getSize();
 
-                auto stats = new Stats(sprite, textureSize, type);
+                auto stats = new Stats(move(sprite), textureSize, type);
                 m_stats.push_back(stats);
             }
         }
@@ -1328,6 +1346,9 @@ void Game::RenderHotkey()
 
 void Game::RenderMenu()
 {
+    if (m_playing)
+        m_player->SetMove(PlayerMove::NotMoving);
+
     m_window->setView(*m_menuView);
     Utilities utilities;
     sf::Sprite *lastbtn;
@@ -1520,7 +1541,6 @@ void Game::SaveWorld(const bool destroy)
 
 void Game::LoadGroundItems()
 {
-    Utilities utilities;
     auto saveId = m_player->GetID();
     auto path = format("./save/{}/groundItems.json", saveId);
 
@@ -1532,30 +1552,45 @@ void Game::LoadGroundItems()
 
         for (const auto &data : jsonData)
         {
-            uint16_t id = data["id"];
+            uint8_t id = data["id"];
             uint16_t count = data["count"];
             float posX = data["posX"];
             float posY = data["posY"];
 
             for (const auto &data : m_itemCfg)
             {
-                auto texture = data->GetTexture();
-                auto textureData = data->GetTextureData();
                 auto itemID = data->GetID();
 
                 if (id == itemID)
                 {
-                    auto itemSprite = new sf::Sprite();
-                    utilities.SetSFSprite(itemSprite, texture, textureData, posX, posY);
-
-                    auto item = new ItemGround(itemSprite, id, count);
-                    m_items.push_back(item);
+                    auto textureID = data->GetTextureID();
+                    auto textureData = data->GetTextureData();
+                    CreateGroundItem(textureID, textureData, posX, posY, id, count);
                 }
             }
         }
 
         file.close();
     }
+}
+
+void Game::CreateGroundItem(const uint8_t textureID,
+                            const sf::IntRect &textureData,
+                            const float posX,
+                            const float posY,
+                            const uint8_t id,
+                            const uint16_t count)
+{
+    Utilities utilities;
+
+    auto texture = utilities.GetTexture(m_textures, textureID);
+
+    auto itemSprite = make_unique<sf::Sprite>();
+
+    utilities.SetSFSprite(itemSprite.get(), texture, textureData, posX, posY);
+
+    auto item = new ItemGround(move(itemSprite), id, count);
+    m_items.push_back(item);
 }
 
 void Game::SaveGroundItems(const bool destroy)

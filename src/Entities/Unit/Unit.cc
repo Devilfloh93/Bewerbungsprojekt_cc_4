@@ -1,7 +1,7 @@
 #include "Unit.h"
 
-Unit::Unit(sf::Sprite *sprite, const float health, const float speed, const uint8_t animID)
-    : Sprite(sprite), m_health(health), m_speed(speed), m_animID(animID)
+Unit::Unit(unique_ptr<sf::Sprite> sprite, const float health, const float speed, const uint8_t animID)
+    : Sprite(move(sprite)), m_health(health), m_speed(speed), m_animID(animID)
 {
 }
 

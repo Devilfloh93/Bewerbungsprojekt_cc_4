@@ -9,7 +9,7 @@ class Creature : public Unit
 {
 
 public:
-    Creature(sf::Sprite *sprite,
+    Creature(unique_ptr<sf::Sprite> sprite,
              const float health,
              const float speed,
              const uint8_t animID,
@@ -38,7 +38,7 @@ private:
 class Trader : public Creature
 {
 public:
-    Trader(sf::Sprite *sprite,
+    Trader(unique_ptr<sf::Sprite> sprite,
            const float health,
            const float speed,
            const uint8_t animID,
