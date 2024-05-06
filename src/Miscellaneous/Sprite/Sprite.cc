@@ -1,10 +1,10 @@
 #include "Sprite.h"
 
-Sprite::Sprite(sf::Sprite *sprite) : m_sprite(sprite)
+Sprite::Sprite(unique_ptr<sf::Sprite> sprite) : m_sprite(move(sprite))
 {
 }
 
 sf::Sprite *Sprite::GetSprite() const
 {
-    return m_sprite;
+    return m_sprite.get();
 }

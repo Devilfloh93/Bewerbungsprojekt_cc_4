@@ -1,14 +1,16 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 
+using namespace std;
+
 class Sprite
 {
 public:
-    Sprite(sf::Sprite *sprite);
+    Sprite(unique_ptr<sf::Sprite> sprite);
     ~Sprite() = default;
 
     sf::Sprite *GetSprite() const;
 
 protected:
-    sf::Sprite *m_sprite;
+    unique_ptr<sf::Sprite> m_sprite;
 };

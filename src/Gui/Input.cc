@@ -1,8 +1,11 @@
 #include "Input.h"
 #include "Utilities.h"
 
-Input::Input(const MenuState menuState, sf::Text *text, const uint8_t maxChars, const string_view defaultString)
-    : Gui(menuState), Text(text), m_maxChars(maxChars), m_defaultString(defaultString)
+Input::Input(const MenuState menuState,
+             unique_ptr<sf::Text> text,
+             const uint8_t maxChars,
+             const string_view defaultString)
+    : Gui(menuState), Text(move(text)), m_maxChars(maxChars), m_defaultString(defaultString)
 {
 }
 
@@ -30,7 +33,7 @@ void Input::Write(const uint16_t width, const sf::Uint32 character)
     {
         m_string.insert(m_string.end(), character);
         m_text->setString(m_string);
-        utilities.SetInputPos(width, m_text);
+        utilities.SetInputPos(width, m_text.get());
     }
 }
 
@@ -48,5 +51,5 @@ void Input::Popback(const uint16_t width)
 void Input::UpdateInputPos(const uint16_t width)
 {
     Utilities utilities;
-    utilities.SetInputPos(width, m_text);
+    utilities.SetInputPos(width, m_text.get());
 }

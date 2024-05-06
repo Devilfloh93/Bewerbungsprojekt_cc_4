@@ -6,13 +6,13 @@ class Font
 {
 
 public:
-    Font(const uint8_t ID, sf::Font *font);
+    Font(const uint8_t ID, unique_ptr<sf::Font> font);
     ~Font() = default;
 
     uint8_t GetID() const;
-    sf::Font *GetFont() const;
+    const sf::Font *GetFont() const;
 
 private:
     uint8_t m_ID;
-    sf::Font *m_font;
+    unique_ptr<sf::Font> m_font;
 };

@@ -1,11 +1,15 @@
 #include "Texture.h"
 
-
-Texture::Texture(sf::Texture *texture) : m_texture(texture)
+Texture::Texture(unique_ptr<sf::Texture> texture, const uint8_t ID) : m_texture(move(texture)), m_ID(ID)
 {
 }
 
-sf::Texture *Texture::GetTexture() const
+uint8_t Texture::GetID() const
 {
-    return m_texture;
+    return m_ID;
+}
+
+const sf::Texture *Texture::GetTexture() const
+{
+    return m_texture.get();
 }

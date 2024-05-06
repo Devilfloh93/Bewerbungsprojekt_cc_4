@@ -7,6 +7,6 @@ using namespace std;
 class Title : public Gui, public Text
 {
 public:
-    Title(const MenuState menuState, sf::Text *text);
+    Title(const MenuState menuState, unique_ptr<sf::Text> text);
     ~Title() = default;
 };

@@ -7,7 +7,10 @@ using namespace std;
 class Input : public Gui, public Text
 {
 public:
-    Input(const MenuState menuState, sf::Text *text, const uint8_t maxChars, const string_view defaultString);
+    Input(const MenuState menuState,
+          unique_ptr<sf::Text> text,
+          const uint8_t maxChars,
+          const string_view defaultString);
     ~Input() = default;
 
     string GetString() const;

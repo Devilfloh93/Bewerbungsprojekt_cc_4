@@ -1,10 +1,10 @@
 #include "Text.h"
 
-Text::Text(sf::Text *text) : m_text(text)
+Text::Text(unique_ptr<sf::Text> text) : m_text(move(text))
 {
 }
 
 sf::Text *Text::GetText() const
 {
-    return m_text;
+    return m_text.get();
 }

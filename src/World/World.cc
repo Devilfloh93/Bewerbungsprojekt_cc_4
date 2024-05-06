@@ -1,12 +1,12 @@
 #include "World.h"
 
-World::World(sf::Sprite *sprite,
+World::World(unique_ptr<sf::Sprite> sprite,
              const uint8_t id,
              const CollisionData collision,
              const vector<uint8_t> itemOutputID,
              const TextureProgData textureProgData,
              const bool saving)
-    : Sprite(sprite), m_ID(id), m_collision(collision), m_itemOutputID(itemOutputID),
+    : Sprite(move(sprite)), m_ID(id), m_collision(collision), m_itemOutputID(itemOutputID),
       m_textureProgData(textureProgData), m_saveIt(saving)
 {
     if (itemOutputID.size() > 0 && !m_saveIt)

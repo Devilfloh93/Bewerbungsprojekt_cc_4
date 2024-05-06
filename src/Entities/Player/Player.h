@@ -33,8 +33,8 @@ enum class PlayerMove
 class Player : public Unit
 {
 public:
-    Player(sf::Sprite *sprite, const uint8_t animID, const string_view name, const uint8_t id);
-    Player(sf::Sprite *sprite, const uint8_t animID, const uint8_t id);
+    Player(unique_ptr<sf::Sprite> sprite, const uint8_t animID, const string_view name, const uint8_t id);
+    Player(unique_ptr<sf::Sprite> sprite, const uint8_t animID, const uint8_t id);
     ~Player() = default;
 
     // INIT

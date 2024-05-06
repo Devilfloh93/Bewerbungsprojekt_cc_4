@@ -1,7 +1,7 @@
 #include "Surface.h"
 
 
-Surface::Surface(sf::Sprite *sprite, const float speed) : Sprite(sprite), m_speed(speed)
+Surface::Surface(unique_ptr<sf::Sprite> sprite, const float speed) : Sprite(move(sprite)), m_speed(speed)
 {
 }
 

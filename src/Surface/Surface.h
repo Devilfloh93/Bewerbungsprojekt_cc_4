@@ -6,7 +6,7 @@ class Surface : public Sprite
 {
 
 public:
-    Surface(sf::Sprite *sprite, const float speed);
+    Surface(unique_ptr<sf::Sprite> sprite, const float speed);
     ~Surface() = default;
 
     float GetSpeed() const;

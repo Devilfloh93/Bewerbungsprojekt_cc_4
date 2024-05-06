@@ -8,14 +8,14 @@
 #include <iostream>
 #include <random>
 
-Player::Player(sf::Sprite *sprite, const uint8_t animID, const string_view name, const uint8_t id)
-    : Unit(sprite, 100.0F, 1.0F, animID), m_name(name), m_ID(id)
+Player::Player(unique_ptr<sf::Sprite> sprite, const uint8_t animID, const string_view name, const uint8_t id)
+    : Unit(move(sprite), 100.0F, 1.0F, animID), m_name(name), m_ID(id)
 {
     Init();
 }
 
-Player::Player(sf::Sprite *sprite, const uint8_t animID, const uint8_t id)
-    : Unit(sprite, 100.0F, 1.0F, animID), m_ID(id)
+Player::Player(unique_ptr<sf::Sprite> sprite, const uint8_t animID, const uint8_t id)
+    : Unit(move(sprite), 100.0F, 1.0F, animID), m_ID(id)
 {
     Init();
 }
@@ -110,6 +110,7 @@ void Player::HandleMove(sf::Clock &clock, Game *game)
     auto width = game->GetGameWidth();
     auto height = game->GetGameHeight();
     auto playerPos = m_sprite->getPosition();
+    auto sprite = m_sprite.get();
 
     auto animData = utilities.GetAnim(anim, m_animID);
 
@@ -118,7 +119,7 @@ void Player::HandleMove(sf::Clock &clock, Game *game)
     case PlayerMove::Left:
         if (playerPos.x - m_speed > 0 + (tileSize / 2) && m_moveAllowed.left)
         {
-            utilities.PlayAnimation(m_sprite, clock, animData.left.notMoving, animData.left.anim01);
+            utilities.PlayAnimation(sprite, clock, animData.left.notMoving, animData.left.anim01);
             m_sprite->setPosition(playerPos.x - m_speed, playerPos.y);
         }
         else
@@ -127,7 +128,7 @@ void Player::HandleMove(sf::Clock &clock, Game *game)
     case PlayerMove::Right:
         if (playerPos.x + m_speed < width - tileSize && m_moveAllowed.right)
         {
-            utilities.PlayAnimation(m_sprite, clock, animData.right.notMoving, animData.right.anim01);
+            utilities.PlayAnimation(sprite, clock, animData.right.notMoving, animData.right.anim01);
             m_sprite->setPosition(playerPos.x + m_speed, playerPos.y);
         }
         else
@@ -136,7 +137,7 @@ void Player::HandleMove(sf::Clock &clock, Game *game)
     case PlayerMove::Down:
         if (playerPos.y + m_speed < height - tileSize && m_moveAllowed.down)
         {
-            utilities.PlayAnimation(m_sprite, clock, animData.down.anim01, animData.down.anim02);
+            utilities.PlayAnimation(sprite, clock, animData.down.anim01, animData.down.anim02);
             m_sprite->setPosition(playerPos.x, playerPos.y + m_speed);
         }
         else
@@ -146,7 +147,7 @@ void Player::HandleMove(sf::Clock &clock, Game *game)
     case PlayerMove::Up:
         if (playerPos.y - m_speed > 0 + (tileSize / 2) && m_moveAllowed.up)
         {
-            utilities.PlayAnimation(m_sprite, clock, animData.up.anim01, animData.up.anim02);
+            utilities.PlayAnimation(sprite, clock, animData.up.anim01, animData.up.anim02);
             m_sprite->setPosition(playerPos.x, playerPos.y - m_speed);
         }
         else
@@ -264,7 +265,7 @@ void Player::Interact(Game &game)
             uint16_t posIncrease = 0;
             for (const auto &data : itemCfg)
             {
-                auto texture = data->GetTexture();
+                auto textureID = data->GetTextureID();
                 auto textureData = data->GetTextureData();
                 auto itemID = data->GetID();
                 auto maxDrop = data->GetMaxDrop();
@@ -315,11 +316,7 @@ void Player::Interact(Game &game)
                             break;
                         }
 
-                        auto itemSprite = new sf::Sprite();
-                        utilities.SetSFSprite(itemSprite, texture, textureData, itemPos.x, itemPos.y);
-
-                        auto item = new ItemGround(itemSprite, itemID, dist(gen));
-                        game.SetItems(item);
+                        game.CreateGroundItem(textureID, textureData, itemPos.x, itemPos.y, itemID, dist(gen));
                     }
                 }
             }
@@ -352,12 +349,14 @@ void Player::CheckRenderHotkey(Game *game)
 */
 void Player::InitTraderItems(Game &game)
 {
+    game.ClearDialog();
     bool firstIcon = true;
     Utilities utilities;
     sf::Vector2f prevPos;
     auto itemCfg = game.GetItemCfg();
     auto fonts = game.GetFont();
     auto width = game.GetWindowWidth();
+    auto textures = game.GetTexture();
     auto sellingItems = m_trader->GetSellingItem();
     auto buyingItems = m_trader->GetBuyingItem();
     auto titles = game.GetTitles();
@@ -379,10 +378,12 @@ void Player::InitTraderItems(Game &game)
             auto ID = data->GetID();
             if (key == ID)
             {
+                auto textureID = data->GetTextureID();
                 auto itemSprite = make_unique<sf::Sprite>();
                 auto itemText = make_unique<sf::Text>();
 
-                auto texture = data->GetTexture();
+                auto texture = utilities.GetTexture(textures, textureID);
+
                 auto textureData = data->GetTextureData();
                 auto fontID = data->GetFontID();
 
@@ -425,10 +426,11 @@ void Player::InitTraderItems(Game &game)
                     auto ID = data->GetID();
                     if (key == ID)
                     {
+                        auto textureID = data->GetTextureID();
                         auto itemSprite = make_unique<sf::Sprite>();
                         auto itemText = make_unique<sf::Text>();
 
-                        auto texture = data->GetTexture();
+                        auto texture = utilities.GetTexture(textures, textureID);
                         auto textureData = data->GetTextureData();
                         auto fontID = data->GetFontID();
 
@@ -463,6 +465,7 @@ void Player::InitTraderItems(Game &game)
 
 void Player::InitInventoryItems(Game &game)
 {
+    game.ClearDialog();
     bool firstIcon = true;
     Utilities utilities;
     sf::Vector2f prevPos;
@@ -470,6 +473,7 @@ void Player::InitInventoryItems(Game &game)
     auto fonts = game.GetFont();
     auto width = game.GetWindowWidth();
     auto titles = game.GetTitles();
+    auto textures = game.GetTexture();
     sf::Text *previousTxt;
 
     for (const auto &data : titles)
@@ -488,9 +492,10 @@ void Player::InitInventoryItems(Game &game)
             auto ID = data->GetID();
             if (key == ID)
             {
+                auto textureID = data->GetTextureID();
                 auto itemSprite = make_unique<sf::Sprite>();
                 auto itemText = make_unique<sf::Text>();
-                auto texture = data->GetTexture();
+                auto texture = utilities.GetTexture(textures, textureID);
                 auto textureData = data->GetTextureData();
                 auto fontID = data->GetFontID();
 

@@ -1,5 +1,4 @@
 #pragma once
-#include "AllTextures.h"
 #include "Anim.h"
 #include "Btn.h"
 #include "Creature.h"
@@ -60,7 +59,7 @@ public:
     // VECTOR
     vector<ItemCfg *> GetItemCfg() const;
     vector<Anim *> GetAnim() const;
-    vector<AllTextures *> GetTexture() const;
+    vector<Texture *> GetTexture() const;
     vector<Stats *> GetStats() const;
     vector<Input *> GetInput() const;
     vector<sf::Text *> GetSaveFiles() const;
@@ -104,6 +103,12 @@ public:
     // ITEMS
     void SetItems(ItemGround *item);
     void RemoveItems(const size_t i);
+    void CreateGroundItem(const uint8_t textureID,
+                          const sf::IntRect &textureData,
+                          const float posX,
+                          const float posY,
+                          const uint8_t id,
+                          const uint16_t count);
 
     // INITS
     void Init();
@@ -184,7 +189,7 @@ private:
     vector<Title *> m_titles;
     vector<Btn *> m_btns;
     vector<ItemGround *> m_items;
-    vector<AllTextures *> m_textures;
+    vector<Texture *> m_textures;
     vector<Font *> m_fonts;
     vector<Anim *> m_anim;
     vector<Stats *> m_stats;
