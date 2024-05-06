@@ -61,20 +61,6 @@ void Game::Init()
     InitViews();
     cout << "InitViews Done!" << endl;
 
-    /***
-     * TODO: MOVE THIS TO CHANGE HOTKEY OPTIONS LATER
-    */
-
-    Utilities utilities;
-    auto font = utilities.GetFont(m_fonts, 0);
-    m_hotkeyRender = new sf::Text();
-    utilities.SetSFText(m_hotkeyRender, font, 10);
-
-    auto interact = m_hotkeys["interact"];
-    auto hotkeyString = (sf::Keyboard::getDescription(static_cast<sf::Keyboard::Scancode>(interact))).toAnsiString();
-
-    m_hotkeyRender->setString(hotkeyString);
-
     cout << "Game Init Done!" << endl;
 }
 
@@ -502,23 +488,50 @@ void Game::InitGeneral()
 
 void Game::InitHotkeys()
 {
+    m_hotkeyRender = new sf::Text();
     auto path = filesystem::current_path();
     path /= "settings/hotkeys.json";
 
+    ifstream fileLanguage("./data/language/hotkeys.json");
     ifstream file(path);
 
-    if (file.is_open())
+    if (file.is_open() && fileLanguage.is_open())
     {
+        Utilities utilities;
+        auto font = utilities.GetFont(m_fonts, 0);
         auto jsonData = json::parse(file);
+        auto jsonDataLanguage = json::parse(fileLanguage);
 
-        map<string, uint8_t> hotkeys = jsonData["hotkeys"];
-
-        for (const auto &data : hotkeys)
+        for (const auto &data : jsonData)
         {
-            m_hotkeys[data.first] = data.second;
+            uint8_t hotkeyID = data["hotkeyID"];
+            uint16_t sfmlHotkey = data["SFMLHotkey"];
+
+            m_hotkeys[hotkeyID] = sfmlHotkey;
+
+            auto hotkeyName = utilities.GetLanguageText(jsonDataLanguage, hotkeyID, m_language);
+            auto hotkeyString =
+                (sf::Keyboard::getDescription(static_cast<sf::Keyboard::Scancode>(sfmlHotkey))).toAnsiString();
+
+            auto text = new sf::Text(format("{}: {}", hotkeyName, sfmlHotkey), *font, 15U);
+            m_hotkeyMenu.push_back(text);
         }
 
+        auto interact = m_hotkeys[static_cast<int>(Hotkey::Interact)];
+
+        /***
+         * TODO: MOVE THIS TO CHANGING HOTKEYS
+        */
+
+        utilities.SetSFText(m_hotkeyRender, font, 10);
+
+        auto hotkeyString =
+            (sf::Keyboard::getDescription(static_cast<sf::Keyboard::Scancode>(interact))).toAnsiString();
+
+        m_hotkeyRender->setString(hotkeyString);
+
         file.close();
+        fileLanguage.close();
     }
 }
 
@@ -1364,6 +1377,16 @@ void Game::RenderMenu()
         if (m_menuState == MenuState::Inventory || m_menuState == MenuState::Trader)
             RenderDialog();
 
+        for (const auto &data1 : m_hotkeyMenu)
+        {
+            if (m_menuState == MenuState::Hotkeys)
+            {
+                utilities.SetTitlePos(m_windowWidth, previousTxt, data1);
+                m_window->draw(*data1);
+                previousTxt = data1;
+            }
+        }
+
         for (const auto &data1 : m_inputs)
         {
             if (m_menuState == data1->GetMenuState())
@@ -1794,7 +1817,7 @@ Thread *Game::GetThread()
 
 
 // SETTINGS
-map<string, uint8_t> Game::GetHotkeys() const
+map<uint8_t, uint16_t> Game::GetHotkeys() const
 {
     return m_hotkeys;
 }
@@ -1847,7 +1870,7 @@ void Game::SaveGeneral()
     }
 }
 
-// UNIQUE PTR
+// DIALOG
 void Game::SetDialogSprite(unique_ptr<sf::Sprite> sprite)
 {
     m_dialogSprites.push_back(move(sprite));

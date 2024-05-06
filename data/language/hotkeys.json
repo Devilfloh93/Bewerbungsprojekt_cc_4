@@ -1,6 +1,6 @@
 [
     {
-        "hotkey": "interact",
+        "id": 0,
         "enEN": {
             "title": "Interact",
             "description": "Press this Key..."
@@ -11,7 +11,7 @@
         }
     },
     {
-        "hotkey": "escape",
+        "id": 1,
         "enEN": {
             "title": "Pause",
             "description": "Press this Key..."
@@ -22,7 +22,7 @@
         }
     },
     {
-        "hotkey": "inventory",
+        "id": 2,
         "enEN": {
             "title": "Inventory",
             "description": "Press this Key..."
@@ -33,7 +33,7 @@
         }
     },
     {
-        "hotkey": "leftMove",
+        "id": 3,
         "enEN": {
             "title": "Left Move",
             "description": "Press this Key..."
@@ -44,7 +44,7 @@
         }
     },
     {
-        "hotkey": "rightMove",
+        "id": 4,
         "enEN": {
             "title": "Right Move",
             "description": "Press this Key..."
@@ -55,7 +55,7 @@
         }
     },
     {
-        "hotkey": "upMove",
+        "id": 5,
         "enEN": {
             "title": "Up Move",
             "description": "Press this Key..."
@@ -66,7 +66,7 @@
         }
     },
     {
-        "hotkey": "downMove",
+        "id": 6,
         "enEN": {
             "title": "Down Move",
             "description": "Press this Key..."

@@ -218,5 +218,16 @@
             "title": "1280x720",
             "description": ""
         }
+    },
+    {
+        "id": 21,
+        "enEN": {
+            "title": "Hotkeys",
+            "description": ""
+        },
+        "deDE": {
+            "title": "Tastaturbelegung",
+            "description": ""
+        }
     }
 ]

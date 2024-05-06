@@ -157,11 +157,11 @@ public:
     void SetMenuState(MenuState state);
 
     // SETTINGS
-    map<string, uint8_t> GetHotkeys() const;
+    map<uint8_t, uint16_t> GetHotkeys() const;
     void ChangeLanguage(const string language);
     void SaveGeneral();
 
-    // UNIQUE PTR
+    // DIALOG
     void SetDialogSprite(unique_ptr<sf::Sprite> sprite);
     void SetDialogText(unique_ptr<sf::Text> text);
     void ClearDialog();
@@ -195,11 +195,12 @@ private:
     vector<Stats *> m_stats;
     vector<Input *> m_inputs;
     vector<sf::Text *> m_saveFiles;
+    vector<sf::Text *> m_hotkeyMenu; // TEMPORARY FIX
 
     vector<unique_ptr<sf::Sprite>> m_dialogSprites;
     vector<unique_ptr<sf::Text>> m_dialogTexts;
     // SETTINGS
-    map<string, uint8_t> m_hotkeys;
+    map<uint8_t, uint16_t> m_hotkeys;
     string m_language;
     // VIEW
     sf::View *m_view;

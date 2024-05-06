@@ -30,7 +30,8 @@ enum class BtnFunc
     ChangeLanguageDE,
     OpenResolution,
     Resolution1920x1080,
-    Resolution1280x720
+    Resolution1280x720,
+    OpenHotkeys
 };
 
 enum class MenuState
@@ -46,7 +47,19 @@ enum class MenuState
     Load,
     Language,
     Trader,
-    Resolution
+    Resolution,
+    Hotkeys
+};
+
+enum class Hotkey
+{
+    Interact = 0,
+    Escape,
+    Inventory,
+    LeftMove,
+    RightMove,
+    UpMove,
+    DownMove
 };
 
 class Gui

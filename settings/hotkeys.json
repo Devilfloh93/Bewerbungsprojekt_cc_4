@@ -1,11 +1,30 @@
-{
-    "hotkeys": {
-        "interact": 5,
-        "escape": 36,
-        "inventory": 8,
-        "leftMove": 0,
-        "rightMove": 3,
-        "upMove": 22,
-        "downMove": 18
+[
+    {
+        "hotkeyID": 0,
+        "SFMLHotkey": 5
+    },
+    {
+        "hotkeyID": 1,
+        "SFMLHotkey": 36
+    },
+    {
+        "hotkeyID": 2,
+        "SFMLHotkey": 8
+    },
+    {
+        "hotkeyID": 3,
+        "SFMLHotkey": 0
+    },
+    {
+        "hotkeyID": 4,
+        "SFMLHotkey": 3
+    },
+    {
+        "hotkeyID": 5,
+        "SFMLHotkey": 22
+    },
+    {
+        "hotkeyID": 6,
+        "SFMLHotkey": 18
     }
-}
+]
