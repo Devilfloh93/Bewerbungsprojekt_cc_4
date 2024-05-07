@@ -21,9 +21,13 @@
 * Nlohmann/json <https://github.com/nlohmann/json>
 * Keine weiteren da ich so viel wie möglich selbst schreiben wollte
 
+## Systemanforderung
+
+* OpenGL 2.1 or newer is enabled
+
 ## Installationshinweise
 
-* Laden Sie die Zip Datei runter und entpacken diese. <https://github.com/Devilfloh93/Bewerbungsprojekt_cc_4/releases/tag/%23Game>
+* Laden Sie die Zip Datei runter und entpacken diese. <https://github.com/Devilfloh93/Bewerbungsprojekt_cc_4/releases/tag/%23GoodGame>
 * Gehen Sie in den Entpackten Ordner und starten Sie die GoodGame.exe
 * Datein und Ordner die vom Program erstellt werden, sind in dem selben Ordner, für schnelle und Problemlose Löschung, abgelegt
 * Alle erstellten Datein und Texturen sind einsehbar
