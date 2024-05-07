@@ -4,16 +4,16 @@
 
 * Eine kleine Kollektion von Screenshots um einen kleinen Einblick zu vermitteln.
 
-![Hauptmenü]()
+![Hauptmenü](https://github.com/Devilfloh93/Bewerbungsprojekt_cc_4/blob/main/preview/main_menu.png)
 
-![Pausenmenü]()
+![Pausenmenü](https://github.com/Devilfloh93/Bewerbungsprojekt_cc_4/blob/main/preview/pause_menu.png)
 
-![Optionsmenü]()
+![Optionsmenü](https://github.com/Devilfloh93/Bewerbungsprojekt_cc_4/blob/main/preview/options_menu.png)
 
-![Tastaturbelegung]()
+![Tastaturbelegung](https://github.com/Devilfloh93/Bewerbungsprojekt_cc_4/blob/main/preview/hotkeys.png)
 
-![Sprachauswahl]()
+![Sprachauswahl](https://github.com/Devilfloh93/Bewerbungsprojekt_cc_4/blob/main/preview/language.png)
 
-![Charakter Erstellung]()
+![Charakter Erstellung](https://github.com/Devilfloh93/Bewerbungsprojekt_cc_4/blob/main/preview/create_character.png)
 
-![Ingame]()
+![Ingame](https://github.com/Devilfloh93/Bewerbungsprojekt_cc_4/blob/main/preview/ingame.png)
