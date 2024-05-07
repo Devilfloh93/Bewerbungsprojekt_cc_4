@@ -1,5 +1,12 @@
 #include "Anim.h"
 
+/**
+ * @brief Construct a new Anim:: Anim object, Build with JSON file
+ *
+ * @param id Animation unique ID to identify which animation should be used
+ * @param textureID Unique Texture ID to identify which texture should be used
+ */
+
 Anim::Anim(const uint8_t id, const uint8_t textureID) : m_ID(id), m_textureID(textureID)
 {
 }

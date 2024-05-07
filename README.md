@@ -30,6 +30,7 @@
 
 ## Anmerkungen
 
+* Es fehlen Kommentierungen im Code
 * Die Tastaturbelegung findet man im Optionsmenü unter dem Menüpunkt Hotkeys/Tastaturbelegung
 * Mausinteraktionen sind aktuell in der Tastaturbelegung nicht aufgelistet, aus diesem Grund folgen nun einige:
 * Linker Mausklick auf das Spielfeld bewegt die Kamera

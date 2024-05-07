@@ -32,10 +32,10 @@
 
 ## Menus
 
-* Add Keybindings
+* ~~Add Keybindings~~
 * ~~Add Save/Load~~
-* Fix Fullscreen and Resize when changing Resolution
-* Add Character Creation
+* ~~Fix Fullscreen and Resize when changing Resolution~~
+* ~~Add Character Creation~~
 
 ## Rework
 
