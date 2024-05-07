@@ -61,6 +61,9 @@ void Game::Init()
     InitViews();
     cout << "InitViews Done!" << endl;
 
+    InitHotkeys();
+    cout << "InitHotkeys Done!" << endl;
+
     cout << "Game Init Done!" << endl;
 }
 
@@ -453,11 +456,11 @@ void Game::InitFolder()
 
 void Game::InitSettings()
 {
-    InitGeneral();
-    InitHotkeys();
+    LoadGeneral();
+    LoadHotkeys();
 }
 
-void Game::InitGeneral()
+void Game::LoadGeneral()
 {
     auto path = filesystem::current_path();
     path /= "settings/general.json";
@@ -488,19 +491,49 @@ void Game::InitGeneral()
 
 void Game::InitHotkeys()
 {
-    m_hotkeyRender = new sf::Text();
-    auto path = filesystem::current_path();
-    path /= "settings/hotkeys.json";
-
     ifstream fileLanguage("./data/language/hotkeys.json");
-    ifstream file(path);
 
-    if (file.is_open() && fileLanguage.is_open())
+    if (fileLanguage.is_open())
     {
         Utilities utilities;
         auto font = utilities.GetFont(m_fonts, 0);
-        auto jsonData = json::parse(file);
         auto jsonDataLanguage = json::parse(fileLanguage);
+
+        for (const auto &[key, value] : m_hotkeys)
+        {
+            auto hotkeyName = utilities.GetLanguageText(jsonDataLanguage, key, m_language);
+            auto sfmlHotkey = sf::Keyboard::delocalize(static_cast<sf::Keyboard::Key>(value));
+            auto hotkeyString = sf::Keyboard::getDescription(sfmlHotkey).toAnsiString();
+
+            auto string = format("{} : {}", hotkeyName, hotkeyString);
+
+            auto text = new sf::Text();
+            utilities.SetSFText(text, font, 20U, string);
+            m_hotkeyMenu.push_back(text);
+        }
+
+        auto interact = m_hotkeys[static_cast<uint8_t>(Hotkey::Interact)];
+
+        m_hotkeyRender = new sf::Text();
+
+        utilities.SetSFText(m_hotkeyRender, font, 10);
+
+        auto sfmlHotkey = sf::Keyboard::delocalize(static_cast<sf::Keyboard::Key>(interact));
+        auto hotkeyString = sf::Keyboard::getDescription(sfmlHotkey).toAnsiString();
+
+        m_hotkeyRender->setString(hotkeyString);
+
+        fileLanguage.close();
+    }
+}
+
+void Game::LoadHotkeys()
+{
+    ifstream file("./settings/hotkeys.json");
+
+    if (file.is_open())
+    {
+        auto jsonData = json::parse(file);
 
         for (const auto &data : jsonData)
         {
@@ -508,30 +541,9 @@ void Game::InitHotkeys()
             uint16_t sfmlHotkey = data["SFMLHotkey"];
 
             m_hotkeys[hotkeyID] = sfmlHotkey;
-
-            auto hotkeyName = utilities.GetLanguageText(jsonDataLanguage, hotkeyID, m_language);
-            auto hotkeyString =
-                (sf::Keyboard::getDescription(static_cast<sf::Keyboard::Scancode>(sfmlHotkey))).toAnsiString();
-
-            auto text = new sf::Text(format("{}: {}", hotkeyName, sfmlHotkey), *font, 15U);
-            m_hotkeyMenu.push_back(text);
         }
 
-        auto interact = m_hotkeys[static_cast<int>(Hotkey::Interact)];
-
-        /***
-         * TODO: MOVE THIS TO CHANGING HOTKEYS
-        */
-
-        utilities.SetSFText(m_hotkeyRender, font, 10);
-
-        auto hotkeyString =
-            (sf::Keyboard::getDescription(static_cast<sf::Keyboard::Scancode>(interact))).toAnsiString();
-
-        m_hotkeyRender->setString(hotkeyString);
-
         file.close();
-        fileLanguage.close();
     }
 }
 
@@ -1412,7 +1424,7 @@ void Game::RenderMenu()
             {
                 auto btnObj = data1->GetSprite();
                 auto btnText = data1->GetText();
-                if (m_menuState == MenuState::OpenLoad)
+                if (m_menuState == MenuState::OpenLoad || m_menuState == MenuState::Hotkeys)
                 {
                     if (firstBtn)
                     {
@@ -1850,8 +1862,16 @@ void Game::ChangeLanguage(const string language)
     }
     m_inputs.clear();
 
+    for (auto &data : m_hotkeyMenu)
+    {
+        delete data;
+        data = nullptr;
+    }
+    m_hotkeyMenu.clear();
+
     SaveGeneral();
     InitMenu();
+    InitHotkeys();
 }
 
 void Game::SaveGeneral()
