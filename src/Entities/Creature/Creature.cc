@@ -1,5 +1,19 @@
 #include "Creature.h"
 
+/**
+ * @brief Construct a new Creature:: Creature object
+ *
+ * @param sprite
+ * @param health healtpoints the creature has
+ * @param speed how many pixels the creature can move with one movement command
+ * @param animID which animation it should play while running
+ * @param moving true / false if creature is allowed to move
+ * @param dialogIntro     |
+ * @param dialogOutro     | Dialog Optionen when interacting with the creature or random messages while playing (WIP)
+ * @param dialogOffensive |
+ * @param interactable true / false can Player interact with this creature like trading
+ */
+
 Creature::Creature(unique_ptr<sf::Sprite> sprite,
                    const float health,
                    const float speed,

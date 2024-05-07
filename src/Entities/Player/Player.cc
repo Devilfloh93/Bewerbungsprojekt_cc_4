@@ -8,6 +8,15 @@
 #include <iostream>
 #include <random>
 
+/**
+ * @brief Construct a new Player:: Player object
+ *
+ * @param sprite
+ * @param animID
+ * @param name Playername of the player created by himself
+ * @param id unique PlayerID
+ */
+
 Player::Player(unique_ptr<sf::Sprite> sprite, const uint8_t animID, const string_view name, const uint8_t id)
     : Unit(move(sprite), 100.0F, 1.0F, animID), m_name(name), m_ID(id)
 {

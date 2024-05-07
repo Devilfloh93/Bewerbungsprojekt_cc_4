@@ -1,5 +1,16 @@
 #include "ItemCfg.h"
 
+/**
+ * @brief Construct a new Item Cfg:: Item Cfg object
+ *
+ * @param textureID
+ * @param textureData pixel coords of the texture [x , y, sizeX, sizeY]
+ * @param ID unique ID of the item loaded from json file - data/entities/item/item.json
+ * @param name name of the item loaded from json file - gets created by LanguageID found in data/entities/item/item.json and data/language/item.json
+ * @param maxDrop max possible item drop 1 - maxDrop loaded from json file - data/entities/item/item.json
+ * @param fontID
+ */
+
 ItemCfg::ItemCfg(const uint8_t textureID,
                  const sf::IntRect textureData,
                  const uint8_t ID,
