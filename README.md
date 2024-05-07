@@ -28,10 +28,19 @@
 * Datein und Ordner die vom Program erstellt werden, sind in dem selben Ordner, für schnelle und Problemlose Löschung, abgelegt
 * Alle erstellten Datein und Texturen sind einsehbar
 
-## ToDo und Ideen
+## Anmerkungen
+
+* Die Tastaturbelegung findet man im Optionsmenü unter dem Menüpunkt Hotkeys/Tastaturbelegung
+* Mausinteraktionen sind aktuell in der Tastaturbelegung nicht aufgelistet, aus diesem Grund folgen nun einige:
+* Linker Mausklick auf das Spielfeld bewegt die Kamera
+* Maus Scroll zoomt hinein oder heraus
+
+## Features, ToDo, Ideen und Screenshots
 
 * <https://github.com/Devilfloh93/Bewerbungsprojekt_cc_4/blob/main/Ideas.md>
 * <https://github.com/Devilfloh93/Bewerbungsprojekt_cc_4/blob/main/ToDo.md>
+* <https://github.com/Devilfloh93/Bewerbungsprojekt_cc_4/blob/main/preview/Screenshots.md>
+* <https://github.com/Devilfloh93/Bewerbungsprojekt_cc_4/blob/main/Features.md> (WIP)
 
 ## Genutzte Texturen / Animationen / Fonts
 
