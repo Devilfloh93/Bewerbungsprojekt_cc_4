@@ -44,10 +44,12 @@ public:
     uint16_t GetGameHeight() const;
 
     // WINDOW
+    vector<World *> GetWorld() const;
     uint16_t GetWindowWidth() const;
     void SetWindowHeight(uint16_t width);
     void SetWindowWidth(uint16_t height);
     sf::RenderWindow *GetWindow();
+    void InitWindow();
 
     // ZOOM
     void SetZoom(const uint8_t zoom);
@@ -55,34 +57,39 @@ public:
     void UpdateZoom(const float delta);
     uint8_t GetZoom() const;
     uint8_t GetMaxZoom() const;
+    void InitZoom();
 
-    // VECTOR
-    vector<ItemCfg *> GetItemCfg() const;
+    // ANIM
     vector<Anim *> GetAnim() const;
-    vector<Texture *> GetTexture() const;
-    vector<Stats *> GetStats() const;
-    vector<Input *> GetInput() const;
-    vector<sf::Text *> GetSaveFiles() const;
-    vector<Btn *> GetBtn() const;
-    vector<Title *> GetTitles() const;
-    vector<Font *> GetFont() const;
+    void InitAnim();
 
-    vector<ItemGround *> GetItem() const;
-    vector<World *> GetWorld() const;
+    // TEXUTRE
+    vector<Texture *> GetTexture() const;
+    void InitTexture();
+
+    // FONT
+    vector<Font *> GetFont() const;
+    void InitFont();
+
+    // CREATURE
     vector<Creature *> GetCreature() const;
+    void InitCreature();
 
     // VIEW
     sf::View *GetView();
     void UpdateView();
     void HandleViewPosition();
+    void InitViews();
 
     // PLAYER
     void SetPlayer(Player *player);
     Player *GetPlayer() const;
     bool CreatePlayer();
     bool LoadPlayer(const uint8_t id);
+    void InitPlayer();
 
     // LOAD SAVE FILE
+    vector<sf::Text *> GetSaveFiles() const;
     void CreateLoadMenu();
     void SetSaveGameID(const uint8_t id);
     uint8_t GetSaveGameID() const;
@@ -93,6 +100,8 @@ public:
     void LoadGroundItems();
 
     // STATS
+    void InitRenderStats();
+    vector<Stats *> GetStats() const;
     StatDecay GetStatDecay() const;
     void ResizeStats();
     void RenderStats();
@@ -101,6 +110,10 @@ public:
     Thread *GetThread();
 
     // ITEMS
+    vector<ItemGround *> GetItem() const;
+    vector<ItemCfg *> GetItemCfg() const;
+    void InitItemCfg();
+    void RenderItems();
     void SetItems(ItemGround *item);
     void RemoveItems(const size_t i);
     void CreateGroundItem(const uint8_t textureID,
@@ -113,31 +126,14 @@ public:
     // INITS
     void Init();
     void InitFolder();
-    void InitSettings();
-    void InitGeneral();
-    void InitHotkeys();
 
-    void InitViews();
-    void InitZoom();
-    void InitTexture();
-    void InitFont();
-    void InitAnim();
-
-    void InitItemCfg();
-    void InitRenderStats();
-    void InitMenu();
     void InitSurface();
     void InitWorld();
-    void InitPlayer();
-    void InitCreature();
-    void InitWindow();
 
     // Render
     void Render(sf::Clock &clock);
     void RenderSurface();
     void RenderWorld();
-    void RenderMenu();
-    void RenderItems();
     void RenderCreature();
     float GetRenderPuffer() const;
     void RenderHotkey();
@@ -153,13 +149,22 @@ public:
     uint8_t CountSaveFolders();
 
     // MENU
+    vector<Title *> GetTitles() const;
+    vector<Btn *> GetBtn() const;
+    vector<Input *> GetInput() const;
+    void InitMenu();
+    void RenderMenu();
     void ResetInputToDefault();
     void SetMenuState(MenuState state);
 
     // SETTINGS
     map<uint8_t, uint16_t> GetHotkeys() const;
     void ChangeLanguage(const string language);
+    void InitSettings();
     void SaveGeneral();
+    void LoadGeneral();
+    void LoadHotkeys();
+    void InitHotkeys();
 
     // DIALOG
     void SetDialogSprite(unique_ptr<sf::Sprite> sprite);
@@ -178,6 +183,8 @@ private:
     // WINDOW
     uint16_t m_windowWidth;
     uint16_t m_windowHeight;
+    sf::RenderWindow *m_window;
+    uint8_t m_windowStyle;
     // ZOOM
     uint8_t m_maxZoom;
     uint8_t m_zoom;
@@ -192,10 +199,9 @@ private:
     vector<Texture *> m_textures;
     vector<Font *> m_fonts;
     vector<Anim *> m_anim;
-    vector<Stats *> m_stats;
     vector<Input *> m_inputs;
     vector<sf::Text *> m_saveFiles;
-    vector<sf::Text *> m_hotkeyMenu; // TEMPORARY FIX
+    vector<sf::Text *> m_hotkeyMenu; // TODO: TEMPORARY FIX
 
     vector<unique_ptr<sf::Sprite>> m_dialogSprites;
     vector<unique_ptr<sf::Text>> m_dialogTexts;
@@ -211,12 +217,10 @@ private:
     uint8_t m_saveGameID;
     // STATS
     StatDecay m_statDecay;
+    vector<Stats *> m_stats;
     // THREAD
     Thread *m_thread;
     // RENDER
     float m_renderPuffer;
     sf::Text *m_hotkeyRender;
-    // WINDOW
-    sf::RenderWindow *m_window;
-    uint8_t m_windowStyle;
 };
