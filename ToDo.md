@@ -8,7 +8,7 @@
 * Implement Houses with Indoor
 * Implement Interactable NPCs
 * Implement Currency / Shop System
-* Implement Enemys with Pathfinding and Combat Abilities like Sword, Bow, Magic
+* Implement Enemies with Pathfinding and Combat Abilities like Sword, Bow, Magic
 
 ## Player Features
 
@@ -25,7 +25,7 @@
 
 * ~~New Threads for better performance?~~
 
-## Soundsystem
+## Sound system
 
 * Add Background Music
 * Add Sounds for Interactions like wood chopping
@@ -34,7 +34,7 @@
 
 * ~~Add Keybindings~~
 * ~~Add Save/Load~~
-* ~~Fix Fullscreen and Resize when changing Resolution~~
+* ~~Fix Full-screen and Resize when changing Resolution~~
 * ~~Add Character Creation~~
 
 ## Rework

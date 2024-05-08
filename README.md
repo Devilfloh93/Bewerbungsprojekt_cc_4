@@ -12,14 +12,14 @@
 ### Warum ein Spiel?
 
 * Zuallererst durch meine Leidenschaft für Videospiele
-* Ein Spiel kann schnell zu einer Komplexen Anwendung werden und erfordert oft performante Lösungen für verschiedene Features
-* Die zu erstellende Logik ist umfangreich und teilweise Komplex
+* Ein Spiel kann schnell zu einer komplexen Anwendung werden und erfordert oft performante Lösungen für verschiedene Features
+* Die zu erstellende Logik ist umfangreich und teilweise komplex
 
 ### Welche Libraries wurden verwendet?
 
 * SFML <https://www.sfml-dev.org/>
 * Nlohmann/json <https://github.com/nlohmann/json>
-* Keine weiteren da ich so viel wie möglich selbst schreiben wollte
+* Keine weiteren, da ich so viel wie möglich selbst schreiben wollte
 
 ## Systemanforderung
 
@@ -27,10 +27,10 @@
 
 ## Installationshinweise
 
-* Laden Sie die Zip Datei runter und entpacken diese. <https://github.com/Devilfloh93/Bewerbungsprojekt_cc_4/releases/tag/%23GoodGame>
-* Gehen Sie in den Entpackten Ordner und starten Sie die GoodGame.exe
-* Datein und Ordner die vom Program erstellt werden, sind in dem selben Ordner, für schnelle und Problemlose Löschung, abgelegt
-* Alle erstellten Datein und Texturen sind einsehbar
+* Laden Sie die ZIP Datei runter und entpacken diese. <https://github.com/Devilfloh93/Bewerbungsprojekt_cc_4/releases/tag/%23GoodGame>
+* Gehen Sie in den entpackten Ordner und starten Sie die GoodGame.exe
+* Dateien und Ordner, die vom Programm erstellt werden, sind in demselben Ordner, für schnelle und problemlose Löschung, abgelegt
+* Alle erstellten Dateien und Texturen sind einsehbar
 
 ## Anmerkungen
 
@@ -40,7 +40,7 @@
 * Linker Mausklick auf das Spielfeld bewegt die Kamera
 * Maus Scroll zoomt hinein oder heraus
 
-## Features, ToDo, Ideen und Screenshots
+## Features, To-do, Ideen und Screenshots
 
 * <https://github.com/Devilfloh93/Bewerbungsprojekt_cc_4/blob/main/Ideas.md>
 * <https://github.com/Devilfloh93/Bewerbungsprojekt_cc_4/blob/main/ToDo.md>
