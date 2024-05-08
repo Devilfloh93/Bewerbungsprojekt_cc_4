@@ -486,17 +486,17 @@ void Game::LoadGeneral()
          */
         m_language = "enEN";
 
-        m_windowWidth = sf::VideoMode::getDesktopMode().width;
-        m_windowHeight = sf::VideoMode::getDesktopMode().height;
-        m_windowStyle = 8;
+        // m_windowWidth = sf::VideoMode::getDesktopMode().width;
+        // m_windowHeight = sf::VideoMode::getDesktopMode().height;
+        // m_windowStyle = 8;
 
         /**
          * @brief Comment this back in to enable a standalone window for better testing
-         *
+         * @test
          */
-        // m_windowWidth = 1280U;
-        // m_windowHeight = 720U;
-        // m_windowStyle = 4;
+        m_windowWidth = 1280U;
+        m_windowHeight = 720U;
+        m_windowStyle = 4;
     }
 }
 

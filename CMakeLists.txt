@@ -20,7 +20,7 @@ FetchContent_MakeAvailable(nlohmann_json)
 #set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 add_executable(${EXECUTABLE_NAME})
-set_target_properties(${EXECUTABLE_NAME} PROPERTIES OUTPUT_NAME "GoodGame" LINK_FLAGS "/ENTRY:mainCRTStartup /SUBSYSTEM:WINDOWS")
+set_target_properties(${EXECUTABLE_NAME} PROPERTIES OUTPUT_NAME "GoodGame") #LINK_FLAGS "/ENTRY:mainCRTStartup /SUBSYSTEM:WINDOWS")
 target_sources(${EXECUTABLE_NAME} PRIVATE "./app/main.cc")
 target_compile_features(${EXECUTABLE_NAME} PUBLIC cxx_std_20)
 target_include_directories(${EXECUTABLE_NAME} PRIVATE "${PROJECT_SOURCE_DIR}")
