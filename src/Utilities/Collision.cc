@@ -4,7 +4,6 @@ Collision::Collision()
 {
 }
 
-// RIGHT MOVE X
 bool Collision::CanMoveRightX(const float playerPos,
                               const float playerSize,
                               const float objPos,
@@ -22,7 +21,6 @@ bool Collision::CanMoveRightX(const float playerPos, const float objPos, const f
     return true;
 }
 
-// RIGHT LEFT MOVE Y
 bool Collision::CanMoveRightLeftY(const float playerPos,
                                   const float playerSize,
                                   const float objSize,
@@ -43,7 +41,6 @@ bool Collision::CanMoveRightLeftY(const float playerPos,
     return true;
 }
 
-// LEFT MOVE X
 bool Collision::CanMoveLeftX(const float playerPos, const float objPos, const float objSize, const float speed) const
 {
     if (playerPos >= objPos && playerPos - speed <= objPos + objSize)
@@ -61,7 +58,6 @@ bool Collision::CanMoveLeftX(const float playerPos,
     return true;
 }
 
-// DOWN UP MOVE X
 bool Collision::CanMoveDownUpX(const float playerPos,
                                const float playerSize,
                                const float objPos,
@@ -79,7 +75,6 @@ bool Collision::CanMoveDownUpX(const float playerPos, const float objPos, const 
     return true;
 }
 
-// UP MOVE
 bool Collision::CanMoveUpY(const float playerPos,
                            const float playerSize,
                            const float objPos,
@@ -102,7 +97,6 @@ bool Collision::CanMoveUpY(const float playerPos,
     return true;
 }
 
-// DOWN MOVE
 bool Collision::CanMoveDownY(const float playerPos,
                              const float playerSize,
                              const float objPos,
