@@ -12,6 +12,7 @@
 #include "Surface.h"
 #include "Thread.h"
 #include "Title.h"
+#include "Trader.h"
 #include "Utilities.h"
 #include "World.h"
 #include <SFML/Graphics.hpp>
@@ -166,10 +167,11 @@ public:
     void InitHotkeys();
 
     // DIALOG
-    void SetDialogSprite(unique_ptr<sf::Sprite> sprite);
-    void SetDialogText(unique_ptr<sf::Text> text);
+    void SetDialogSprite(unique_ptr<Sprite> sprite);
+    void SetDialogText(unique_ptr<TextTrader> text);
     void ClearDialog();
     sf::Text *RenderDialog();
+    const vector<unique_ptr<TextTrader>> *GetDialogText() const;
 
     MenuState GetMenuState() const;
     void SetMenuState(const MenuState menuState);
@@ -205,8 +207,8 @@ private:
     vector<sf::Text *> m_saveFiles;
     vector<sf::Text *> m_hotkeyMenu; // TODO: TEMPORARY FIX
 
-    vector<unique_ptr<sf::Sprite>> m_dialogSprites;
-    vector<unique_ptr<sf::Text>> m_dialogTexts;
+    vector<unique_ptr<Sprite>> m_dialogSprites;
+    vector<unique_ptr<TextTrader>> m_dialogTexts;
     // SETTINGS
     map<uint8_t, uint16_t> m_hotkeys;
     string m_language;

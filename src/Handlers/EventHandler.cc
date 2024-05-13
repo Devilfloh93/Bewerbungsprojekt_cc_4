@@ -193,31 +193,63 @@ void EventHandler::MouseWheelScrolled(Game &game, float delta)
 
 void EventHandler::BtnPressed(Game &game)
 {
+    Utilities utilities;
     auto window = game.GetWindow();
     // get the current mouse position in the window
     auto pixelPos = sf::Mouse::getPosition(*window);
     // convert it to world coordinates
     auto worldPos = window->mapPixelToCoords(pixelPos);
 
-    auto saveFiles = game.GetSaveFiles();
     auto menuState = game.GetMenuState();
     auto btns = game.GetBtn();
 
     if (menuState == MenuState::OpenLoad)
     {
+        auto saveFiles = game.GetSaveFiles();
+
         for (size_t i = 1; const auto &data : saveFiles)
         {
             data->setColor(sf::Color(255, 255, 255));
             auto txtPos = data->getPosition();
             auto txtLSize = data->getLocalBounds().getSize();
 
-            if (worldPos.x > txtPos.x && worldPos.x < txtPos.x + txtLSize.x && worldPos.y > txtPos.y &&
-                worldPos.y < txtPos.y + txtLSize.y)
+            auto clicked = utilities.CheckTextClicked(worldPos, txtPos, txtLSize);
+            if (clicked)
             {
+                /**
+                 * @todo when deselect Save File in Load Menu set ID back to 0
+                 *
+                 */
                 game.SetSaveGameID(i);
                 data->setColor(sf::Color(0, 255, 0));
             }
             ++i;
+        }
+    }
+
+    if (menuState == MenuState::Trader)
+    {
+        auto dialogText = game.GetDialogText();
+
+        for (const auto &data : *dialogText)
+        {
+            auto text = data.get()->GetText();
+            text->setColor(sf::Color(255, 255, 255));
+            auto txtPos = text->getPosition();
+            auto txtLSize = text->getLocalBounds().getSize();
+            auto selectedItemID = data.get()->GetSelectedItemID();
+            auto clicked = utilities.CheckTextClicked(worldPos, txtPos, txtLSize);
+
+            if (clicked)
+            {
+                auto trader = game.GetPlayer()->GetTrader();
+                /**
+                 * @todo when deselect Item in Trader Menu set ID back to 0
+                 *
+                 */
+                trader->SetSelectedItemID(selectedItemID);
+                text->setColor(sf::Color(0, 255, 0));
+            }
         }
     }
 
@@ -227,14 +259,13 @@ void EventHandler::BtnPressed(Game &game)
         auto btnLSize = data->GetSprite()->getLocalBounds().getSize();
         auto btnScale = data->GetSprite()->getScale();
         auto state = data->GetMenuState();
-        bool created = false;
 
         /**
          * @brief Check if Mouse is inside the size of the Btn Size
          *
          */
-        if (worldPos.x > btnPos.x && worldPos.x < btnPos.x + (btnLSize.x * btnScale.x) && worldPos.y > btnPos.y &&
-            worldPos.y < btnPos.y + (btnLSize.y * btnScale.y) && menuState == state)
+        auto clicked = utilities.CheckBtnClicked(worldPos, btnPos, btnLSize, btnScale);
+        if (clicked && menuState == state)
         {
             switch (data->GetBtnFnc())
             {

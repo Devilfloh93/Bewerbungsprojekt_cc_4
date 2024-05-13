@@ -286,3 +286,24 @@ bool Utilities::CheckMenuState(const vector<MenuState> &menuState, const MenuSta
     }
     return check;
 }
+
+bool Utilities::CheckTextClicked(const sf::Vector2f &mousePos, const sf::Vector2f &txtPos, const sf::Vector2f &txtLSize)
+{
+    if (mousePos.x > txtPos.x && mousePos.x < txtPos.x + txtLSize.x && mousePos.y > txtPos.y &&
+        mousePos.y < txtPos.y + txtLSize.y)
+        return true;
+
+    return false;
+}
+
+bool Utilities::CheckBtnClicked(const sf::Vector2f &mousePos,
+                                const sf::Vector2f &btnPos,
+                                const sf::Vector2f &btnLSize,
+                                const sf::Vector2f &btnScale)
+{
+    if (mousePos.x > btnPos.x && mousePos.x < btnPos.x + (btnLSize.x * btnScale.x) && mousePos.y > btnPos.y &&
+        mousePos.y < btnPos.y + (btnLSize.y * btnScale.y))
+        return true;
+
+    return false;
+}

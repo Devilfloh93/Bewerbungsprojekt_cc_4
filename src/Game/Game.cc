@@ -1402,10 +1402,10 @@ void Game::RenderMenu()
     for (const auto &data : m_titles)
     {
         Element element = Element::Title;
-        auto previousTxt = data->GetText();
 
         if (m_menuState == data->GetMenuState())
         {
+            auto previousTxt = data->GetText();
             m_window->draw(*previousTxt);
 
             for (const auto &data1 : m_hotkeyMenu)
@@ -1454,7 +1454,7 @@ void Game::RenderMenu()
                     auto btnObj = data1->GetSprite();
                     auto btnText = data1->GetText();
                     if (m_menuState == MenuState::OpenLoad || m_menuState == MenuState::Hotkeys ||
-                        m_menuState == MenuState::Trader)
+                        m_menuState == MenuState::Trader || m_menuState == MenuState::Inventory)
                     {
                         auto alignment = data1->GetAlignment();
                         auto windowWidth = utilities.CalculateAlignmentWindowWidth(m_windowWidth, alignment);
@@ -1936,12 +1936,12 @@ void Game::SaveGeneral()
 }
 
 // DIALOG
-void Game::SetDialogSprite(unique_ptr<sf::Sprite> sprite)
+void Game::SetDialogSprite(unique_ptr<Sprite> sprite)
 {
     m_dialogSprites.push_back(move(sprite));
 }
 
-void Game::SetDialogText(unique_ptr<sf::Text> text)
+void Game::SetDialogText(unique_ptr<TextTrader> text)
 {
     m_dialogTexts.push_back(move(text));
 }
@@ -1957,16 +1957,21 @@ sf::Text *Game::RenderDialog()
     sf::Text *prevTxt;
     for (const auto &data : m_dialogSprites)
     {
-        m_window->draw(*data);
+        m_window->draw(*(data.get()->GetSprite()));
     }
 
     for (const auto &data : m_dialogTexts)
     {
-        m_window->draw(*data);
-        prevTxt = data.get();
+        prevTxt = data.get()->GetText();
+        m_window->draw(*prevTxt);
     }
 
     return prevTxt;
+}
+
+const vector<unique_ptr<TextTrader>> *Game::GetDialogText() const
+{
+    return &m_dialogTexts;
 }
 
 MenuState Game::GetMenuState() const
