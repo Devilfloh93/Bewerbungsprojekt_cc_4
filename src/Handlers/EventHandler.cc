@@ -229,6 +229,10 @@ void EventHandler::BtnPressed(Game &game)
         auto state = data->GetMenuState();
         bool created = false;
 
+        /**
+         * @brief Check if Mouse is inside the size of the Btn Size
+         *
+         */
         if (worldPos.x > btnPos.x && worldPos.x < btnPos.x + (btnLSize.x * btnScale.x) && worldPos.y > btnPos.y &&
             worldPos.y < btnPos.y + (btnLSize.y * btnScale.y) && menuState == state)
         {

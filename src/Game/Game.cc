@@ -759,12 +759,17 @@ void Game::InitMenu()
 
             for (const auto &dataInput : jsonDataInput)
             {
+                Alignment alignment = jsonDataInputTemplate["alignment"];
+
                 vector<MenuState> inputState = dataInput["state"];
 
                 auto canAdd = utilities.CheckMenuState(inputState, state);
 
                 if (canAdd)
                 {
+                    if (dataInput.contains("alignment"))
+                        alignment = dataInput["alignment"];
+
                     auto inputText = make_unique<sf::Text>();
 
                     fontID = jsonDataInputTemplate["fontID"];
@@ -777,13 +782,16 @@ void Game::InitMenu()
 
                     auto text = utilities.GetLanguageText(jsonDataLanguage, languageID, m_language);
 
-                    utilities.SetSFText(inputText.get(), font, fontSize);
+                    auto windowWidth = utilities.CalculateAlignmentWindowWidth(m_windowWidth, alignment);
+                    auto spaceBetween = utilities.CalculateSpaceBetweenMenu(alignment);
 
-                    utilities.SetTitlePos(m_windowWidth, prevTitleText, inputText.get());
+                    utilities.SetSFText(inputText.get(), font, fontSize, text);
+
+                    utilities.SetTitlePos(windowWidth, prevTitleText, inputText.get(), spaceBetween);
 
                     element = Element::Input;
 
-                    auto inputs = new Input(state, move(inputText), maxChars, text);
+                    auto inputs = new Input(state, move(inputText), maxChars, text, alignment);
                     m_inputs.push_back(inputs);
                     prevInputText = inputs->GetText();
                 }
@@ -791,12 +799,16 @@ void Game::InitMenu()
 
             for (const auto &dataBtn : jsonDataBtn)
             {
+                Alignment alignment = jsonDataBtnTemplate["alignment"];
                 vector<MenuState> btnState = dataBtn["state"];
 
                 auto canAdd = utilities.CheckMenuState(btnState, state);
 
                 if (canAdd)
                 {
+                    if (dataBtn.contains("alignment"))
+                        alignment = dataBtn["alignment"];
+
                     auto btnText = make_unique<sf::Text>();
                     auto btn = make_unique<sf::Sprite>();
 
@@ -822,17 +834,19 @@ void Game::InitMenu()
 
                     utilities.SetSFText(btnText.get(), font, fontSize, text);
 
+                    auto windowWidth = utilities.CalculateAlignmentWindowWidth(m_windowWidth, alignment);
+                    auto spaceBetween = utilities.CalculateSpaceBetweenMenu(alignment);
+
                     if (element == Element::Title)
-                        utilities.SetBtnAndTextPos(m_windowWidth, btn.get(), prevTitleText, btnText.get());
+                        utilities.SetBtnAndTextPos(windowWidth, btn.get(), prevTitleText, btnText.get(), spaceBetween);
                     else if (element == Element::Input)
-                        utilities.SetBtnAndTextPos(m_windowWidth, btn.get(), prevInputText, btnText.get());
+                        utilities.SetBtnAndTextPos(windowWidth, btn.get(), prevInputText, btnText.get(), spaceBetween);
                     else
-                        utilities.SetBtnAndTextPos(m_windowWidth, btn.get(), prevBtn, btnText.get());
+                        utilities.SetBtnAndTextPos(windowWidth, btn.get(), prevBtn, btnText.get(), spaceBetween);
 
                     element = Element::Nothing;
 
-
-                    auto btns = new Btn(state, btnFnc, move(btnText), move(btn));
+                    auto btns = new Btn(state, btnFnc, move(btnText), move(btn), alignment);
                     m_btns.push_back(btns);
                     prevBtn = btns->GetSprite();
                 }
@@ -1391,65 +1405,81 @@ void Game::RenderMenu()
 
     for (const auto &data : m_titles)
     {
-        bool firstBtn = true;
+        Element element = Element::Title;
         auto previousTxt = data->GetText();
 
         if (m_menuState == data->GetMenuState())
+        {
             m_window->draw(*previousTxt);
 
-        if (m_menuState == MenuState::Inventory || m_menuState == MenuState::Trader)
-            RenderDialog();
-
-        for (const auto &data1 : m_hotkeyMenu)
-        {
-            if (m_menuState == MenuState::Hotkeys)
+            for (const auto &data1 : m_hotkeyMenu)
             {
-                utilities.SetTitlePos(m_windowWidth, previousTxt, data1);
-                m_window->draw(*data1);
-                previousTxt = data1;
-            }
-        }
-
-        for (const auto &data1 : m_inputs)
-        {
-            if (m_menuState == data1->GetMenuState())
-                m_window->draw(*(data1->GetText()));
-        }
-
-        for (const auto &data1 : m_saveFiles)
-        {
-            if (m_menuState == MenuState::OpenLoad)
-            {
-                utilities.SetTitlePos(m_windowWidth, previousTxt, data1);
-                m_window->draw(*data1);
-                previousTxt = data1;
-            }
-        }
-
-        for (const auto &data1 : m_btns)
-        {
-            bool showBtn = false;
-            auto menuStates = data1->GetMenuState();
-
-            if (m_menuState == menuStates)
-            {
-                auto btnObj = data1->GetSprite();
-                auto btnText = data1->GetText();
-                if (m_menuState == MenuState::OpenLoad || m_menuState == MenuState::Hotkeys)
+                if (m_menuState == MenuState::Hotkeys)
                 {
-                    if (firstBtn)
-                    {
-                        utilities.SetBtnAndTextPos(m_windowWidth, btnObj, previousTxt, btnText);
-                        lastbtn = btnObj;
-                        firstBtn = false;
-                    }
-                    else
-                        utilities.SetBtnAndTextPos(m_windowWidth, btnObj, lastbtn, btnText);
-                }
+                    auto spaceBetween = utilities.CalculateSpaceBetweenMenu(Alignment::Middle);
 
-                m_window->draw(*btnObj);
-                m_window->draw(*btnText);
+                    utilities.SetTitlePos(m_windowWidth, previousTxt, data1, spaceBetween);
+                    m_window->draw(*data1);
+                    previousTxt = data1;
+                }
             }
+
+            for (const auto &data1 : m_inputs)
+            {
+                if (m_menuState == data1->GetMenuState())
+                {
+                    element = Element::Input;
+                    m_window->draw(*(data1->GetText()));
+                    previousTxt = data1->GetText();
+                }
+            }
+
+            for (const auto &data1 : m_saveFiles)
+            {
+                if (m_menuState == MenuState::OpenLoad)
+                {
+                    auto spaceBetween = utilities.CalculateSpaceBetweenMenu(Alignment::Middle);
+
+                    utilities.SetTitlePos(m_windowWidth, previousTxt, data1, spaceBetween);
+                    m_window->draw(*data1);
+                    previousTxt = data1;
+                }
+            }
+
+            if (m_menuState == MenuState::Inventory || m_menuState == MenuState::Trader)
+                previousTxt = RenderDialog();
+
+            for (const auto &data1 : m_btns)
+            {
+                auto menuStates = data1->GetMenuState();
+
+                if (m_menuState == menuStates)
+                {
+                    auto btnObj = data1->GetSprite();
+                    auto btnText = data1->GetText();
+                    if (m_menuState == MenuState::OpenLoad || m_menuState == MenuState::Hotkeys ||
+                        m_menuState == MenuState::Trader)
+                    {
+                        auto alignment = data1->GetAlignment();
+                        auto windowWidth = utilities.CalculateAlignmentWindowWidth(m_windowWidth, alignment);
+                        auto spaceBetween = utilities.CalculateSpaceBetweenMenu(alignment);
+
+                        if (element == Element::Title)
+                            utilities.SetBtnAndTextPos(windowWidth, btnObj, previousTxt, btnText, spaceBetween);
+                        else if (element == Element::Input)
+                            utilities.SetBtnAndTextPos(windowWidth, btnObj, previousTxt, btnText, spaceBetween);
+                        else
+                            utilities.SetBtnAndTextPos(windowWidth, btnObj, lastbtn, btnText, spaceBetween);
+
+                        element = Element::Nothing;
+                        lastbtn = btnObj;
+                    }
+
+                    m_window->draw(*btnObj);
+                    m_window->draw(*btnText);
+                }
+            }
+            break;
         }
     }
 }
@@ -1755,8 +1785,12 @@ void Game::ResizeMenu()
             if (titleState == inputState)
             {
                 inputText = dataInput->GetText();
+                auto alignment = dataInput->GetAlignment();
 
-                utilities.SetTitlePos(m_windowWidth, text, inputText);
+                auto windowWidth = utilities.CalculateAlignmentWindowWidth(m_windowWidth, alignment);
+                auto spaceBetween = utilities.CalculateSpaceBetweenMenu(alignment);
+
+                utilities.SetTitlePos(windowWidth, text, inputText, spaceBetween);
 
                 element = Element::Input;
             }
@@ -1770,13 +1804,17 @@ void Game::ResizeMenu()
             {
                 auto sprite = data2->GetSprite();
                 auto btnText = data2->GetText();
+                auto alignment = data2->GetAlignment();
+
+                auto windowWidth = utilities.CalculateAlignmentWindowWidth(m_windowWidth, alignment);
+                auto spaceBetween = utilities.CalculateSpaceBetweenMenu(alignment);
 
                 if (element == Element::Title)
-                    utilities.SetBtnAndTextPos(m_windowWidth, sprite, text, btnText);
+                    utilities.SetBtnAndTextPos(windowWidth, sprite, text, btnText, spaceBetween);
                 else if (element == Element::Input)
-                    utilities.SetBtnAndTextPos(m_windowWidth, sprite, inputText, btnText);
+                    utilities.SetBtnAndTextPos(windowWidth, sprite, inputText, btnText, spaceBetween);
                 else
-                    utilities.SetBtnAndTextPos(m_windowWidth, sprite, prevBtn, btnText);
+                    utilities.SetBtnAndTextPos(windowWidth, sprite, prevBtn, btnText, spaceBetween);
 
                 prevBtn = sprite;
                 element = Element::Nothing;
@@ -1918,8 +1956,9 @@ void Game::ClearDialog()
     m_dialogTexts.clear();
 }
 
-void Game::RenderDialog()
+sf::Text *Game::RenderDialog()
 {
+    sf::Text *prevTxt;
     for (const auto &data : m_dialogSprites)
     {
         m_window->draw(*data);
@@ -1928,5 +1967,8 @@ void Game::RenderDialog()
     for (const auto &data : m_dialogTexts)
     {
         m_window->draw(*data);
+        prevTxt = data.get();
     }
+
+    return prevTxt;
 }

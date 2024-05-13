@@ -28,16 +28,21 @@ void Utilities::SetTitlePos(const uint16_t width, sf::Text *title)
     title->setPosition(sf::Vector2f((width / 2U) - (titleLSize.x / 2U), 0.0F));
 }
 
-void Utilities::SetTitlePos(const uint16_t width, sf::Text *title, sf::Text *text)
+void Utilities::SetTitlePos(const uint16_t width, sf::Text *title, sf::Text *text, float spaceBetweenInputs)
 {
     auto titleLSize = title->getLocalBounds().getSize();
     auto titlePos = title->getGlobalBounds().getPosition();
     auto textLSize = text->getLocalBounds().getSize();
 
-    text->setPosition(sf::Vector2f((width / 2U) - (textLSize.x / 2U), (titlePos.y + titleLSize.y) + 50.0F));
+    text->setPosition(
+        sf::Vector2f((width / 2U) - (textLSize.x / 2U), (titlePos.y + titleLSize.y) + spaceBetweenInputs));
 }
 
-void Utilities::SetBtnAndTextPos(const uint16_t width, sf::Sprite *btnObj, sf::Text *title, sf::Text *btntext)
+void Utilities::SetBtnAndTextPos(const uint16_t width,
+                                 sf::Sprite *btnObj,
+                                 sf::Text *title,
+                                 sf::Text *btntext,
+                                 float spaceBetweenBtn)
 {
     auto btnObjLSize = btnObj->getLocalBounds().getSize();
     auto btnObjScale = btnObj->getScale();
@@ -45,8 +50,8 @@ void Utilities::SetBtnAndTextPos(const uint16_t width, sf::Sprite *btnObj, sf::T
     auto titlePos = title->getGlobalBounds().getPosition();
     auto btnTextLSize = btntext->getLocalBounds().getSize();
 
-    btnObj->setPosition(
-        sf::Vector2f((width / 2U) - ((btnObjLSize.x * btnObjScale.x) / 2U), (titlePos.y + titleLSize.y) + 50.0F));
+    btnObj->setPosition(sf::Vector2f((width / 2U) - ((btnObjLSize.x * btnObjScale.x) / 2U),
+                                     (titlePos.y + titleLSize.y) + spaceBetweenBtn));
 
     auto btnObjPos = btnObj->getGlobalBounds().getPosition();
     auto btnObjSize = btnObj->getGlobalBounds().getSize();
@@ -55,7 +60,11 @@ void Utilities::SetBtnAndTextPos(const uint16_t width, sf::Sprite *btnObj, sf::T
                                       btnObjPos.y + ((btnObjSize.y / 2U) - (btnTextLSize.y / 2U))));
 }
 
-void Utilities::SetBtnAndTextPos(const uint16_t width, sf::Sprite *btnObj, sf::Sprite *btn, sf::Text *btntext)
+void Utilities::SetBtnAndTextPos(const uint16_t width,
+                                 sf::Sprite *btnObj,
+                                 sf::Sprite *btn,
+                                 sf::Text *btntext,
+                                 float spaceBetweenBtn)
 {
     auto btnObjLSize = btnObj->getLocalBounds().getSize();
     auto btnObjScale = btnObj->getScale();
@@ -63,8 +72,15 @@ void Utilities::SetBtnAndTextPos(const uint16_t width, sf::Sprite *btnObj, sf::S
     auto btnPos = btn->getGlobalBounds().getPosition();
     auto btnTextLSize = btntext->getLocalBounds().getSize();
 
-    btnObj->setPosition(
-        sf::Vector2f((width / 2U) - ((btnObjLSize.x * btnObjScale.x) / 2U), (btnPos.y + btnLSize.y) + 50.0F));
+    if (spaceBetweenBtn > 0)
+    {
+        btnObj->setPosition(sf::Vector2f((width / 2U) - ((btnObjLSize.x * btnObjScale.x) / 2U),
+                                         (btnPos.y + btnLSize.y) + spaceBetweenBtn));
+    }
+    else
+    {
+        btnObj->setPosition(sf::Vector2f((width / 2U) - ((btnObjLSize.x * btnObjScale.x) / 2U), btnPos.y));
+    }
 
     auto btnObjPos = btnObj->getGlobalBounds().getPosition();
     auto btnObjSize = btnObj->getGlobalBounds().getSize();
@@ -92,8 +108,8 @@ void Utilities::SetTextBeforeIcon(const uint16_t width, sf::Text *title, sf::Spr
     auto iconLSize = icon.getLocalBounds().getSize();
     auto textLSize = text.getLocalBounds().getSize();
 
-    // TODO REMOVE + 150.0F Y TEMPORARY FIX
-    icon.setPosition((width / 2U) - ((iconLSize.x + textLSize.x) / 2), (titlePos.y + titleLSize.y) + 150.0F);
+    // TODO REMOVE + 50.0F Y TEMPORARY FIX
+    icon.setPosition((width / 2U) - ((iconLSize.x + textLSize.x) / 2), (titlePos.y + titleLSize.y) + 50.0F);
 
     auto iconPos = icon.getPosition();
 
@@ -111,6 +127,36 @@ void Utilities::SetTextBeforeIcon(const uint16_t x, const uint16_t y, sf::Sprite
     text.setPosition(sf::Vector2f(iconPos.x + (iconLSize.x + (iconLSize.x / 2)), iconPos.y));
 }
 
+uint16_t Utilities::CalculateAlignmentWindowWidth(const uint16_t width, const Alignment alignment)
+{
+    auto alignmentWidth = width;
+
+    switch (alignment)
+    {
+    case Alignment::Left:
+        alignmentWidth -= (alignmentWidth / 2);
+        break;
+    case Alignment::Right:
+        alignmentWidth += (alignmentWidth / 2);
+        break;
+
+    default:
+        break;
+    }
+
+    return alignmentWidth;
+}
+
+float Utilities::CalculateSpaceBetweenMenu(const Alignment alignment)
+{
+    float spaceBetweenBtn = 50.0F;
+
+    if (alignment != Alignment::Middle)
+        spaceBetweenBtn = 0.0F;
+
+    return spaceBetweenBtn;
+}
+
 void Utilities::PlayAnimation(sf::Sprite *sprite, sf::Clock &clock, sf::IntRect &anim0, sf::IntRect &anim1)
 {
     auto elapsed = clock.getElapsedTime();
@@ -124,12 +170,6 @@ void Utilities::PlayAnimation(sf::Sprite *sprite, sf::Clock &clock, sf::IntRect 
         clock.restart();
 }
 
-void Utilities::SetSFText(sf::Text *text, const sf::Font *font, const uint8_t size, const string value)
-{
-    text->setFont(*font);
-    text->setCharacterSize(size);
-    text->setString(format("{}", value));
-}
 
 void Utilities::SetSFText(sf::Text *text, const sf::Font *font, const uint8_t size)
 {

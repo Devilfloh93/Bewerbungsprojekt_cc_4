@@ -369,10 +369,12 @@ void Player::InitTraderItems(Game &game)
     auto sellingItems = m_trader->GetSellingItem();
     auto buyingItems = m_trader->GetBuyingItem();
     auto titles = game.GetTitles();
+    auto input = game.GetInput();
     sf::Text *previousTxt;
 
     for (const auto &data : titles)
     {
+
         if (data->GetMenuState() == MenuState::Trader)
         {
             previousTxt = data->GetText();
@@ -380,51 +382,15 @@ void Player::InitTraderItems(Game &game)
         }
     }
 
-    for (const auto &[key, value] : sellingItems)
+    for (const auto &data : input)
     {
-        for (const auto &data : itemCfg)
+        if (data->GetMenuState() == MenuState::Trader)
         {
-            auto ID = data->GetID();
-            if (key == ID)
-            {
-                auto textureID = data->GetTextureID();
-                auto itemSprite = make_unique<sf::Sprite>();
-                auto itemText = make_unique<sf::Text>();
-
-                auto texture = utilities.GetTexture(textures, textureID);
-
-                auto textureData = data->GetTextureData();
-                auto fontID = data->GetFontID();
-
-                auto font = utilities.GetFont(fonts, fontID);
-
-                // utilities.SetSFText(itemText, font, 15, value);
-                itemText->setFont(*font);
-                itemText->setCharacterSize(15);
-                itemText->setString(format("{}", value));
-
-                itemSprite->setTexture(*texture);
-                itemSprite->setTextureRect(textureData);
-
-                if (firstIcon)
-                {
-                    utilities.SetTextBeforeIcon(width, previousTxt, *itemSprite, *itemText);
-                    firstIcon = false;
-                }
-                else
-                    utilities.SetTextBeforeIcon(*itemSprite, *itemText, prevPos);
-
-                prevPos = itemSprite->getGlobalBounds().getPosition();
-
-                game.SetDialogSprite(move(itemSprite));
-                game.SetDialogText(move(itemText));
-                break;
-            }
+            previousTxt = data->GetText();
         }
     }
 
-
-    for (const auto &[key, value] : buyingItems)
+    for (const auto &[key, value] : sellingItems)
     {
         for (const auto &[key1, value1] : m_items)
         {
@@ -440,32 +406,74 @@ void Player::InitTraderItems(Game &game)
                         auto itemText = make_unique<sf::Text>();
 
                         auto texture = utilities.GetTexture(textures, textureID);
+
                         auto textureData = data->GetTextureData();
                         auto fontID = data->GetFontID();
 
                         auto font = utilities.GetFont(fonts, fontID);
 
-                        itemText->setFont(*font);
-                        itemText->setCharacterSize(15);
-                        itemText->setString(format("{}", value));
+                        auto text = format("Selling: {} - Inventory: {}", value, value1);
+                        utilities.SetSFText(itemText.get(), font, 15, text);
 
-                        itemSprite->setTexture(*texture);
-                        itemSprite->setTextureRect(textureData);
+                        utilities.SetSFSprite(itemSprite.get(), texture, textureData);
+                        auto alignemntWidth = utilities.CalculateAlignmentWindowWidth(width, Alignment::Right);
 
                         if (firstIcon)
                         {
-                            utilities.SetTextBeforeIcon(width, previousTxt, *itemSprite, *itemText);
+                            utilities.SetTextBeforeIcon(alignemntWidth, previousTxt, *itemSprite, *itemText);
                             firstIcon = false;
                         }
                         else
                             utilities.SetTextBeforeIcon(*itemSprite, *itemText, prevPos);
 
                         prevPos = itemSprite->getGlobalBounds().getPosition();
+
                         game.SetDialogSprite(move(itemSprite));
                         game.SetDialogText(move(itemText));
                         break;
                     }
                 }
+            }
+        }
+    }
+
+    firstIcon = true;
+
+    for (const auto &[key, value] : buyingItems)
+    {
+        for (const auto &data : itemCfg)
+        {
+            auto ID = data->GetID();
+            if (key == ID)
+            {
+                auto textureID = data->GetTextureID();
+                auto itemSprite = make_unique<sf::Sprite>();
+                auto itemText = make_unique<sf::Text>();
+
+                auto texture = utilities.GetTexture(textures, textureID);
+                auto textureData = data->GetTextureData();
+                auto fontID = data->GetFontID();
+
+                auto font = utilities.GetFont(fonts, fontID);
+
+                auto text = format("Buying: {}", value);
+                utilities.SetSFText(itemText.get(), font, 15, text);
+
+                utilities.SetSFSprite(itemSprite.get(), texture, textureData);
+                auto alignemntWidth = utilities.CalculateAlignmentWindowWidth(width, Alignment::Left);
+
+                if (firstIcon)
+                {
+                    utilities.SetTextBeforeIcon(alignemntWidth, previousTxt, *itemSprite, *itemText);
+                    firstIcon = false;
+                }
+                else
+                    utilities.SetTextBeforeIcon(*itemSprite, *itemText, prevPos);
+
+                prevPos = itemSprite->getGlobalBounds().getPosition();
+                game.SetDialogSprite(move(itemSprite));
+                game.SetDialogText(move(itemText));
+                break;
             }
         }
     }
@@ -510,12 +518,9 @@ void Player::InitInventoryItems(Game &game)
 
                 auto font = utilities.GetFont(fonts, fontID);
 
-                itemText->setFont(*font);
-                itemText->setCharacterSize(15);
-                itemText->setString(format("{}", value));
+                utilities.SetSFText(itemText.get(), font, 15, value);
 
-                itemSprite->setTexture(*texture);
-                itemSprite->setTextureRect(textureData);
+                utilities.SetSFSprite(itemSprite.get(), texture, textureData);
 
                 if (firstIcon)
                 {

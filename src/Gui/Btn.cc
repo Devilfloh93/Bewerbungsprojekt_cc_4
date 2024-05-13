@@ -9,12 +9,21 @@
  * @param sprite
  */
 
-Btn::Btn(const MenuState menuState, const BtnFunc btnfnc, unique_ptr<sf::Text> text, unique_ptr<sf::Sprite> sprite)
-    : Gui(menuState), Text(move(text)), Sprite(move(sprite)), m_btnfnc(btnfnc)
+Btn::Btn(const MenuState menuState,
+         const BtnFunc btnfnc,
+         unique_ptr<sf::Text> text,
+         unique_ptr<sf::Sprite> sprite,
+         const Alignment alignment)
+    : Gui(menuState), Text(move(text)), Sprite(move(sprite)), m_btnfnc(btnfnc), m_alignment(alignment)
 {
 }
 
 BtnFunc Btn::GetBtnFnc() const
 {
     return m_btnfnc;
+}
+
+Alignment Btn::GetAlignment() const
+{
+    return m_alignment;
 }

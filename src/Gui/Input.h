@@ -10,11 +10,13 @@ public:
     Input(const MenuState menuState,
           unique_ptr<sf::Text> text,
           const uint8_t maxChars,
-          const string_view defaultString);
+          const string_view defaultString,
+          const Alignment alignment);
     ~Input() = default;
 
     string GetString() const;
     string GetDefaultString() const;
+    Alignment GetAlignment() const;
 
     void ResetToDefaultString(const uint16_t width);
     void Write(const uint16_t width, const sf::Uint32 character);
@@ -25,4 +27,5 @@ private:
     string m_defaultString;
     string m_string;
     uint8_t m_maxChars;
+    Alignment m_alignment;
 };

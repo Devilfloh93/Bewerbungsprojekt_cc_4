@@ -1,5 +1,6 @@
 {
     "fontID": 0,
     "fontSize": 20,
-    "maxChars": 16
+    "maxChars": 16,
+    "alignment": 0
 }

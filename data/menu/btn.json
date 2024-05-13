@@ -123,6 +123,22 @@
     },
     {
         "state": [
+            10
+        ],
+        "languageID": 22,
+        "fnc": 0,
+        "alignment": 1
+    },
+    {
+        "state": [
+            10
+        ],
+        "languageID": 23,
+        "fnc": 0,
+        "alignment": 2
+    },
+    {
+        "state": [
             3,
             5,
             6,

@@ -62,6 +62,13 @@ enum class Hotkey
     DownMove
 };
 
+enum class Alignment
+{
+    Middle = 0,
+    Left,
+    Right
+};
+
 class Gui
 {
 public:

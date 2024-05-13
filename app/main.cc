@@ -63,7 +63,7 @@ int main()
         window->clear(sf::Color(50U, 50U, 50U));
 
         /**
-         * @brief While the Game is running the game.Render() will be executed and while we are in a Menu the Render.Menu() will be executed
+         * @brief While the Game is running the Render() will be executed and while we are in a Menu the RenderMenu() will be executed
          *
          */
         if (game.GetPlaying() && game.GetMenuState() == MenuState::Playing)
