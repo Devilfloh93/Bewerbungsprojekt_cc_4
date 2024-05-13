@@ -6,7 +6,7 @@ Input::Input(const MenuState menuState,
              const uint8_t maxChars,
              const string_view defaultString,
              const Alignment alignment)
-    : Gui(menuState), Text(move(text)), m_maxChars(maxChars), m_defaultString(defaultString)
+    : Gui(menuState, alignment), Text(move(text)), m_maxChars(maxChars), m_defaultString(defaultString)
 {
 }
 
@@ -18,11 +18,6 @@ string Input::GetString() const
 string Input::GetDefaultString() const
 {
     return m_defaultString;
-}
-
-Alignment Input::GetAlignment() const
-{
-    return m_alignment;
 }
 
 void Input::ResetToDefaultString(const uint16_t width)

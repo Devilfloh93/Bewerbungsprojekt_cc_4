@@ -25,7 +25,7 @@ struct StatDecay
 
 class Thread;
 
-class Game : public Gui
+class Game
 {
 public:
     Game();
@@ -155,7 +155,6 @@ public:
     void InitMenu();
     void RenderMenu();
     void ResetInputToDefault();
-    void SetMenuState(MenuState state);
 
     // SETTINGS
     map<uint8_t, uint16_t> GetHotkeys() const;
@@ -171,6 +170,9 @@ public:
     void SetDialogText(unique_ptr<sf::Text> text);
     void ClearDialog();
     sf::Text *RenderDialog();
+
+    MenuState GetMenuState() const;
+    void SetMenuState(const MenuState menuState);
 
 private:
     // RUNNING
@@ -223,4 +225,5 @@ private:
     // RENDER
     float m_renderPuffer;
     sf::Text *m_hotkeyRender;
+    MenuState m_menuState;
 };

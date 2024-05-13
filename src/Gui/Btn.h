@@ -16,9 +16,7 @@ public:
     ~Btn() = default;
 
     BtnFunc GetBtnFnc() const;
-    Alignment GetAlignment() const;
 
 private:
     BtnFunc m_btnfnc;
-    Alignment m_alignment;
 };
