@@ -1,6 +1,7 @@
 #pragma once
 #include "Game.h"
 #include "Stats.h"
+#include "Trader.h"
 #include <SFML/Graphics.hpp>
 #include <World.h>
 #include <cstdint>
@@ -74,6 +75,9 @@ public:
     // DATASTORE
     void Load(const uint8_t id, Game *game);
     void Save(Game *game);
+
+    // TRADER
+    Trader *GetTrader();
 
 private:
     // INFO

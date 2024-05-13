@@ -413,23 +413,26 @@ void Player::InitTraderItems(Game &game)
                         auto font = utilities.GetFont(fonts, fontID);
 
                         auto text = format("Selling: {} - Inventory: {}", value, value1);
-                        utilities.SetSFText(itemText.get(), font, 15, text);
+                        auto spriteUnique = itemSprite.get();
+                        auto textUnique = itemText.get();
 
-                        utilities.SetSFSprite(itemSprite.get(), texture, textureData);
+                        utilities.SetSFText(textUnique, font, 15, text);
+
+                        utilities.SetSFSprite(spriteUnique, texture, textureData);
                         auto alignemntWidth = utilities.CalculateAlignmentWindowWidth(width, Alignment::Right);
 
                         if (firstIcon)
                         {
-                            utilities.SetTextBeforeIcon(alignemntWidth, previousTxt, *itemSprite, *itemText);
+                            utilities.SetTextBeforeIcon(alignemntWidth, previousTxt, *spriteUnique, *textUnique);
                             firstIcon = false;
                         }
                         else
-                            utilities.SetTextBeforeIcon(*itemSprite, *itemText, prevPos);
+                            utilities.SetTextBeforeIcon(*spriteUnique, *textUnique, prevPos);
 
-                        prevPos = itemSprite->getGlobalBounds().getPosition();
+                        prevPos = spriteUnique->getGlobalBounds().getPosition();
 
-                        game.SetDialogSprite(move(itemSprite));
-                        game.SetDialogText(move(itemText));
+                        game.SetDialogSprite(make_unique<Sprite>(move(itemSprite)));
+                        game.SetDialogText(make_unique<TextTrader>(move(itemText)));
                         break;
                     }
                 }
@@ -457,28 +460,30 @@ void Player::InitTraderItems(Game &game)
                 auto font = utilities.GetFont(fonts, fontID);
 
                 auto text = format("Buying: {}", value);
-                utilities.SetSFText(itemText.get(), font, 15, text);
+                auto spriteUnique = itemSprite.get();
+                auto textUnique = itemText.get();
 
-                utilities.SetSFSprite(itemSprite.get(), texture, textureData);
+                utilities.SetSFText(textUnique, font, 15, text);
+
+                utilities.SetSFSprite(spriteUnique, texture, textureData);
                 auto alignemntWidth = utilities.CalculateAlignmentWindowWidth(width, Alignment::Left);
 
                 if (firstIcon)
                 {
-                    utilities.SetTextBeforeIcon(alignemntWidth, previousTxt, *itemSprite, *itemText);
+                    utilities.SetTextBeforeIcon(alignemntWidth, previousTxt, *spriteUnique, *textUnique);
                     firstIcon = false;
                 }
                 else
-                    utilities.SetTextBeforeIcon(*itemSprite, *itemText, prevPos);
+                    utilities.SetTextBeforeIcon(*spriteUnique, *textUnique, prevPos);
 
-                prevPos = itemSprite->getGlobalBounds().getPosition();
-                game.SetDialogSprite(move(itemSprite));
-                game.SetDialogText(move(itemText));
+                prevPos = spriteUnique->getGlobalBounds().getPosition();
+                game.SetDialogSprite(make_unique<Sprite>(move(itemSprite)));
+                game.SetDialogText(make_unique<TextTrader>(move(itemText)));
                 break;
             }
         }
     }
 }
-
 
 void Player::InitInventoryItems(Game &game)
 {
@@ -517,22 +522,24 @@ void Player::InitInventoryItems(Game &game)
                 auto fontID = data->GetFontID();
 
                 auto font = utilities.GetFont(fonts, fontID);
+                auto spriteUnique = itemSprite.get();
+                auto textUnique = itemText.get();
 
-                utilities.SetSFText(itemText.get(), font, 15, value);
+                utilities.SetSFText(textUnique, font, 15, value);
 
-                utilities.SetSFSprite(itemSprite.get(), texture, textureData);
+                utilities.SetSFSprite(spriteUnique, texture, textureData);
 
                 if (firstIcon)
                 {
-                    utilities.SetTextBeforeIcon(width, previousTxt, *itemSprite, *itemText);
+                    utilities.SetTextBeforeIcon(width, previousTxt, *spriteUnique, *textUnique);
                     firstIcon = false;
                 }
                 else
-                    utilities.SetTextBeforeIcon(*itemSprite, *itemText, prevPos);
+                    utilities.SetTextBeforeIcon(*spriteUnique, *textUnique, prevPos);
 
-                prevPos = itemSprite->getGlobalBounds().getPosition();
-                game.SetDialogSprite(move(itemSprite));
-                game.SetDialogText(move(itemText));
+                prevPos = spriteUnique->getGlobalBounds().getPosition();
+                game.SetDialogSprite(make_unique<Sprite>(move(itemSprite)));
+                game.SetDialogText(make_unique<TextTrader>(move(itemText)));
                 break;
             }
         }
@@ -757,4 +764,10 @@ void Player::Save(Game *game)
         file << jsonData;
         file.close();
     }
+}
+
+// TRADER
+Trader *Player::GetTrader()
+{
+    return m_trader;
 }
