@@ -11,7 +11,7 @@
 using json = nlohmann::json;
 using namespace std;
 
-Game::Game() : Gui(MenuState::Main)
+Game::Game() : m_menuState(MenuState::Main)
 {
     m_saveGameID = 0;
     m_renderPuffer = 200.0F;
@@ -65,11 +65,6 @@ void Game::Init()
     cout << "InitHotkeys Done!" << endl;
 
     cout << "Game Init Done!" << endl;
-}
-
-void Game::SetMenuState(MenuState state)
-{
-    m_menuState = state;
 }
 
 // RUNNING
@@ -733,6 +728,7 @@ void Game::InitMenu()
 
         for (const auto &dataTitle : jsonDataTitle)
         {
+            Alignment alignment = jsonDataTitleTemplate["alignment"];
             auto titleText = make_unique<sf::Text>();
             Element element = Element::Title;
 
@@ -753,13 +749,13 @@ void Game::InitMenu()
 
             utilities.SetTitlePos(m_windowWidth, titleText.get());
 
-            auto titles = new Title(state, move(titleText));
+            auto titles = new Title(state, move(titleText), alignment);
             m_titles.push_back(titles);
             prevTitleText = titles->GetText();
 
             for (const auto &dataInput : jsonDataInput)
             {
-                Alignment alignment = jsonDataInputTemplate["alignment"];
+                alignment = jsonDataInputTemplate["alignment"];
 
                 vector<MenuState> inputState = dataInput["state"];
 
@@ -799,7 +795,7 @@ void Game::InitMenu()
 
             for (const auto &dataBtn : jsonDataBtn)
             {
-                Alignment alignment = jsonDataBtnTemplate["alignment"];
+                alignment = jsonDataBtnTemplate["alignment"];
                 vector<MenuState> btnState = dataBtn["state"];
 
                 auto canAdd = utilities.CheckMenuState(btnState, state);
@@ -1971,4 +1967,14 @@ sf::Text *Game::RenderDialog()
     }
 
     return prevTxt;
+}
+
+MenuState Game::GetMenuState() const
+{
+    return m_menuState;
+}
+
+void Game::SetMenuState(const MenuState menuState)
+{
+    m_menuState = menuState;
 }

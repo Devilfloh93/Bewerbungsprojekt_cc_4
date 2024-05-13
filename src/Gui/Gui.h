@@ -72,13 +72,15 @@ enum class Alignment
 class Gui
 {
 public:
-    Gui(const MenuState menuState);
+    Gui(const MenuState menuState, const Alignment alignment);
     ~Gui() = default;
 
     MenuState GetMenuState() const;
 
     void SetMenuState(const MenuState menuState);
+    Alignment GetAlignment() const;
 
 protected:
     MenuState m_menuState;
+    Alignment m_alignment;
 };
