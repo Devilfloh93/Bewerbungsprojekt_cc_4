@@ -229,5 +229,49 @@
             "title": "Tastaturbelegung",
             "description": ""
         }
+    },
+    {
+        "id": 22,
+        "enEN": {
+            "title": "Buy",
+            "description": ""
+        },
+        "deDE": {
+            "title": "Kaufen",
+            "description": ""
+        }
+    },
+    {
+        "id": 23,
+        "enEN": {
+            "title": "Sell",
+            "description": ""
+        },
+        "deDE": {
+            "title": "Verkaufen",
+            "description": ""
+        }
+    },
+    {
+        "id": 24,
+        "enEN": {
+            "title": "How many Items you want to buy?",
+            "description": ""
+        },
+        "deDE": {
+            "title": "Wieviele Items willst du kaufen?",
+            "description": ""
+        }
+    },
+    {
+        "id": 25,
+        "enEN": {
+            "title": "How many Items you want to sell?",
+            "description": ""
+        },
+        "deDE": {
+            "title": "Wieviele Items willst du verkaufen?",
+            "description": ""
+        }
     }
 ]

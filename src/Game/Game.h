@@ -170,7 +170,7 @@ public:
     void SetDialogSprite(unique_ptr<sf::Sprite> sprite);
     void SetDialogText(unique_ptr<sf::Text> text);
     void ClearDialog();
-    void RenderDialog();
+    sf::Text *RenderDialog();
 
 private:
     // RUNNING
