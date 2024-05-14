@@ -69,6 +69,7 @@ enum class Alignment
     Right
 };
 
+
 class Gui
 {
 public:

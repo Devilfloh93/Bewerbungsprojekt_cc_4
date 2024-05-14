@@ -1,4 +1,5 @@
 #pragma once
+#include "Gui.h"
 #include <SFML/Graphics.hpp>
 
 using namespace std;
@@ -16,15 +17,16 @@ protected:
 };
 
 
-class TextTrader : public Text
+class SelectableText : public Text
 {
 public:
-    TextTrader(unique_ptr<sf::Text> text);
-    ~TextTrader() = default;
+    SelectableText(unique_ptr<sf::Text> text, const uint16_t ID, const uint8_t selectedID);
+    ~SelectableText() = default;
 
-    void SetSelectedItemID(const uint8_t ID);
-    uint8_t GetSelectedItemID() const;
+    uint16_t GetID() const;
+    uint8_t GetSelectedID() const;
 
 protected:
-    uint8_t m_selectedItemID;
+    uint16_t m_ID;
+    uint8_t m_selectedID;
 };

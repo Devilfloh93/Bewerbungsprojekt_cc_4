@@ -90,10 +90,8 @@ public:
     void InitPlayer();
 
     // LOAD SAVE FILE
-    vector<sf::Text *> GetSaveFiles() const;
+    const vector<unique_ptr<SelectableText>> *GetSaveFiles() const;
     void CreateLoadMenu();
-    void SetSaveGameID(const uint8_t id);
-    uint8_t GetSaveGameID() const;
     void Saving(const bool destroy);
     void SaveCreatures(const bool destroy);
     void SaveWorld(const bool destroy);
@@ -168,10 +166,14 @@ public:
 
     // DIALOG
     void SetDialogSprite(unique_ptr<Sprite> sprite);
-    void SetDialogText(unique_ptr<TextTrader> text);
+    void SetDialogText(unique_ptr<SelectableText> text);
     void ClearDialog();
     sf::Text *RenderDialog();
-    const vector<unique_ptr<TextTrader>> *GetDialogText() const;
+    const vector<unique_ptr<SelectableText>> *GetDialogText() const;
+    uint8_t GetDialogSelectedID() const;
+
+    void SetSelectedTextID(const uint8_t ID);
+    uint8_t GetSelectedTextID() const;
 
     MenuState GetMenuState() const;
     void SetMenuState(const MenuState menuState);
@@ -204,11 +206,12 @@ private:
     vector<Font *> m_fonts;
     vector<Anim *> m_anim;
     vector<Input *> m_inputs;
-    vector<sf::Text *> m_saveFiles;
+    vector<unique_ptr<SelectableText>> m_saveFiles;
     vector<sf::Text *> m_hotkeyMenu; // TODO: TEMPORARY FIX
 
     vector<unique_ptr<Sprite>> m_dialogSprites;
-    vector<unique_ptr<TextTrader>> m_dialogTexts;
+    vector<unique_ptr<SelectableText>> m_dialogTexts;
+    uint8_t m_selectedTextID;
     // SETTINGS
     map<uint8_t, uint16_t> m_hotkeys;
     string m_language;
@@ -218,7 +221,6 @@ private:
     // PLAYER
     uint8_t m_defaultAnimID;
     Player *m_player;
-    uint8_t m_saveGameID;
     // STATS
     StatDecay m_statDecay;
     vector<Stats *> m_stats;

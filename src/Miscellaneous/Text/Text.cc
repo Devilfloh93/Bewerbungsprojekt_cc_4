@@ -9,16 +9,17 @@ sf::Text *Text::GetText() const
     return m_text.get();
 }
 
-TextTrader::TextTrader(unique_ptr<sf::Text> text) : Text(move(text)), m_selectedItemID(0)
+SelectableText::SelectableText(unique_ptr<sf::Text> text, const uint16_t ID, const uint8_t selectedID)
+    : Text(move(text)), m_ID(ID), m_selectedID(selectedID)
 {
 }
 
-void TextTrader::SetSelectedItemID(const uint8_t ID)
+uint16_t SelectableText::GetID() const
 {
-    m_selectedItemID = ID;
+    return m_ID;
 }
 
-uint8_t TextTrader::GetSelectedItemID() const
+uint8_t SelectableText::GetSelectedID() const
 {
-    return m_selectedItemID;
+    return m_selectedID;
 }
