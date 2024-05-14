@@ -82,23 +82,11 @@ void Player::CollectItem(Game *game)
             auto itemSize = sprite->getLocalBounds().getSize();
 
             bool remove = false;
-            bool newItem = true;
 
             if ((playerPos.x + (playerSize.x / 2)) >= itemPos.x && playerPos.x <= itemPos.x + (itemSize.x / 2) &&
                 playerPos.y + (playerSize.y / 2) >= itemPos.y && playerPos.y <= itemPos.y + (itemSize.y / 2))
             {
-                for (const auto &[key, value] : m_items)
-                {
-                    if (key == ID)
-                    {
-                        m_items[key] = value + count;
-                        newItem = false;
-                    }
-                }
-
-                if (newItem)
-                    m_items[ID] = count;
-
+                AddItem(ID, count);
                 remove = true;
             }
 
@@ -109,6 +97,46 @@ void Player::CollectItem(Game *game)
             }
         }
     }
+}
+
+void Player::AddItem(const uint8_t ID, const uint16_t count)
+{
+    bool newItem = true;
+    for (const auto &[key, value] : m_items)
+    {
+        if (key == ID)
+        {
+            m_items[key] = value + count;
+            newItem = false;
+        }
+    }
+
+    if (newItem)
+        m_items[ID] = count;
+}
+
+bool Player::RemoveItem(const uint8_t ID, const uint16_t count)
+{
+    for (const auto &[key, value] : m_items)
+    {
+        if (key == ID && value >= count)
+        {
+            uint16_t newValue = value - count;
+            if (newValue > 0)
+                m_items[key] = newValue;
+            else
+                m_items.erase(key);
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
+uint16_t Player::GetItemCount(const uint8_t ID)
+{
+    return m_items[ID];
 }
 
 void Player::HandleMove(sf::Clock &clock, Game *game)
@@ -394,49 +422,55 @@ void Player::InitTraderItems(Game &game)
 
     for (const auto &[key, value] : sellingItems)
     {
-        for (const auto &[key1, value1] : m_items)
+        if (value > 0)
         {
-            if (key == key1)
+            for (const auto &[key1, value1] : m_items)
             {
-                for (const auto &data : itemCfg)
+                if (key == key1)
                 {
-                    auto ID = data->GetID();
-                    if (key == ID)
+                    for (const auto &data : itemCfg)
                     {
-                        auto textureID = data->GetTextureID();
-                        auto itemSprite = make_unique<sf::Sprite>();
-                        auto itemText = make_unique<sf::Text>();
-
-                        auto texture = utilities.GetTexture(textures, textureID);
-
-                        auto textureData = data->GetTextureData();
-                        auto fontID = data->GetFontID();
-
-                        auto font = utilities.GetFont(fonts, fontID);
-
-                        auto text = format("Selling: {} - Inventory: {}", value, value1);
-                        auto spriteUnique = itemSprite.get();
-                        auto textUnique = itemText.get();
-
-                        utilities.SetSFText(textUnique, font, 15, text);
-
-                        utilities.SetSFSprite(spriteUnique, texture, textureData);
-                        auto alignemntWidth = utilities.CalculateAlignmentWindowWidth(width, Alignment::Right);
-
-                        if (firstIcon)
+                        auto ID = data->GetID();
+                        if (key == ID)
                         {
-                            utilities.SetTextBeforeIcon(alignemntWidth, previousTxt, *spriteUnique, *textUnique);
-                            firstIcon = false;
+                            auto textureID = data->GetTextureID();
+                            auto itemSprite = make_unique<sf::Sprite>();
+                            auto itemText = make_unique<sf::Text>();
+
+                            auto texture = utilities.GetTexture(textures, textureID);
+
+                            auto textureData = data->GetTextureData();
+                            auto fontID = data->GetFontID();
+
+                            auto font = utilities.GetFont(fonts, fontID);
+
+                            auto text = format("Selling: {} - Inventory: {}", value, value1);
+                            auto spriteUnique = itemSprite.get();
+                            auto textUnique = itemText.get();
+
+                            utilities.SetSFText(textUnique, font, 15, text);
+
+                            utilities.SetSFSprite(spriteUnique, texture, textureData);
+                            auto alignemntWidth = utilities.CalculateAlignmentWindowWidth(width, Alignment::Right);
+
+                            if (firstIcon)
+                            {
+                                utilities.SetTextBeforeIcon(alignemntWidth, previousTxt, *spriteUnique, *textUnique);
+                                firstIcon = false;
+                            }
+                            else
+                                utilities.SetTextBeforeIcon(*spriteUnique, *textUnique, prevPos);
+
+                            prevPos = spriteUnique->getGlobalBounds().getPosition();
+
+                            game.SetDialogSprite(make_unique<Sprite>(move(itemSprite)));
+                            game.SetDialogText(make_unique<SelectableText>(move(itemText),
+                                                                           selectableID,
+                                                                           key,
+                                                                           SelectedTextCategorie::Sell));
+                            ++selectableID;
+                            break;
                         }
-                        else
-                            utilities.SetTextBeforeIcon(*spriteUnique, *textUnique, prevPos);
-
-                        prevPos = spriteUnique->getGlobalBounds().getPosition();
-
-                        game.SetDialogSprite(make_unique<Sprite>(move(itemSprite)));
-                        game.SetDialogText(make_unique<SelectableText>(move(itemText), selectableID, key));
-                        ++selectableID;
-                        break;
                     }
                 }
             }
@@ -447,43 +481,47 @@ void Player::InitTraderItems(Game &game)
 
     for (const auto &[key, value] : buyingItems)
     {
-        for (const auto &data : itemCfg)
+        if (value > 0)
         {
-            auto ID = data->GetID();
-            if (key == ID)
+            for (const auto &data : itemCfg)
             {
-                auto textureID = data->GetTextureID();
-                auto itemSprite = make_unique<sf::Sprite>();
-                auto itemText = make_unique<sf::Text>();
-
-                auto texture = utilities.GetTexture(textures, textureID);
-                auto textureData = data->GetTextureData();
-                auto fontID = data->GetFontID();
-
-                auto font = utilities.GetFont(fonts, fontID);
-
-                auto text = format("Buying: {}", value);
-                auto spriteUnique = itemSprite.get();
-                auto textUnique = itemText.get();
-
-                utilities.SetSFText(textUnique, font, 15, text);
-
-                utilities.SetSFSprite(spriteUnique, texture, textureData);
-                auto alignemntWidth = utilities.CalculateAlignmentWindowWidth(width, Alignment::Left);
-
-                if (firstIcon)
+                auto ID = data->GetID();
+                if (key == ID)
                 {
-                    utilities.SetTextBeforeIcon(alignemntWidth, previousTxt, *spriteUnique, *textUnique);
-                    firstIcon = false;
-                }
-                else
-                    utilities.SetTextBeforeIcon(*spriteUnique, *textUnique, prevPos);
+                    auto textureID = data->GetTextureID();
+                    auto itemSprite = make_unique<sf::Sprite>();
+                    auto itemText = make_unique<sf::Text>();
 
-                prevPos = spriteUnique->getGlobalBounds().getPosition();
-                game.SetDialogSprite(make_unique<Sprite>(move(itemSprite)));
-                game.SetDialogText(make_unique<SelectableText>(move(itemText), selectableID, key));
-                ++selectableID;
-                break;
+                    auto texture = utilities.GetTexture(textures, textureID);
+                    auto textureData = data->GetTextureData();
+                    auto fontID = data->GetFontID();
+
+                    auto font = utilities.GetFont(fonts, fontID);
+
+                    auto text = format("Buying: {}", value);
+                    auto spriteUnique = itemSprite.get();
+                    auto textUnique = itemText.get();
+
+                    utilities.SetSFText(textUnique, font, 15, text);
+
+                    utilities.SetSFSprite(spriteUnique, texture, textureData);
+                    auto alignemntWidth = utilities.CalculateAlignmentWindowWidth(width, Alignment::Left);
+
+                    if (firstIcon)
+                    {
+                        utilities.SetTextBeforeIcon(alignemntWidth, previousTxt, *spriteUnique, *textUnique);
+                        firstIcon = false;
+                    }
+                    else
+                        utilities.SetTextBeforeIcon(*spriteUnique, *textUnique, prevPos);
+
+                    prevPos = spriteUnique->getGlobalBounds().getPosition();
+                    game.SetDialogSprite(make_unique<Sprite>(move(itemSprite)));
+                    game.SetDialogText(
+                        make_unique<SelectableText>(move(itemText), selectableID, key, SelectedTextCategorie::Buy));
+                    ++selectableID;
+                    break;
+                }
             }
         }
     }
@@ -544,7 +582,8 @@ void Player::InitInventoryItems(Game &game)
 
                 prevPos = spriteUnique->getGlobalBounds().getPosition();
                 game.SetDialogSprite(make_unique<Sprite>(move(itemSprite)));
-                game.SetDialogText(make_unique<SelectableText>(move(itemText), selectableID, key));
+                game.SetDialogText(
+                    make_unique<SelectableText>(move(itemText), selectableID, key, SelectedTextCategorie::Nothing));
                 ++selectableID;
                 break;
             }

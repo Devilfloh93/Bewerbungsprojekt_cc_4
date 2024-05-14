@@ -31,7 +31,9 @@ enum class BtnFunc
     OpenResolution,
     Resolution1920x1080,
     Resolution1280x720,
-    OpenHotkeys
+    OpenHotkeys,
+    Buy,
+    Sell
 };
 
 enum class MenuState
@@ -69,6 +71,12 @@ enum class Alignment
     Right
 };
 
+enum class SelectedTextCategorie
+{
+    Nothing = 0,
+    Buy,
+    Sell
+};
 
 class Gui
 {
