@@ -13,7 +13,6 @@ using namespace std;
 
 Game::Game() : m_menuState(MenuState::Main)
 {
-    m_saveGameID = 0;
     m_renderPuffer = 200.0F;
     m_maxZoom = 3U;
     m_playing = false;
@@ -210,9 +209,9 @@ vector<Input *> Game::GetInput() const
     return m_inputs;
 }
 
-vector<sf::Text *> Game::GetSaveFiles() const
+const vector<unique_ptr<SelectableText>> *Game::GetSaveFiles() const
 {
-    return m_saveFiles;
+    return &m_saveFiles;
 }
 
 vector<Btn *> Game::GetBtn() const
@@ -568,9 +567,11 @@ void Game::InitPlayer()
 
     if (m_menuState == MenuState::Load)
     {
-        if (LoadPlayer(m_saveGameID))
+        auto saveGameID = GetDialogSelectedID();
+
+        if (LoadPlayer(saveGameID))
         {
-            m_player->Load(m_saveGameID, this);
+            m_player->Load(saveGameID, this);
             LoadGroundItems();
             cout << "Player Load Done!" << endl;
             startGame = true;
@@ -1434,11 +1435,20 @@ void Game::RenderMenu()
             {
                 if (m_menuState == MenuState::OpenLoad)
                 {
+                    auto text = data1.get()->GetText();
+
+                    text->setColor(sf::Color(255, 255, 255));
+
+                    auto textID = data1.get()->GetID();
+
+                    if (m_selectedTextID == textID)
+                        text->setColor(sf::Color(0, 255, 0));
+
                     auto spaceBetween = utilities.CalculateSpaceBetweenMenu(Alignment::Middle);
 
-                    utilities.SetTitlePos(m_windowWidth, previousTxt, data1, spaceBetween);
-                    m_window->draw(*data1);
-                    previousTxt = data1;
+                    utilities.SetTitlePos(m_windowWidth, previousTxt, text, spaceBetween);
+                    m_window->draw(*text);
+                    previousTxt = text;
                 }
             }
 
@@ -1484,32 +1494,19 @@ void Game::RenderMenu()
 void Game::CreateLoadMenu()
 {
     Utilities utilities;
-    for (auto &data : m_saveFiles)
-    {
-        delete data;
-        data = nullptr;
-    }
     m_saveFiles.clear();
+    m_selectedTextID = 0;
 
     auto count = CountSaveFolders();
 
     auto font = utilities.GetFont(m_fonts, 0);
 
-    for (size_t i = 1; i < count; ++i)
+    for (uint8_t i = 1; i < count; ++i)
     {
-        auto text = new sf::Text(format("{}. Savegame", i), *font, 20U);
-        m_saveFiles.push_back(text);
+        auto text = make_unique<sf::Text>(format("{}. Savegame", i), *font, 20U);
+
+        m_saveFiles.push_back(make_unique<SelectableText>(move(text), i, i));
     }
-}
-
-uint8_t Game::GetSaveGameID() const
-{
-    return m_saveGameID;
-}
-
-void Game::SetSaveGameID(const uint8_t id)
-{
-    m_saveGameID = id;
 }
 
 void Game::Saving(const bool destroy)
@@ -1941,7 +1938,7 @@ void Game::SetDialogSprite(unique_ptr<Sprite> sprite)
     m_dialogSprites.push_back(move(sprite));
 }
 
-void Game::SetDialogText(unique_ptr<TextTrader> text)
+void Game::SetDialogText(unique_ptr<SelectableText> text)
 {
     m_dialogTexts.push_back(move(text));
 }
@@ -1950,6 +1947,7 @@ void Game::ClearDialog()
 {
     m_dialogSprites.clear();
     m_dialogTexts.clear();
+    m_selectedTextID = 0;
 }
 
 sf::Text *Game::RenderDialog()
@@ -1962,14 +1960,23 @@ sf::Text *Game::RenderDialog()
 
     for (const auto &data : m_dialogTexts)
     {
+        auto text = data.get()->GetText();
+
+        text->setColor(sf::Color(255, 255, 255));
+
+        auto textID = data.get()->GetID();
         prevTxt = data.get()->GetText();
+
+        if (m_selectedTextID == textID)
+            text->setColor(sf::Color(0, 255, 0));
+
         m_window->draw(*prevTxt);
     }
 
     return prevTxt;
 }
 
-const vector<unique_ptr<TextTrader>> *Game::GetDialogText() const
+const vector<unique_ptr<SelectableText>> *Game::GetDialogText() const
 {
     return &m_dialogTexts;
 }
@@ -1982,4 +1989,28 @@ MenuState Game::GetMenuState() const
 void Game::SetMenuState(const MenuState menuState)
 {
     m_menuState = menuState;
+}
+
+uint8_t Game::GetDialogSelectedID() const
+{
+    for (const auto &data : m_saveFiles)
+    {
+        auto textID = data.get()->GetID();
+
+        if (m_selectedTextID == textID)
+        {
+            return data.get()->GetSelectedID();
+        }
+    }
+    return 0;
+}
+
+void Game::SetSelectedTextID(const uint8_t ID)
+{
+    m_selectedTextID = ID;
+}
+
+uint8_t Game::GetSelectedTextID() const
+{
+    return m_selectedTextID;
 }

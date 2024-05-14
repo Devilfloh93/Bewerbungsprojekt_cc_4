@@ -27,7 +27,7 @@ Trader::Trader(unique_ptr<sf::Sprite> sprite,
                const map<uint8_t, uint16_t> sellingItem,
                const map<uint8_t, uint16_t> buyingItem)
     : Creature(move(sprite), health, speed, animID, moving, dialogIntro, dialogOutro, dialogOffensive, interactable),
-      m_sellingItem(sellingItem), m_buyingItem(buyingItem), m_selectedItemID(0U)
+      m_sellingItem(sellingItem), m_buyingItem(buyingItem)
 {
 }
 
@@ -39,9 +39,4 @@ map<uint8_t, uint16_t> Trader::GetSellingItem() const
 map<uint8_t, uint16_t> Trader::GetBuyingItem() const
 {
     return m_buyingItem;
-}
-
-void Trader::SetSelectedItemID(const uint8_t ID)
-{
-    m_selectedItemID = ID;
 }

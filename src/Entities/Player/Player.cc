@@ -359,6 +359,7 @@ void Player::CheckRenderHotkey(Game *game)
 void Player::InitTraderItems(Game &game)
 {
     game.ClearDialog();
+
     bool firstIcon = true;
     Utilities utilities;
     sf::Vector2f prevPos;
@@ -371,6 +372,7 @@ void Player::InitTraderItems(Game &game)
     auto titles = game.GetTitles();
     auto input = game.GetInput();
     sf::Text *previousTxt;
+    uint16_t selectableID = 1;
 
     for (const auto &data : titles)
     {
@@ -432,7 +434,8 @@ void Player::InitTraderItems(Game &game)
                         prevPos = spriteUnique->getGlobalBounds().getPosition();
 
                         game.SetDialogSprite(make_unique<Sprite>(move(itemSprite)));
-                        game.SetDialogText(make_unique<TextTrader>(move(itemText)));
+                        game.SetDialogText(make_unique<SelectableText>(move(itemText), selectableID, key));
+                        ++selectableID;
                         break;
                     }
                 }
@@ -478,7 +481,8 @@ void Player::InitTraderItems(Game &game)
 
                 prevPos = spriteUnique->getGlobalBounds().getPosition();
                 game.SetDialogSprite(make_unique<Sprite>(move(itemSprite)));
-                game.SetDialogText(make_unique<TextTrader>(move(itemText)));
+                game.SetDialogText(make_unique<SelectableText>(move(itemText), selectableID, key));
+                ++selectableID;
                 break;
             }
         }
@@ -497,6 +501,7 @@ void Player::InitInventoryItems(Game &game)
     auto titles = game.GetTitles();
     auto textures = game.GetTexture();
     sf::Text *previousTxt;
+    uint16_t selectableID = 1;
 
     for (const auto &data : titles)
     {
@@ -539,7 +544,8 @@ void Player::InitInventoryItems(Game &game)
 
                 prevPos = spriteUnique->getGlobalBounds().getPosition();
                 game.SetDialogSprite(make_unique<Sprite>(move(itemSprite)));
-                game.SetDialogText(make_unique<TextTrader>(move(itemText)));
+                game.SetDialogText(make_unique<SelectableText>(move(itemText), selectableID, key));
+                ++selectableID;
                 break;
             }
         }
