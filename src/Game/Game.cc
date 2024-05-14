@@ -567,7 +567,7 @@ void Game::InitPlayer()
 
     if (m_menuState == MenuState::Load)
     {
-        auto saveGameID = GetDialogSelectedID();
+        auto saveGameID = GetDialogSelectedID(&m_saveFiles, SelectedTextCategorie::Nothing);
 
         if (LoadPlayer(saveGameID))
         {
@@ -1453,7 +1453,10 @@ void Game::RenderMenu()
             }
 
             if (m_menuState == MenuState::Inventory || m_menuState == MenuState::Trader)
-                previousTxt = RenderDialog();
+            {
+                if (m_dialogTexts.size() > 0)
+                    previousTxt = RenderDialog();
+            }
 
             for (const auto &data1 : m_btns)
             {
@@ -1505,7 +1508,7 @@ void Game::CreateLoadMenu()
     {
         auto text = make_unique<sf::Text>(format("{}. Savegame", i), *font, 20U);
 
-        m_saveFiles.push_back(make_unique<SelectableText>(move(text), i, i));
+        m_saveFiles.push_back(make_unique<SelectableText>(move(text), i, i, SelectedTextCategorie::Nothing));
     }
 }
 
@@ -1958,19 +1961,25 @@ sf::Text *Game::RenderDialog()
         m_window->draw(*(data.get()->GetSprite()));
     }
 
-    for (const auto &data : m_dialogTexts)
+    for (float i = 0.0F; const auto &data : m_dialogTexts)
     {
         auto text = data.get()->GetText();
 
         text->setColor(sf::Color(255, 255, 255));
 
         auto textID = data.get()->GetID();
-        prevTxt = data.get()->GetText();
+        auto txt = data.get()->GetText();
+
+        if (txt->getPosition().y >= i)
+        {
+            prevTxt = txt;
+            i = txt->getPosition().y;
+        }
 
         if (m_selectedTextID == textID)
             text->setColor(sf::Color(0, 255, 0));
 
-        m_window->draw(*prevTxt);
+        m_window->draw(*txt);
     }
 
     return prevTxt;
@@ -1991,13 +2000,15 @@ void Game::SetMenuState(const MenuState menuState)
     m_menuState = menuState;
 }
 
-uint8_t Game::GetDialogSelectedID() const
+uint8_t Game::GetDialogSelectedID(const vector<unique_ptr<SelectableText>> *vec,
+                                  const SelectedTextCategorie selectedCategorie) const
 {
-    for (const auto &data : m_saveFiles)
+    for (const auto &data : *vec)
     {
         auto textID = data.get()->GetID();
+        auto categorie = data.get()->GetSelectedCategorie();
 
-        if (m_selectedTextID == textID)
+        if (m_selectedTextID == textID && categorie == selectedCategorie)
         {
             return data.get()->GetSelectedID();
         }

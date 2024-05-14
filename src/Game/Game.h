@@ -170,7 +170,8 @@ public:
     void ClearDialog();
     sf::Text *RenderDialog();
     const vector<unique_ptr<SelectableText>> *GetDialogText() const;
-    uint8_t GetDialogSelectedID() const;
+    uint8_t GetDialogSelectedID(const vector<unique_ptr<SelectableText>> *vec,
+                                const SelectedTextCategorie selectedCategorie) const;
 
     void SetSelectedTextID(const uint8_t ID);
     uint8_t GetSelectedTextID() const;

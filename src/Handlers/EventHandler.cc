@@ -226,7 +226,6 @@ void EventHandler::BtnPressed(Game &game)
     if (menuState == MenuState::Trader)
     {
         auto dialogText = game.GetDialogText();
-        auto player = game.GetPlayer();
         for (const auto &data : *dialogText)
         {
             auto text = data.get()->GetText();
@@ -321,7 +320,7 @@ void EventHandler::BtnPressed(Game &game)
                 m_break = true;
                 break;
             case BtnFunc::Load:
-                if (game.GetDialogSelectedID() > 0)
+                if (game.GetDialogSelectedID(game.GetSaveFiles(), SelectedTextCategorie::Nothing) > 0)
                 {
                     game.SetMenuState(MenuState::Load);
                     game.InitPlayer();
@@ -346,6 +345,14 @@ void EventHandler::BtnPressed(Game &game)
                 break;
             case BtnFunc::OpenHotkeys:
                 game.SetMenuState(MenuState::Hotkeys);
+                m_break = true;
+                break;
+            case BtnFunc::Buy:
+                game.GetPlayer()->GetTrader()->Buy(game);
+                m_break = true;
+                break;
+            case BtnFunc::Sell:
+                game.GetPlayer()->GetTrader()->Sell(game);
                 m_break = true;
                 break;
             default:
