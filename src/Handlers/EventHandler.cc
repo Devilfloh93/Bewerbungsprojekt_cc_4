@@ -247,11 +247,12 @@ void EventHandler::BtnPressed(Game &game)
 
     for (const auto &data : game.GetInput())
     {
-        auto text = data->GetText();
-        auto txtPos = text->getPosition();
-        auto txtLSize = text->getLocalBounds().getSize();
+        auto sprite = data->GetSprite();
+        auto btnPos = sprite->getPosition();
+        auto btnLSize = sprite->getLocalBounds().getSize();
+        auto btnScale = sprite->getScale();
 
-        auto clicked = utilities.CheckTextClicked(worldPos, txtPos, txtLSize);
+        auto clicked = utilities.CheckSpriteClicked(worldPos, btnPos, btnLSize, btnScale);
 
         if (data->GetMenuState() == menuState && clicked)
         {
@@ -270,7 +271,7 @@ void EventHandler::BtnPressed(Game &game)
          * @brief Check if Mouse is inside the size of the Btn Size
          *
          */
-        auto clicked = utilities.CheckBtnClicked(worldPos, btnPos, btnLSize, btnScale);
+        auto clicked = utilities.CheckSpriteClicked(worldPos, btnPos, btnLSize, btnScale);
         if (clicked && menuState == state)
         {
             switch (data->GetBtnFnc())

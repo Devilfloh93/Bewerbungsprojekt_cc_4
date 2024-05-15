@@ -44,11 +44,11 @@ void Utilities::SetTitlePos(const uint16_t width, sf::Text *title, sf::Text *tex
         sf::Vector2f((width / 2U) - (textLSize.x / 2U), (titlePos.y + titleLSize.y) + spaceBetweenInputs));
 }
 
-void Utilities::SetBtnAndTextPos(const uint16_t width,
-                                 sf::Sprite *btnObj,
-                                 sf::Text *title,
-                                 sf::Text *btntext,
-                                 float spaceBetweenBtn)
+void Utilities::SetSpriteAndTextPos(const uint16_t width,
+                                    sf::Sprite *btnObj,
+                                    sf::Text *title,
+                                    sf::Text *btntext,
+                                    float spaceBetweenBtn)
 {
     auto btnObjLSize = btnObj->getLocalBounds().getSize();
     auto btnObjScale = btnObj->getScale();
@@ -66,11 +66,11 @@ void Utilities::SetBtnAndTextPos(const uint16_t width,
                                       btnObjPos.y + ((btnObjSize.y / 2U) - (btnTextLSize.y / 2U))));
 }
 
-void Utilities::SetBtnAndTextPos(const uint16_t width,
-                                 sf::Sprite *btnObj,
-                                 sf::Sprite *btn,
-                                 sf::Text *btntext,
-                                 float spaceBetweenBtn)
+void Utilities::SetSpriteAndTextPos(const uint16_t width,
+                                    sf::Sprite *btnObj,
+                                    sf::Sprite *btn,
+                                    sf::Text *btntext,
+                                    float spaceBetweenBtn)
 {
     auto btnObjLSize = btnObj->getLocalBounds().getSize();
     auto btnObjScale = btnObj->getScale();
@@ -302,7 +302,7 @@ bool Utilities::CheckTextClicked(const sf::Vector2f &mousePos, const sf::Vector2
     return false;
 }
 
-bool Utilities::CheckBtnClicked(const sf::Vector2f &mousePos,
+bool Utilities::CheckSpriteClicked(const sf::Vector2f &mousePos,
                                 const sf::Vector2f &btnPos,
                                 const sf::Vector2f &btnLSize,
                                 const sf::Vector2f &btnScale)

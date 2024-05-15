@@ -29,16 +29,16 @@ public:
 
     void SetInputPos(const uint16_t width, sf::Text *input);
 
-    void SetBtnAndTextPos(const uint16_t width,
-                          sf::Sprite *btnObj,
-                          sf::Text *title,
-                          sf::Text *btntext,
-                          float spaceBetweenBtn);
-    void SetBtnAndTextPos(const uint16_t width,
-                          sf::Sprite *btnObj,
-                          sf::Sprite *btn,
-                          sf::Text *btntext,
-                          float spaceBetweenBtn);
+    void SetSpriteAndTextPos(const uint16_t width,
+                             sf::Sprite *btnObj,
+                             sf::Text *title,
+                             sf::Text *btntext,
+                             float spaceBetweenBtn);
+    void SetSpriteAndTextPos(const uint16_t width,
+                             sf::Sprite *btnObj,
+                             sf::Sprite *btn,
+                             sf::Text *btntext,
+                             float spaceBetweenBtn);
 
     void SetTextBeforeIcon(sf::Sprite &icon, sf::Text &text, const sf::Vector2f &prevPos);
     void SetTextBeforeIcon(const uint16_t x, const uint16_t y, sf::Sprite &icon, sf::Text &text);
@@ -78,8 +78,8 @@ public:
     bool CheckMenuState(const vector<MenuState> &menuState, const MenuState currentState);
 
     bool CheckTextClicked(const sf::Vector2f &mousePos, const sf::Vector2f &txtPos, const sf::Vector2f &txtLSize);
-    bool CheckBtnClicked(const sf::Vector2f &mousePos,
-                         const sf::Vector2f &btnPos,
-                         const sf::Vector2f &btnLSize,
-                         const sf::Vector2f &btnScale);
+    bool CheckSpriteClicked(const sf::Vector2f &mousePos,
+                            const sf::Vector2f &btnPos,
+                            const sf::Vector2f &btnLSize,
+                            const sf::Vector2f &btnScale);
 };

@@ -12,7 +12,12 @@
         ],
         "languageID": 24,
         "alignment": 1,
-        "allowedInput": 3
+        "allowedInput": 3,
+        "scale": [
+            12.5,
+            5.0
+        ],
+        "maxInput": 4
     },
     {
         "state": [
@@ -20,6 +25,11 @@
         ],
         "languageID": 25,
         "alignment": 2,
-        "allowedInput": 3
+        "allowedInput": 3,
+        "scale": [
+            12.5,
+            5.0
+        ],
+        "maxInput": 4
     }
 ]
