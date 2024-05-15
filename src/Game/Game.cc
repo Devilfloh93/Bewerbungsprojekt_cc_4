@@ -1815,8 +1815,7 @@ void Game::ResizeMenu()
     for (const auto &data : m_titles)
     {
         Element element = Element::Title;
-        sf::Sprite *prevBtn;
-        sf::Text *inputText;
+        sf::Sprite *prevSprite;
         auto titleState = data->GetMenuState();
 
         auto text = data->GetText();
@@ -1828,15 +1827,21 @@ void Game::ResizeMenu()
 
             if (titleState == inputState)
             {
-                inputText = dataInput->GetText();
+                auto inputText = dataInput->GetText();
+                auto sprite = dataInput->GetSprite();
+
                 auto alignment = dataInput->GetAlignment();
 
                 auto windowWidth = utilities.CalculateAlignmentWindowWidth(m_windowWidth, alignment);
                 auto spaceBetween = utilities.CalculateSpaceBetweenMenu(alignment);
 
-                utilities.SetTitlePos(windowWidth, text, inputText, spaceBetween);
+                if (element == Element::Title)
+                    utilities.SetSpriteAndTextPos(windowWidth, sprite, text, inputText, spaceBetween);
+                else
+                    utilities.SetSpriteAndTextPos(windowWidth, sprite, prevSprite, inputText, spaceBetween);
 
-                element = Element::Input;
+                prevSprite = sprite;
+                element = Element::Nothing;
             }
         }
 
@@ -1855,12 +1860,10 @@ void Game::ResizeMenu()
 
                 if (element == Element::Title)
                     utilities.SetSpriteAndTextPos(windowWidth, sprite, text, btnText, spaceBetween);
-                else if (element == Element::Input)
-                    utilities.SetSpriteAndTextPos(windowWidth, sprite, inputText, btnText, spaceBetween);
                 else
-                    utilities.SetSpriteAndTextPos(windowWidth, sprite, prevBtn, btnText, spaceBetween);
+                    utilities.SetSpriteAndTextPos(windowWidth, sprite, prevSprite, btnText, spaceBetween);
 
-                prevBtn = sprite;
+                prevSprite = sprite;
                 element = Element::Nothing;
             }
         }
