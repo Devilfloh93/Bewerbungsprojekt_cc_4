@@ -19,7 +19,7 @@ public:
 
     void MouseBtnPressed(Game &game);
     void KeyPressed(Game &game, const sf::Keyboard::Key &key);
-    void TxtEntered(const Game &game, const sf::Uint32 character);
+    void TxtEntered(Game &game, const sf::Uint32 character);
     void KeyReleased(const Game &game);
     void MouseWheelScrolled(Game &game, float delta);
 

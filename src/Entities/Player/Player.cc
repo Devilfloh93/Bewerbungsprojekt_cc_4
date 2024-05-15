@@ -279,8 +279,8 @@ void Player::Interact(Game &game)
         if (tradeable)
         {
             m_trader = static_cast<Trader *>(m_creatureInFront);
-            InitTraderItems(game);
             game.SetMenuState(MenuState::Trader);
+            InitTraderItems(game);
         }
     }
 

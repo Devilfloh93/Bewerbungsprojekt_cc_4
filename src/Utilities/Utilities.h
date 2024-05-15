@@ -22,6 +22,7 @@ public:
     ~Utilities() = default;
 
     bool isAlpha(const sf::Uint32 character) const;
+    bool isNum(const sf::Uint32 character) const;
 
     void SetTitlePos(const uint16_t width, sf::Text *text);
     void SetTitlePos(const uint16_t width, sf::Text *title, sf::Text *text, float spaceBetweenInputs);

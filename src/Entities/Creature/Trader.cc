@@ -13,6 +13,8 @@
  * @param dialogOutro     | Dialog Optionen when interacting with the creature or random messages while playing (WIP)
  * @param dialogOffensive |
  * @param interactable true / false can Player interact with this creature like trading
+ * @param sellingItem stores all sellingItem defined in data/entities/trader/trader.json
+ * @param buyingItem stores all buyingItem defined in data/entities/trader/trader.json
  */
 
 Trader::Trader(unique_ptr<sf::Sprite> sprite,
@@ -47,12 +49,24 @@ void Trader::Buy(Game &game)
     auto dialogText = game.GetDialogText();
     auto selectedDialogID = game.GetDialogSelectedID(dialogText, SelectedTextCategorie::Buy);
 
+    auto input = game.GetInputString();
+    if (input.size() == 0)
+        return;
+
+    uint16_t inputNum = stoi(input);
+
     auto maxCount = m_buyingItem[selectedDialogID];
 
-    game.GetPlayer()->AddItem(selectedDialogID, maxCount);
-    m_buyingItem[selectedDialogID] -= maxCount;
-    auto text = format("Buying: {}", m_buyingItem[selectedDialogID]);
-    UpdateTrader(game, dialogText, SelectedTextCategorie::Buy, text);
+    if (maxCount >= inputNum)
+    {
+        game.GetPlayer()->AddItem(selectedDialogID, inputNum);
+        m_buyingItem[selectedDialogID] -= inputNum;
+
+        auto text = format("Buying: {}", m_buyingItem[selectedDialogID]);
+        UpdateTrader(game, dialogText, SelectedTextCategorie::Buy, text);
+    }
+    else
+        cout << "You can't buy that much!" << endl;
 }
 
 void Trader::Sell(Game &game)
@@ -62,18 +76,31 @@ void Trader::Sell(Game &game)
     auto dialogText = game.GetDialogText();
     auto selectedDialogID = game.GetDialogSelectedID(dialogText, SelectedTextCategorie::Sell);
 
-    auto maxCount = m_sellingItem[selectedDialogID];
-    auto removed = player->RemoveItem(selectedDialogID, maxCount);
+    auto input = game.GetInputString();
 
-    if (removed)
+    if (input.size() == 0)
+        return;
+
+    uint16_t inputNum = stoi(input);
+
+    auto maxCount = m_sellingItem[selectedDialogID];
+
+    if (maxCount >= inputNum)
     {
-        m_sellingItem[selectedDialogID] -= maxCount;
-        auto inventoryValue = player->GetItemCount(selectedDialogID);
-        auto text = format("Selling: {} - Inventory: {}", m_sellingItem[selectedDialogID], inventoryValue);
-        UpdateTrader(game, dialogText, SelectedTextCategorie::Sell, text);
+        auto removed = player->RemoveItem(selectedDialogID, inputNum);
+
+        if (removed)
+        {
+            m_sellingItem[selectedDialogID] -= inputNum;
+            auto inventoryValue = player->GetItemCount(selectedDialogID);
+            auto text = format("Selling: {} - Inventory: {}", m_sellingItem[selectedDialogID], inventoryValue);
+            UpdateTrader(game, dialogText, SelectedTextCategorie::Sell, text);
+        }
+        else
+            cout << "Not Enough Items to sell!" << endl;
     }
     else
-        cout << "Not Enough Items to sell!" << endl;
+        cout << "You can't sell that much!" << endl;
 }
 
 void Trader::UpdateTrader(Game &game,

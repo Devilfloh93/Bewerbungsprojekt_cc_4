@@ -150,10 +150,8 @@ public:
     // MENU
     vector<Title *> GetTitles() const;
     vector<Btn *> GetBtn() const;
-    vector<Input *> GetInput() const;
     void InitMenu();
     void RenderMenu();
-    void ResetInputToDefault();
 
     // SETTINGS
     map<uint8_t, uint16_t> GetHotkeys() const;
@@ -178,6 +176,13 @@ public:
 
     MenuState GetMenuState() const;
     void SetMenuState(const MenuState menuState);
+
+    // INPUT
+    vector<Input *> GetInput() const;
+    Input *GetSelectedInput();
+    void SetSelectedInput(Input *selectedInput);
+    void ResetInputToDefault();
+    string GetInputString() const;
 
 private:
     // RUNNING
@@ -231,4 +236,6 @@ private:
     float m_renderPuffer;
     sf::Text *m_hotkeyRender;
     MenuState m_menuState;
+    // INPUT
+    Input *m_selectedInput;
 };
