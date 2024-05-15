@@ -734,8 +734,7 @@ void Game::InitMenu()
             uint8_t languageID = dataTitle["languageID"];
             MenuState state = dataTitle["state"];
             Utilities utilities;
-            sf::Sprite *prevBtn;
-            sf::Text *prevInputText;
+            sf::Sprite *prevSprite;
             sf::Text *prevTitleText;
 
             auto font = utilities.GetFont(m_fonts, fontID);
@@ -752,28 +751,43 @@ void Game::InitMenu()
 
             for (const auto &dataInput : jsonDataInput)
             {
-                alignment = jsonDataInputTemplate["alignment"];
-                AllowedInput allowedInput = jsonDataInputTemplate["allowedInput"];
-
                 vector<MenuState> inputState = dataInput["state"];
 
                 auto canAdd = utilities.CheckMenuState(inputState, state);
 
                 if (canAdd)
                 {
+                    alignment = jsonDataInputTemplate["alignment"];
+                    AllowedInput allowedInput = jsonDataInputTemplate["allowedInput"];
+                    auto scale = sf::Vector2f{jsonDataInputTemplate["scale"][0], jsonDataInputTemplate["scale"][1]};
+                    uint8_t textureID = jsonDataInputTemplate["textureID"];
+                    auto textureRect = sf::IntRect{jsonDataInputTemplate["textureData"][0],
+                                                   jsonDataInputTemplate["textureData"][1],
+                                                   jsonDataInputTemplate["textureData"][2],
+                                                   jsonDataInputTemplate["textureData"][3]};
+
+                    fontID = jsonDataInputTemplate["fontID"];
+                    fontSize = jsonDataInputTemplate["fontSize"];
+                    uint8_t maxInput = jsonDataInputTemplate["maxInput"];
+
                     if (dataInput.contains("alignment"))
                         alignment = dataInput["alignment"];
 
                     if (dataInput.contains("allowedInput"))
                         allowedInput = dataInput["allowedInput"];
 
-                    auto inputText = make_unique<sf::Text>();
+                    if (dataInput.contains("scale"))
+                        scale = sf::Vector2f{dataInput["scale"][0], dataInput["scale"][1]};
 
-                    fontID = jsonDataInputTemplate["fontID"];
-                    fontSize = jsonDataInputTemplate["fontSize"];
-                    uint8_t maxChars = jsonDataInputTemplate["maxChars"];
+                    if (dataInput.contains("maxInput"))
+                        maxInput = dataInput["maxInput"];
 
                     languageID = dataInput["languageID"];
+
+                    auto inputText = make_unique<sf::Text>();
+                    auto inputBackground = make_unique<sf::Sprite>();
+
+                    auto texture = utilities.GetTexture(m_textures, textureID);
 
                     auto font = utilities.GetFont(m_fonts, fontID);
 
@@ -782,15 +796,38 @@ void Game::InitMenu()
                     auto windowWidth = utilities.CalculateAlignmentWindowWidth(m_windowWidth, alignment);
                     auto spaceBetween = utilities.CalculateSpaceBetweenMenu(alignment);
 
+                    utilities.SetSFSprite(inputBackground.get(), texture, textureRect, scale);
+
                     utilities.SetSFText(inputText.get(), font, fontSize, text);
 
-                    utilities.SetTitlePos(windowWidth, prevTitleText, inputText.get(), spaceBetween);
+                    if (element == Element::Title)
+                    {
+                        utilities.SetSpriteAndTextPos(windowWidth,
+                                                      inputBackground.get(),
+                                                      prevTitleText,
+                                                      inputText.get(),
+                                                      spaceBetween);
+                    }
+                    else
+                    {
+                        utilities.SetSpriteAndTextPos(windowWidth,
+                                                      inputBackground.get(),
+                                                      prevSprite,
+                                                      inputText.get(),
+                                                      spaceBetween);
+                    }
 
-                    element = Element::Input;
+                    element = Element::Nothing;
 
-                    auto inputs = new Input(state, move(inputText), maxChars, text, alignment, allowedInput);
+                    auto inputs = new Input(state,
+                                            move(inputText),
+                                            move(inputBackground),
+                                            maxInput,
+                                            text,
+                                            alignment,
+                                            allowedInput);
                     m_inputs.push_back(inputs);
-                    prevInputText = inputs->GetText();
+                    prevSprite = inputs->GetSprite();
                 }
             }
 
@@ -835,17 +872,21 @@ void Game::InitMenu()
                     auto spaceBetween = utilities.CalculateSpaceBetweenMenu(alignment);
 
                     if (element == Element::Title)
-                        utilities.SetBtnAndTextPos(windowWidth, btn.get(), prevTitleText, btnText.get(), spaceBetween);
-                    else if (element == Element::Input)
-                        utilities.SetBtnAndTextPos(windowWidth, btn.get(), prevInputText, btnText.get(), spaceBetween);
+                    {
+                        utilities.SetSpriteAndTextPos(windowWidth,
+                                                      btn.get(),
+                                                      prevTitleText,
+                                                      btnText.get(),
+                                                      spaceBetween);
+                    }
                     else
-                        utilities.SetBtnAndTextPos(windowWidth, btn.get(), prevBtn, btnText.get(), spaceBetween);
+                        utilities.SetSpriteAndTextPos(windowWidth, btn.get(), prevSprite, btnText.get(), spaceBetween);
 
                     element = Element::Nothing;
 
                     auto btns = new Btn(state, btnFnc, move(btnText), move(btn), alignment);
                     m_btns.push_back(btns);
-                    prevBtn = btns->GetSprite();
+                    prevSprite = btns->GetSprite();
                 }
             }
         }
@@ -1426,15 +1467,19 @@ void Game::RenderMenu()
                 if (m_menuState == data1->GetMenuState())
                 {
                     auto text = data1->GetText();
+                    auto sprite = data1->GetSprite();
 
                     text->setColor(sf::Color(255, 255, 255));
 
                     if (m_selectedInput == data1)
-                        text->setColor(sf::Color(255, 165, 0));
+                        text->setColor(sf::Color(97, 52, 235));
 
                     element = Element::Input;
-                    m_window->draw(*(data1->GetText()));
-                    previousTxt = data1->GetText();
+
+                    m_window->draw(*sprite);
+                    m_window->draw(*text);
+
+                    previousTxt = text;
                 }
             }
 
@@ -1481,11 +1526,11 @@ void Game::RenderMenu()
                         auto spaceBetween = utilities.CalculateSpaceBetweenMenu(alignment);
 
                         if (element == Element::Title)
-                            utilities.SetBtnAndTextPos(windowWidth, btnObj, previousTxt, btnText, spaceBetween);
+                            utilities.SetSpriteAndTextPos(windowWidth, btnObj, previousTxt, btnText, spaceBetween);
                         else if (element == Element::Input)
-                            utilities.SetBtnAndTextPos(windowWidth, btnObj, previousTxt, btnText, spaceBetween);
+                            utilities.SetSpriteAndTextPos(windowWidth, btnObj, previousTxt, btnText, spaceBetween);
                         else
-                            utilities.SetBtnAndTextPos(windowWidth, btnObj, lastbtn, btnText, spaceBetween);
+                            utilities.SetSpriteAndTextPos(windowWidth, btnObj, lastbtn, btnText, spaceBetween);
 
                         element = Element::Nothing;
                         lastbtn = btnObj;
@@ -1813,11 +1858,11 @@ void Game::ResizeMenu()
                 auto spaceBetween = utilities.CalculateSpaceBetweenMenu(alignment);
 
                 if (element == Element::Title)
-                    utilities.SetBtnAndTextPos(windowWidth, sprite, text, btnText, spaceBetween);
+                    utilities.SetSpriteAndTextPos(windowWidth, sprite, text, btnText, spaceBetween);
                 else if (element == Element::Input)
-                    utilities.SetBtnAndTextPos(windowWidth, sprite, inputText, btnText, spaceBetween);
+                    utilities.SetSpriteAndTextPos(windowWidth, sprite, inputText, btnText, spaceBetween);
                 else
-                    utilities.SetBtnAndTextPos(windowWidth, sprite, prevBtn, btnText, spaceBetween);
+                    utilities.SetSpriteAndTextPos(windowWidth, sprite, prevBtn, btnText, spaceBetween);
 
                 prevBtn = sprite;
                 element = Element::Nothing;

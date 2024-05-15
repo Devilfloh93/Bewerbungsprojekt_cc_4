@@ -1,5 +1,6 @@
 #pragma once
 #include "Gui.h"
+#include "Sprite.h"
 #include "Text.h"
 
 using namespace std;
@@ -12,12 +13,13 @@ enum class AllowedInput
     Number
 };
 
-class Input : public Gui, public Text
+class Input : public Gui, public Text, public Sprite
 {
 public:
     Input(const MenuState menuState,
           unique_ptr<sf::Text> text,
-          const uint8_t maxChars,
+          unique_ptr<sf::Sprite> sprite,
+          const uint8_t maxInput,
           const string_view defaultString,
           const Alignment alignment,
           const AllowedInput allowedInput);
@@ -33,6 +35,6 @@ public:
 private:
     string m_defaultString;
     string m_string;
-    uint8_t m_maxChars;
+    uint8_t m_maxInput;
     AllowedInput m_allowedInput;
 };

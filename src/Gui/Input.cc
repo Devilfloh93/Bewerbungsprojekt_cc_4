@@ -3,12 +3,13 @@
 
 Input::Input(const MenuState menuState,
              unique_ptr<sf::Text> text,
-             const uint8_t maxChars,
+             unique_ptr<sf::Sprite> sprite,
+             const uint8_t maxInput,
              const string_view defaultString,
              const Alignment alignment,
              const AllowedInput allowedInput)
-    : Gui(menuState, alignment), Text(move(text)), m_maxChars(maxChars), m_defaultString(defaultString),
-      m_allowedInput(allowedInput)
+    : Gui(menuState, alignment), Text(move(text)), Sprite(move(sprite)), m_maxInput(maxInput),
+      m_defaultString(defaultString), m_allowedInput(allowedInput)
 {
 }
 
@@ -54,7 +55,7 @@ void Input::Write(const uint16_t width, const sf::Uint32 character)
         break;
     }
 
-    if (m_string.size() < m_maxChars && inputAllowed)
+    if (m_string.size() < m_maxInput && inputAllowed)
     {
         m_string.insert(m_string.end(), character);
         m_text->setString(m_string);

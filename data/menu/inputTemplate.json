@@ -1,7 +1,18 @@
 {
     "fontID": 0,
     "fontSize": 20,
-    "maxChars": 16,
+    "maxInput": 16,
     "alignment": 0,
-    "allowedInput": 1
+    "allowedInput": 1,
+    "textureID": 0,
+    "textureData": [
+        816,
+        147,
+        32,
+        13
+    ],
+    "scale": [
+        10.0,
+        5.0
+    ]
 }
