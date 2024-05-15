@@ -14,6 +14,12 @@ bool Utilities::isAlpha(const sf::Uint32 character) const
     return false;
 }
 
+bool Utilities::isNum(const sf::Uint32 character) const
+{
+    if ((character > 47 && character < 58))
+        return true;
+    return false;
+}
 
 void Utilities::SetInputPos(const uint16_t width, sf::Text *input)
 {

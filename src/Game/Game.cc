@@ -13,6 +13,7 @@ using namespace std;
 
 Game::Game() : m_menuState(MenuState::Main)
 {
+    m_selectedInput = nullptr;
     m_renderPuffer = 200.0F;
     m_maxZoom = 3U;
     m_playing = false;
@@ -336,14 +337,9 @@ bool Game::CreatePlayer()
     if (countFolders <= 0 || countFolders > 6)
         return false;
 
-    string playerName = "";
-    for (const auto &data : m_inputs)
-    {
-        if (m_menuState == data->GetMenuState())
-            playerName = data->GetString();
-    }
+    auto input = GetInputString();
 
-    if (playerName.size() == 0)
+    if (input.size() == 0)
         return false;
 
 
@@ -356,7 +352,7 @@ bool Game::CreatePlayer()
 
     auto font = utilities.GetFont(m_fonts, 0);
 
-    m_player = new Player(move(sprite), m_defaultAnimID, playerName, countFolders);
+    m_player = new Player(move(sprite), m_defaultAnimID, input, countFolders);
     return true;
 }
 
@@ -757,6 +753,7 @@ void Game::InitMenu()
             for (const auto &dataInput : jsonDataInput)
             {
                 alignment = jsonDataInputTemplate["alignment"];
+                AllowedInput allowedInput = jsonDataInputTemplate["allowedInput"];
 
                 vector<MenuState> inputState = dataInput["state"];
 
@@ -766,6 +763,9 @@ void Game::InitMenu()
                 {
                     if (dataInput.contains("alignment"))
                         alignment = dataInput["alignment"];
+
+                    if (dataInput.contains("allowedInput"))
+                        allowedInput = dataInput["allowedInput"];
 
                     auto inputText = make_unique<sf::Text>();
 
@@ -788,7 +788,7 @@ void Game::InitMenu()
 
                     element = Element::Input;
 
-                    auto inputs = new Input(state, move(inputText), maxChars, text, alignment);
+                    auto inputs = new Input(state, move(inputText), maxChars, text, alignment, allowedInput);
                     m_inputs.push_back(inputs);
                     prevInputText = inputs->GetText();
                 }
@@ -1425,6 +1425,13 @@ void Game::RenderMenu()
             {
                 if (m_menuState == data1->GetMenuState())
                 {
+                    auto text = data1->GetText();
+
+                    text->setColor(sf::Color(255, 255, 255));
+
+                    if (m_selectedInput == data1)
+                        text->setColor(sf::Color(255, 165, 0));
+
                     element = Element::Input;
                     m_window->draw(*(data1->GetText()));
                     previousTxt = data1->GetText();
@@ -1856,16 +1863,6 @@ uint8_t Game::CountSaveFolders()
     return id;
 }
 
-// MENU
-void Game::ResetInputToDefault()
-{
-    for (const auto &data : m_inputs)
-    {
-        if (data->GetMenuState() == m_menuState)
-            data->ResetToDefaultString(m_windowWidth);
-    }
-}
-
 // THREAD
 Thread *Game::GetThread()
 {
@@ -1951,6 +1948,9 @@ void Game::ClearDialog()
     m_dialogSprites.clear();
     m_dialogTexts.clear();
     m_selectedTextID = 0;
+
+    ResetInputToDefault();
+    m_selectedInput = nullptr;
 }
 
 sf::Text *Game::RenderDialog()
@@ -2024,4 +2024,38 @@ void Game::SetSelectedTextID(const uint8_t ID)
 uint8_t Game::GetSelectedTextID() const
 {
     return m_selectedTextID;
+}
+
+// INPUT
+Input *Game::GetSelectedInput()
+{
+    return m_selectedInput;
+}
+
+void Game::SetSelectedInput(Input *selectedInput)
+{
+    m_selectedInput = selectedInput;
+}
+
+void Game::ResetInputToDefault()
+{
+    for (const auto &data : m_inputs)
+    {
+        if (data->GetMenuState() == m_menuState)
+            data->ResetToDefaultString(m_windowWidth);
+    }
+}
+
+string Game::GetInputString() const
+{
+    if (m_selectedInput != nullptr)
+    {
+        for (const auto &data : m_inputs)
+        {
+            if (m_menuState == data->GetMenuState() && m_selectedInput == data)
+                return data->GetString();
+        }
+    }
+
+    return "";
 }

@@ -149,16 +149,18 @@ void EventHandler::KeyPressed(Game &game, const sf::Keyboard::Key &key)
         }
     }
 }
-void EventHandler::TxtEntered(const Game &game, const sf::Uint32 character)
-{
-    auto state = game.GetMenuState();
 
-    if (state == MenuState::Create)
+void EventHandler::TxtEntered(Game &game, const sf::Uint32 character)
+{
+    auto selectedInput = game.GetSelectedInput();
+    if (selectedInput != nullptr)
     {
+        auto state = game.GetMenuState();
         auto width = game.GetWindowWidth();
+
         for (const auto &data : game.GetInput())
         {
-            if (data->GetMenuState() == MenuState::Create)
+            if (data->GetMenuState() == state && selectedInput == data)
             {
                 if (character == 0x00000008)
                     data->Popback(width);
@@ -168,6 +170,7 @@ void EventHandler::TxtEntered(const Game &game, const sf::Uint32 character)
         }
     }
 }
+
 void EventHandler::KeyReleased(const Game &game)
 {
     auto state = game.GetMenuState();
@@ -239,6 +242,20 @@ void EventHandler::BtnPressed(Game &game)
             {
                 game.SetSelectedTextID(newSelectedTextID);
             }
+        }
+    }
+
+    for (const auto &data : game.GetInput())
+    {
+        auto text = data->GetText();
+        auto txtPos = text->getPosition();
+        auto txtLSize = text->getLocalBounds().getSize();
+
+        auto clicked = utilities.CheckTextClicked(worldPos, txtPos, txtLSize);
+
+        if (data->GetMenuState() == menuState && clicked)
+        {
+            game.SetSelectedInput(data);
         }
     }
 
@@ -316,6 +333,7 @@ void EventHandler::BtnPressed(Game &game)
                 break;
             case BtnFunc::Create:
                 game.SetMenuState(MenuState::Create);
+                game.SetSelectedInput(nullptr);
                 game.ResetInputToDefault();
                 m_break = true;
                 break;
