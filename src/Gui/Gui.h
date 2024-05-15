@@ -6,8 +6,7 @@ using namespace std;
 enum class Element
 {
     Nothing = 0,
-    Title,
-    Input
+    Title
 };
 
 enum class BtnFunc

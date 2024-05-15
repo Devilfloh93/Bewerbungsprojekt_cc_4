@@ -1439,7 +1439,7 @@ void Game::RenderMenu()
 
     m_window->setView(*m_menuView);
     Utilities utilities;
-    sf::Sprite *lastbtn;
+    sf::Sprite *prevSprite;
 
     for (const auto &data : m_titles)
     {
@@ -1474,12 +1474,10 @@ void Game::RenderMenu()
                     if (m_selectedInput == data1)
                         text->setColor(sf::Color(97, 52, 235));
 
-                    element = Element::Input;
-
                     m_window->draw(*sprite);
                     m_window->draw(*text);
 
-                    previousTxt = text;
+                    prevSprite = sprite;
                 }
             }
 
@@ -1527,13 +1525,11 @@ void Game::RenderMenu()
 
                         if (element == Element::Title)
                             utilities.SetSpriteAndTextPos(windowWidth, btnObj, previousTxt, btnText, spaceBetween);
-                        else if (element == Element::Input)
-                            utilities.SetSpriteAndTextPos(windowWidth, btnObj, previousTxt, btnText, spaceBetween);
                         else
-                            utilities.SetSpriteAndTextPos(windowWidth, btnObj, lastbtn, btnText, spaceBetween);
+                            utilities.SetSpriteAndTextPos(windowWidth, btnObj, prevSprite, btnText, spaceBetween);
 
                         element = Element::Nothing;
-                        lastbtn = btnObj;
+                        prevSprite = btnObj;
                     }
 
                     m_window->draw(*btnObj);
@@ -1819,8 +1815,7 @@ void Game::ResizeMenu()
     for (const auto &data : m_titles)
     {
         Element element = Element::Title;
-        sf::Sprite *prevBtn;
-        sf::Text *inputText;
+        sf::Sprite *prevSprite;
         auto titleState = data->GetMenuState();
 
         auto text = data->GetText();
@@ -1832,15 +1827,21 @@ void Game::ResizeMenu()
 
             if (titleState == inputState)
             {
-                inputText = dataInput->GetText();
+                auto inputText = dataInput->GetText();
+                auto sprite = dataInput->GetSprite();
+
                 auto alignment = dataInput->GetAlignment();
 
                 auto windowWidth = utilities.CalculateAlignmentWindowWidth(m_windowWidth, alignment);
                 auto spaceBetween = utilities.CalculateSpaceBetweenMenu(alignment);
 
-                utilities.SetTitlePos(windowWidth, text, inputText, spaceBetween);
+                if (element == Element::Title)
+                    utilities.SetSpriteAndTextPos(windowWidth, sprite, text, inputText, spaceBetween);
+                else
+                    utilities.SetSpriteAndTextPos(windowWidth, sprite, prevSprite, inputText, spaceBetween);
 
-                element = Element::Input;
+                prevSprite = sprite;
+                element = Element::Nothing;
             }
         }
 
@@ -1859,12 +1860,10 @@ void Game::ResizeMenu()
 
                 if (element == Element::Title)
                     utilities.SetSpriteAndTextPos(windowWidth, sprite, text, btnText, spaceBetween);
-                else if (element == Element::Input)
-                    utilities.SetSpriteAndTextPos(windowWidth, sprite, inputText, btnText, spaceBetween);
                 else
-                    utilities.SetSpriteAndTextPos(windowWidth, sprite, prevBtn, btnText, spaceBetween);
+                    utilities.SetSpriteAndTextPos(windowWidth, sprite, prevSprite, btnText, spaceBetween);
 
-                prevBtn = sprite;
+                prevSprite = sprite;
                 element = Element::Nothing;
             }
         }
