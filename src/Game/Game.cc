@@ -423,15 +423,6 @@ void Game::SetItems(ItemGround *item)
     m_items.push_back(item);
 }
 
-void Game::RemoveItems(const size_t i)
-{
-    auto item = m_items.begin() + i;
-
-    delete *item;
-    *item = nullptr;
-    m_items.erase(item);
-}
-
 // INITS
 void Game::InitFolder()
 {
@@ -606,6 +597,43 @@ void Game::InitZoom()
     m_zoom = 1U;
 
     m_view->move({-(center.x / 2), -(center.y / 2)});
+}
+
+void Game::CollectItem()
+{
+    Utilities utilities;
+    auto playerSprite = m_player->GetSprite();
+    auto playerPos = playerSprite->getPosition();
+    auto playerSize = playerSprite->getLocalBounds().getSize();
+
+    for (auto itr = m_items.begin(); itr != m_items.end();)
+    {
+        auto sprite = (*itr)->GetSprite();
+        auto ID = (*itr)->GetID();
+        auto count = (*itr)->GetCount();
+        auto itemPos = sprite->getPosition();
+        auto itemSize = sprite->getLocalBounds().getSize();
+
+        bool remove = false;
+
+        auto isNear = utilities.CheckCreatureIsNearItemPos(playerPos, playerSize, itemPos, itemSize);
+
+        if (isNear)
+        {
+            m_player->AddItem(ID, count);
+            remove = true;
+        }
+
+        if (remove)
+        {
+            delete *itr;
+            *itr = nullptr;
+            m_items.erase(itr);
+            break;
+        }
+        else
+            ++itr;
+    }
 }
 
 void Game::InitItemCfg()
@@ -1155,7 +1183,6 @@ void Game::InitCreature()
     }
 }
 
-
 void Game::InitWorld()
 {
     Utilities utilities;
@@ -1524,6 +1551,8 @@ void Game::RenderMenu()
                     m_window->draw(*btnText);
                 }
             }
+
+            RenderMessage();
             break;
         }
     }
@@ -2088,4 +2117,73 @@ string Game::GetInputString() const
     }
 
     return "";
+}
+
+// MESSSAGE
+
+void Game::RenderMessage()
+{
+    for (auto itr = m_messages.begin(); itr != m_messages.end();)
+    {
+        auto clock = (*itr).get()->GetClock();
+        bool remove = false;
+        auto elapsed = clock->getElapsedTime();
+        auto elapsedAsSec = elapsed.asSeconds();
+
+        if (elapsedAsSec < 1)
+        {
+            auto text = (*itr).get()->GetText();
+            m_window->draw(*text);
+        }
+        else
+            remove = true;
+
+        if (remove)
+            m_messages.erase(itr);
+        else
+            ++itr;
+    }
+}
+
+void Game::AddMessage(const string &message, const MessageType type)
+{
+    Utilities utilities;
+
+    auto newText = make_unique<sf::Text>();
+    auto clock = make_unique<sf::Clock>();
+
+    sf::Color textColor = {255, 165, 0};
+    float x = 0.0F;
+    float y = 0.0F;
+
+    utilities.SetSFText(newText.get(), 20U, m_fonts, 0U, message);
+
+    auto messageLSize = newText.get()->getLocalBounds().getSize();
+    auto width = utilities.CalculateAlignmentWindowWidth(m_windowWidth, Alignment::Left);
+    x = (width / 2) - (messageLSize.x / 2);
+
+    for (const auto &data : m_titles)
+    {
+        auto state = data->GetMenuState();
+        if (state == m_menuState)
+            y = (data->GetText()->getLocalBounds().getSize().y) / 2;
+    }
+
+    newText->setPosition(x, y);
+
+    switch (type)
+    {
+    case MessageType::Information:
+        textColor = {255, 165, 0};
+        break;
+    case MessageType::Error:
+        textColor = {255, 69, 0};
+        break;
+    default:
+        break;
+    }
+
+    newText->setFillColor(textColor);
+
+    m_messages.push_back(make_unique<Message>(move(newText), move(clock)));
 }

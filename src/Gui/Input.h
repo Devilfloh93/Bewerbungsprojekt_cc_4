@@ -7,7 +7,7 @@ using namespace std;
 
 enum class AllowedInput
 {
-    Nothing,
+    Nothing = 0,
     Everything,
     Alphabet,
     Number

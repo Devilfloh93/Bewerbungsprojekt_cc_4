@@ -66,7 +66,7 @@ void Trader::Buy(Game &game)
         UpdateTrader(game, dialogText, SelectedTextCategorie::Buy, text);
     }
     else
-        cout << "You can't buy that much!" << endl;
+        game.AddMessage("You can't buy that much!", MessageType::Error);
 }
 
 void Trader::Sell(Game &game)
@@ -97,10 +97,10 @@ void Trader::Sell(Game &game)
             UpdateTrader(game, dialogText, SelectedTextCategorie::Sell, text);
         }
         else
-            cout << "Not Enough Items to sell!" << endl;
+            game.AddMessage("Not Enough Items to sell!", MessageType::Error);
     }
     else
-        cout << "You can't sell that much!" << endl;
+        game.AddMessage("You can't sell that much!", MessageType::Error);
 }
 
 void Trader::UpdateTrader(Game &game,
