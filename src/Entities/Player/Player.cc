@@ -65,42 +65,6 @@ void Player::SetMove(const PlayerMove move)
     m_move = move;
 }
 
-void Player::CollectItem(Game *game)
-{
-    Utilities utilities;
-    auto items = game->GetItem();
-    auto playerPos = m_sprite->getPosition();
-    auto playerSize = m_sprite->getLocalBounds().getSize();
-
-    if (!items.empty())
-    {
-        for (size_t i = 0; i < items.size(); ++i)
-        {
-            auto sprite = items[i]->GetSprite();
-            auto ID = items[i]->GetID();
-            auto count = items[i]->GetCount();
-            auto itemPos = sprite->getPosition();
-            auto itemSize = sprite->getLocalBounds().getSize();
-
-            bool remove = false;
-
-            auto isNear = utilities.CheckCreatureIsNearItemPos(playerPos, playerSize, itemPos, itemSize);
-
-            if (isNear)
-            {
-                AddItem(ID, count);
-                remove = true;
-            }
-
-            if (remove)
-            {
-                game->RemoveItems(i);
-                break;
-            }
-        }
-    }
-}
-
 void Player::AddItem(const uint8_t ID, const uint16_t count)
 {
     bool newItem = true;
@@ -217,7 +181,7 @@ void Player::HandleMove(sf::Clock &clock, Game *game)
         break;
     }
 
-    CollectItem(game);
+    game->CollectItem();
 
     m_moveAllowed.up = true;
     m_moveAllowed.down = true;

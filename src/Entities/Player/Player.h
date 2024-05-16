@@ -57,7 +57,6 @@ public:
 
     // ITEMS
     void Interact(Game &game);
-    void CollectItem(Game *game);
     void AddItem(const uint8_t ID, const uint16_t count);
     bool RemoveItem(const uint8_t ID, const uint16_t count);
     uint16_t GetItemCount(const uint8_t ID);

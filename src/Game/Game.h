@@ -7,6 +7,7 @@
 #include "Input.h"
 #include "ItemCfg.h"
 #include "ItemGround.h"
+#include "Message.h"
 #include "Player.h"
 #include "Stats.h"
 #include "Surface.h"
@@ -114,7 +115,8 @@ public:
     void InitItemCfg();
     void RenderItems();
     void SetItems(ItemGround *item);
-    void RemoveItems(const size_t i);
+    void CollectItem();
+
     void CreateGroundItem(const uint8_t textureID,
                           const sf::IntRect &textureData,
                           const float posX,
@@ -128,6 +130,10 @@ public:
 
     void InitSurface();
     void InitWorld();
+
+    // MESSAGE
+    void RenderMessage();
+    void AddMessage(const string &message, const MessageType type);
 
     // Render
     void Render(sf::Clock &clock);
@@ -214,6 +220,7 @@ private:
     vector<Input *> m_inputs;
     vector<unique_ptr<SelectableText>> m_saveFiles;
     vector<sf::Text *> m_hotkeyMenu; // TODO: TEMPORARY FIX
+    vector<unique_ptr<Message>> m_messages;
 
     vector<unique_ptr<Sprite>> m_dialogSprites;
     vector<unique_ptr<SelectableText>> m_dialogTexts;
@@ -235,6 +242,7 @@ private:
     // RENDER
     float m_renderPuffer;
     sf::Text *m_hotkeyRender;
+
     MenuState m_menuState;
     // INPUT
     Input *m_selectedInput;
