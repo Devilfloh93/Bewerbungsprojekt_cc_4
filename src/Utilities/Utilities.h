@@ -40,6 +40,14 @@ public:
                              sf::Text *btntext,
                              float spaceBetweenBtn);
 
+    bool UpdateSpriteAndText(const bool firstMenuEntry,
+                             const Alignment alignment,
+                             const uint16_t width,
+                             sf::Sprite *sprite,
+                             sf::Text *prevText,
+                             sf::Sprite *prevSprite,
+                             sf::Text *text);
+
     void SetTextBeforeIcon(sf::Sprite &icon, sf::Text &text, const sf::Vector2f &prevPos);
     void SetTextBeforeIcon(const uint16_t x, const uint16_t y, sf::Sprite &icon, sf::Text &text);
     void SetTextBeforeIcon(const uint16_t width, sf::Text *title, sf::Sprite &icon, sf::Text &text);
@@ -49,19 +57,38 @@ public:
 
     void PlayAnimation(sf::Sprite *sprite, sf::Clock &clock, sf::IntRect &anim0, sf::IntRect &anim1);
 
+    void SetSFText(sf::Text *text,
+                   const uint8_t size,
+                   const vector<Font *> &fonts,
+                   const uint8_t fontID,
+                   const nlohmann::json_abi_v3_11_2::json &jsonDataLanguage,
+                   const uint8_t languageID,
+                   string_view language);
+
+    void SetSFText(sf::Text *text, const uint8_t size, const vector<Font *> &fonts, const uint8_t fontID);
+
     template <typename T>
-    void SetSFText(sf::Text *text, const sf::Font *font, const uint8_t size, const T value)
+    void SetSFText(sf::Text *text, const uint8_t size, const vector<Font *> &fonts, const uint8_t fontID, const T value)
     {
+        auto font = GetFont(fonts, fontID);
+
         text->setFont(*font);
         text->setCharacterSize(size);
         text->setString(format("{}", value));
     }
-    void SetSFText(sf::Text *text, const sf::Font *font, const uint8_t size);
 
     void SetSFSprite(sf::Sprite *sprite, const sf::Texture *texture, const sf::IntRect &rectangle);
-    void SetSFSprite(sf::Sprite *sprite, const sf::Texture *texture, const sf::IntRect &rectangle, float x, float y);
     void SetSFSprite(sf::Sprite *sprite,
-                     const sf::Texture *texture,
+                     const vector<Texture *> &textures,
+                     const uint8_t textureID,
+                     const sf::IntRect &rectangle,
+                     float x,
+                     float y);
+    void SetSFSprite(sf::Sprite *sprite, const sf::Texture *texture, const sf::IntRect &rectangle, float x, float y);
+
+    void SetSFSprite(sf::Sprite *sprite,
+                     const vector<Texture *> &textures,
+                     const uint8_t textureID,
                      const sf::IntRect &rectangle,
                      const sf::Vector2f &factors);
 
@@ -82,4 +109,11 @@ public:
                             const sf::Vector2f &btnPos,
                             const sf::Vector2f &btnLSize,
                             const sf::Vector2f &btnScale);
+    bool CheckCreatureIsNearSurfacePos(const sf::Vector2f &creaturePos, const sf::Vector2f &surfacePos, float tileSize);
+    bool CheckCreatureIsNearItemPos(const sf::Vector2f &creaturePos,
+                                    const sf::Vector2f &creatureSize,
+                                    const sf::Vector2f &itemPos,
+                                    const sf::Vector2f &itemSize);
+
+    string GetAnsiString(const uint16_t key);
 };
