@@ -66,6 +66,25 @@ void Utilities::SetSpriteAndTextPos(const uint16_t width,
                                       btnObjPos.y + ((btnObjSize.y / 2U) - (btnTextLSize.y / 2U))));
 }
 
+bool Utilities::UpdateSpriteAndText(const bool firstMenuEntry,
+                                    const Alignment alignment,
+                                    const uint16_t width,
+                                    sf::Sprite *sprite,
+                                    sf::Text *prevText,
+                                    sf::Sprite *prevSprite,
+                                    sf::Text *text)
+{
+    auto windowWidth = CalculateAlignmentWindowWidth(width, alignment);
+    auto spaceBetween = CalculateSpaceBetweenMenu(alignment);
+
+    if (firstMenuEntry)
+        SetSpriteAndTextPos(windowWidth, sprite, prevText, text, spaceBetween);
+    else
+        SetSpriteAndTextPos(windowWidth, sprite, prevSprite, text, spaceBetween);
+
+    return false;
+}
+
 void Utilities::SetSpriteAndTextPos(const uint16_t width,
                                     sf::Sprite *btnObj,
                                     sf::Sprite *btn,
@@ -176,9 +195,26 @@ void Utilities::PlayAnimation(sf::Sprite *sprite, sf::Clock &clock, sf::IntRect 
         clock.restart();
 }
 
-
-void Utilities::SetSFText(sf::Text *text, const sf::Font *font, const uint8_t size)
+void Utilities::SetSFText(sf::Text *text,
+                          const uint8_t size,
+                          const vector<Font *> &fonts,
+                          const uint8_t fontID,
+                          const nlohmann::json_abi_v3_11_2::json &jsonDataLanguage,
+                          const uint8_t languageID,
+                          string_view language)
 {
+    auto font = GetFont(fonts, fontID);
+    auto languageText = GetLanguageText(jsonDataLanguage, languageID, language);
+
+    text->setFont(*font);
+    text->setCharacterSize(size);
+    text->setString(format("{}", languageText));
+}
+
+void Utilities::SetSFText(sf::Text *text, const uint8_t size, const vector<Font *> &fonts, const uint8_t fontID)
+{
+    auto font = GetFont(fonts, fontID);
+
     text->setFont(*font);
     text->setCharacterSize(size);
 }
@@ -201,10 +237,27 @@ void Utilities::SetSFSprite(sf::Sprite *sprite,
 }
 
 void Utilities::SetSFSprite(sf::Sprite *sprite,
-                            const sf::Texture *texture,
+                            const vector<Texture *> &textures,
+                            const uint8_t textureID,
+                            const sf::IntRect &rectangle,
+                            float x,
+                            float y)
+{
+    auto texture = GetTexture(textures, textureID);
+
+    sprite->setTexture(*texture);
+    sprite->setTextureRect(rectangle);
+    sprite->setPosition(x, y);
+}
+
+void Utilities::SetSFSprite(sf::Sprite *sprite,
+                            const vector<Texture *> &textures,
+                            const uint8_t textureID,
                             const sf::IntRect &rectangle,
                             const sf::Vector2f &factors)
 {
+    auto texture = GetTexture(textures, textureID);
+
     sprite->setTexture(*texture);
     sprite->setTextureRect(rectangle);
     sprite->setScale(factors);
@@ -303,13 +356,42 @@ bool Utilities::CheckTextClicked(const sf::Vector2f &mousePos, const sf::Vector2
 }
 
 bool Utilities::CheckSpriteClicked(const sf::Vector2f &mousePos,
-                                const sf::Vector2f &btnPos,
-                                const sf::Vector2f &btnLSize,
-                                const sf::Vector2f &btnScale)
+                                   const sf::Vector2f &btnPos,
+                                   const sf::Vector2f &btnLSize,
+                                   const sf::Vector2f &btnScale)
 {
     if (mousePos.x > btnPos.x && mousePos.x < btnPos.x + (btnLSize.x * btnScale.x) && mousePos.y > btnPos.y &&
         mousePos.y < btnPos.y + (btnLSize.y * btnScale.y))
         return true;
 
     return false;
+}
+
+bool Utilities::CheckCreatureIsNearSurfacePos(const sf::Vector2f &creaturePos,
+                                              const sf::Vector2f &surfacePos,
+                                              float tileSize)
+{
+    if (creaturePos.x >= surfacePos.x - tileSize && creaturePos.x <= surfacePos.x + tileSize &&
+        creaturePos.y >= surfacePos.y - tileSize && creaturePos.y <= surfacePos.y + tileSize)
+        return true;
+
+    return false;
+}
+
+bool Utilities::CheckCreatureIsNearItemPos(const sf::Vector2f &creaturePos,
+                                           const sf::Vector2f &creatureSize,
+                                           const sf::Vector2f &itemPos,
+                                           const sf::Vector2f &itemSize)
+{
+    if ((creaturePos.x + (creatureSize.x / 2)) >= itemPos.x && creaturePos.x <= itemPos.x + (itemSize.x / 2) &&
+        creaturePos.y + (creatureSize.y / 2) >= itemPos.y && creaturePos.y <= itemPos.y + (itemSize.y / 2))
+        return true;
+
+    return false;
+}
+
+string Utilities::GetAnsiString(const uint16_t key)
+{
+    auto sfmlHotkey = sf::Keyboard::delocalize(static_cast<sf::Keyboard::Key>(key));
+    return (sf::Keyboard::getDescription(sfmlHotkey).toAnsiString());
 }

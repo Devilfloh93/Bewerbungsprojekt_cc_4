@@ -67,6 +67,7 @@ void Player::SetMove(const PlayerMove move)
 
 void Player::CollectItem(Game *game)
 {
+    Utilities utilities;
     auto items = game->GetItem();
     auto playerPos = m_sprite->getPosition();
     auto playerSize = m_sprite->getLocalBounds().getSize();
@@ -83,8 +84,9 @@ void Player::CollectItem(Game *game)
 
             bool remove = false;
 
-            if ((playerPos.x + (playerSize.x / 2)) >= itemPos.x && playerPos.x <= itemPos.x + (itemSize.x / 2) &&
-                playerPos.y + (playerSize.y / 2) >= itemPos.y && playerPos.y <= itemPos.y + (itemSize.y / 2))
+            auto isNear = utilities.CheckCreatureIsNearItemPos(playerPos, playerSize, itemPos, itemSize);
+
+            if (isNear)
             {
                 AddItem(ID, count);
                 remove = true;
@@ -442,13 +444,11 @@ void Player::InitTraderItems(Game &game)
                             auto textureData = data->GetTextureData();
                             auto fontID = data->GetFontID();
 
-                            auto font = utilities.GetFont(fonts, fontID);
-
                             auto text = format("Selling: {} - Inventory: {}", value, value1);
                             auto spriteUnique = itemSprite.get();
                             auto textUnique = itemText.get();
 
-                            utilities.SetSFText(textUnique, font, 15, text);
+                            utilities.SetSFText(textUnique, 15U, fonts, fontID, text);
 
                             utilities.SetSFSprite(spriteUnique, texture, textureData);
                             auto alignemntWidth = utilities.CalculateAlignmentWindowWidth(width, Alignment::Right);
@@ -496,13 +496,11 @@ void Player::InitTraderItems(Game &game)
                     auto textureData = data->GetTextureData();
                     auto fontID = data->GetFontID();
 
-                    auto font = utilities.GetFont(fonts, fontID);
-
                     auto text = format("Buying: {}", value);
                     auto spriteUnique = itemSprite.get();
                     auto textUnique = itemText.get();
 
-                    utilities.SetSFText(textUnique, font, 15, text);
+                    utilities.SetSFText(textUnique, 15U, fonts, fontID, text);
 
                     utilities.SetSFSprite(spriteUnique, texture, textureData);
                     auto alignemntWidth = utilities.CalculateAlignmentWindowWidth(width, Alignment::Left);
@@ -564,11 +562,10 @@ void Player::InitInventoryItems(Game &game)
                 auto textureData = data->GetTextureData();
                 auto fontID = data->GetFontID();
 
-                auto font = utilities.GetFont(fonts, fontID);
                 auto spriteUnique = itemSprite.get();
                 auto textUnique = itemText.get();
 
-                utilities.SetSFText(textUnique, font, 15, value);
+                utilities.SetSFText(textUnique, 15U, fonts, fontID, value);
 
                 utilities.SetSFSprite(spriteUnique, texture, textureData);
 
