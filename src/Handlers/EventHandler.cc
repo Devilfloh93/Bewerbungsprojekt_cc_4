@@ -62,21 +62,24 @@ void EventHandler::Playing(Game &game, const sf::Keyboard::Key &key)
                 player->InitInventoryItems(game);
                 m_break = true;
                 break;
+            case Hotkey::LeftMove:
                 if (collision.InViewRange(&game, {playerPos.x, playerPos.y}))
-                {
-                case Hotkey::LeftMove:
-                    player->SetMove(PlayerMove::Left);
-                    break;
-                case Hotkey::RightMove:
-                    player->SetMove(PlayerMove::Right);
-                    break;
-                case Hotkey::UpMove:
-                    player->SetMove(PlayerMove::Up);
-                    break;
-                case Hotkey::DownMove:
-                    player->SetMove(PlayerMove::Down);
-                    break;
-                }
+                    player->SetMove(Move::Left);
+                break;
+            case Hotkey::RightMove:
+                if (collision.InViewRange(&game, {playerPos.x, playerPos.y}))
+                    player->SetMove(Move::Right);
+
+                break;
+            case Hotkey::UpMove:
+                if (collision.InViewRange(&game, {playerPos.x, playerPos.y}))
+                    player->SetMove(Move::Up);
+                break;
+            case Hotkey::DownMove:
+                if (collision.InViewRange(&game, {playerPos.x, playerPos.y}))
+                    player->SetMove(Move::Down);
+                break;
+
             default:
                 break;
             }
@@ -183,7 +186,7 @@ void EventHandler::KeyReleased(const Game &game)
              sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S));
 
         if (!keyPressed)
-            player->SetMove(PlayerMove::NotMoving);
+            player->SetMove(Move::NotMoving);
     }
 }
 void EventHandler::MouseWheelScrolled(Game &game, float delta)

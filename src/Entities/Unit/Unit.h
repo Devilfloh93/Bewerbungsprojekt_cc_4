@@ -1,6 +1,23 @@
 #pragma once
 #include "Sprite.h"
 
+struct MoveAllowed
+{
+    bool up;
+    bool down;
+    bool left;
+    bool right;
+};
+
+enum class Move
+{
+    NotMoving = 0,
+    Up,
+    Down,
+    Left,
+    Right
+};
+
 class Unit : public Sprite
 {
 public:
@@ -8,10 +25,21 @@ public:
     ~Unit() = default;
 
     void SetSpeed(const float speed);
+    float GetSpeed() const;
+
+    Move GetMove() const;
+    Move GetLastMove() const;
+    void SetMove(const Move move);
+    void SetMoveAllowed(const Move move, const bool moveAllowed);
+    MoveAllowed GetMoveAllowed() const;
 
 protected:
     float m_health;
     float m_speed;
     // ANIM
     uint8_t m_animID;
+    // MOVE
+    Move m_move;
+    Move m_lastMove;
+    MoveAllowed m_moveAllowed;
 };

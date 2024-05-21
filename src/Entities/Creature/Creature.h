@@ -15,7 +15,7 @@ public:
              const float health,
              const float speed,
              const uint8_t animID,
-             const bool moving,
+             const bool moveable,
              const vector<string> dialogIntro,
              const vector<string> dialogOutro,
              const vector<string> dialogOffensive,
@@ -23,7 +23,8 @@ public:
     ~Creature() = default;
 
     bool GetInteractable() const;
-    bool GetMoving() const;
+    bool GetMoveable() const;
+    sf::Vector2f GetSpawnPos() const;
 
     vector<string> GetDialogIntro() const;
     vector<string> GetDialogOutro() const;
@@ -31,7 +32,8 @@ public:
 
 private:
     bool m_interactable;
-    bool m_moving;
+    bool m_moveable;
+    sf::Vector2f m_spawnPos;
     vector<string> m_dialogIntro;
     vector<string> m_dialogOutro;
     vector<string> m_dialogOffensive;

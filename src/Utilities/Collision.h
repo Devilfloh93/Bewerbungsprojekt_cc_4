@@ -11,6 +11,26 @@ public:
     Collision();
     ~Collision() = default;
 
+    // COLLISION
+    void CheckCollision(Game *game);
+    void CheckCollision(Game *game, Creature *creature);
+
+
+    bool CheckInFront(Player *player, const bool interactable, const sf::Vector2f &objPos, const sf::Vector2f &objSize);
+
+    bool CheckInFront(Player *player,
+                      const bool interactable,
+                      const sf::Vector2f &objPos,
+                      const sf::Vector2f &objSize,
+                      const CollisionData objCollision);
+
+    void CheckInFront(Creature *creature,
+                      const sf::Vector2f &objPos,
+                      const sf::Vector2f &objSize,
+                      const CollisionData objCollision);
+
+    void CheckInFront(Creature *creature, const sf::Vector2f &objPos, const sf::Vector2f &objSize);
+
     /**
      * @brief Check if Sprite is in viewRange of the Camera
      *

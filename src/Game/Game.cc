@@ -1355,22 +1355,72 @@ void Game::InitRenderStats()
 // Render
 void Game::Render(sf::Clock &clock)
 {
+    Collision collision;
+
     m_window->setView(*m_view);
 
     RenderSurface();
-    m_player->HandleMove(clock, this);
 
-    RenderItems();
     m_window->draw(*(m_player->GetSprite()));
     RenderCreature();
+    RenderItems();
 
     RenderWorld();
 
-    m_player->CheckCollision(this);
+    collision.CheckCollision(this);
+
+    m_player->HandleMove(clock, this);
 
     m_player->CheckRenderHotkey(this);
 
     RenderStats();
+
+    for (const auto &data : m_creature)
+    {
+        auto canMove = data->GetMoveable();
+
+        if (canMove)
+        {
+            collision.CheckCollision(this, data);
+            auto sprite = data->GetSprite();
+            auto pos = sprite->getPosition();
+            auto spawnPos = data->GetSpawnPos();
+            auto moveAllowed = data->GetMoveAllowed();
+            float maxMoveRange = 50.0F;
+
+            random_device rd;  // a seed source for the random number engine
+            mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
+            uniform_int_distribution<> dist(1U, 4U);
+
+            switch (dist(gen))
+            {
+            case 1:
+                if (pos.x - spawnPos.x <= maxMoveRange && moveAllowed.right)
+                    sprite->setPosition(pos.x + 1, pos.y);
+                break;
+            case 2:
+                if (pos.x - (spawnPos.x - maxMoveRange) >= 0 && moveAllowed.left)
+                    sprite->setPosition(pos.x - 1, pos.y);
+                break;
+            case 3:
+                if (pos.y - spawnPos.y <= maxMoveRange && moveAllowed.down)
+                    sprite->setPosition(pos.x, pos.y + 1);
+                break;
+            case 4:
+                if (pos.y - (spawnPos.y - maxMoveRange) >= 0 && moveAllowed.up)
+                    sprite->setPosition(pos.x, pos.y - 1);
+                break;
+
+            default:
+                break;
+            }
+
+            data->SetMoveAllowed(Move::Up, true);
+            data->SetMoveAllowed(Move::Down, true);
+            data->SetMoveAllowed(Move::Left, true);
+            data->SetMoveAllowed(Move::Right, true);
+        }
+    }
 }
 
 void Game::RenderItems()
@@ -1460,7 +1510,7 @@ void Game::RenderHotkey()
 void Game::RenderMenu()
 {
     if (m_playing)
-        m_player->SetMove(PlayerMove::NotMoving);
+        m_player->SetMove(Move::NotMoving);
 
     m_window->setView(*m_menuView);
     Utilities utilities;
@@ -1581,7 +1631,10 @@ void Game::CreateLoadMenu()
 
     for (uint8_t i = 1; i < count; ++i)
     {
-        auto text = make_unique<sf::Text>(format("{}. Savegame", i), *font, 20U);
+        auto messageFormat = utilities.GetMessageFormat(*this, 14);
+        auto message = vformat(messageFormat, make_format_args(i));
+
+        auto text = make_unique<sf::Text>(message, *font, 20U);
 
         m_saveFiles.push_back(make_unique<SelectableText>(move(text), i, i, SelectedTextCategorie::Nothing));
     }
@@ -1608,7 +1661,7 @@ void Game::SaveCreatures(const bool destroy)
         file << '[';
         for (auto &data : m_creature)
         {
-            if (data->GetMoving())
+            if (data->GetMoveable())
             {
                 if (!firstElement)
                     file << ",";
