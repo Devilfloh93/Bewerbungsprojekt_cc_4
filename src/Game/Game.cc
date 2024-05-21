@@ -335,13 +335,18 @@ bool Game::CreatePlayer()
     Utilities utilities;
     auto countFolders = CountSaveFolders();
     if (countFolders <= 0 || countFolders > 6)
+    {
+        AddMessage("To Many Save Games!", MessageType::Error);
         return false;
+    }
 
     auto input = GetInputString();
 
     if (input.size() == 0)
+    {
+        AddMessage("Please enter a Character Name!", MessageType::Information);
         return false;
-
+    }
 
     auto sprite = make_unique<sf::Sprite>();
 
@@ -1801,6 +1806,11 @@ void Game::ResizeWindow(const uint16_t width, const uint16_t height)
         ResizeMenu();
         ResizeStats();
     }
+    else
+    {
+        auto message = format("Your Window has already the Resolution: {}x{}", width, height);
+        AddMessage(message, MessageType::Information);
+    }
 }
 
 void Game::FullscreenWindow()
@@ -2155,18 +2165,24 @@ void Game::AddMessage(const string &message, const MessageType type)
     sf::Color textColor = {255, 165, 0};
     float x = 0.0F;
     float y = 0.0F;
+    uint8_t fontSize = 20U;
 
-    utilities.SetSFText(newText.get(), 20U, m_fonts, 0U, message);
+    utilities.SetSFText(newText.get(), fontSize, m_fonts, 0U, message);
 
     auto messageLSize = newText.get()->getLocalBounds().getSize();
     auto width = utilities.CalculateAlignmentWindowWidth(m_windowWidth, Alignment::Left);
-    x = (width / 2) - (messageLSize.x / 2);
 
     for (const auto &data : m_titles)
     {
         auto state = data->GetMenuState();
         if (state == m_menuState)
-            y = (data->GetText()->getLocalBounds().getSize().y) / 2;
+        {
+            auto textPosition = data->GetText()->getPosition();
+            auto textSize = data->GetText()->getLocalBounds().getSize();
+            x = (textPosition.x + (textSize.x / 2)) - (newText.get()->getLocalBounds().getSize().x / 2);
+            y = (textPosition.y + textSize.y) + fontSize;
+            break;
+        }
     }
 
     newText->setPosition(x, y);
