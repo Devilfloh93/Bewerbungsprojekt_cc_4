@@ -51,7 +51,10 @@ void Trader::Buy(Game &game)
 
     auto input = game.GetInputString();
     if (input.size() == 0)
+    {
+        game.AddMessage("Please enter how much you want to buy!", MessageType::Error);
         return;
+    }
 
     uint16_t inputNum = stoi(input);
 
@@ -79,7 +82,10 @@ void Trader::Sell(Game &game)
     auto input = game.GetInputString();
 
     if (input.size() == 0)
+    {
+        game.AddMessage("Please enter how much you want to sell!", MessageType::Error);
         return;
+    }
 
     uint16_t inputNum = stoi(input);
 
