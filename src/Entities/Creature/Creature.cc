@@ -18,14 +18,15 @@ Creature::Creature(unique_ptr<sf::Sprite> sprite,
                    const float health,
                    const float speed,
                    const uint8_t animID,
-                   const bool moving,
+                   const bool moveable,
                    const vector<string> dialogIntro,
                    const vector<string> dialogOutro,
                    const vector<string> dialogOffensive,
                    const bool interactable)
-    : Unit(move(sprite), health, speed, animID), m_moving(moving), m_dialogIntro(dialogIntro),
+    : Unit(move(sprite), health, speed, animID), m_moveable(moveable), m_dialogIntro(dialogIntro),
       m_dialogOutro(dialogOutro), m_dialogOffensive(dialogOffensive), m_interactable(interactable)
 {
+    m_spawnPos = m_sprite.get()->getPosition();
 }
 
 bool Creature::GetInteractable() const
@@ -33,9 +34,14 @@ bool Creature::GetInteractable() const
     return m_interactable;
 }
 
-bool Creature::GetMoving() const
+bool Creature::GetMoveable() const
 {
-    return m_moving;
+    return m_moveable;
+}
+
+sf::Vector2f Creature::GetSpawnPos() const
+{
+    return m_spawnPos;
 }
 
 vector<string> Creature::GetDialogIntro() const

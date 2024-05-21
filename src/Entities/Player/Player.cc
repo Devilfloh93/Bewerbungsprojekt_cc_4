@@ -34,8 +34,6 @@ void Player::Init()
 {
     m_sprite->setPosition(80.0F, 80.0F);
     m_survivalStats = {.water = 100.0F, .food = 100.0F};
-    m_move = PlayerMove::NotMoving;
-    m_lastMove = m_move;
     m_trader = nullptr;
     m_objectInFront = nullptr;
     m_creatureInFront = nullptr;
@@ -45,24 +43,6 @@ void Player::Init()
 uint8_t Player::GetID() const
 {
     return m_ID;
-}
-
-// MOVE
-PlayerMove Player::GetMove() const
-{
-    return m_move;
-}
-
-
-PlayerMove Player::GetLastMove() const
-{
-    return m_lastMove;
-}
-
-void Player::SetMove(const PlayerMove move)
-{
-    m_lastMove = m_move;
-    m_move = move;
 }
 
 void Player::AddItem(const uint8_t ID, const uint16_t count)
@@ -119,7 +99,7 @@ void Player::HandleMove(sf::Clock &clock, Game *game)
 
     switch (m_move)
     {
-    case PlayerMove::Left:
+    case Move::Left:
         if (playerPos.x - m_speed > 0 + (tileSize / 2) && m_moveAllowed.left)
         {
             utilities.PlayAnimation(sprite, clock, animData.left.notMoving, animData.left.anim01);
@@ -128,7 +108,7 @@ void Player::HandleMove(sf::Clock &clock, Game *game)
         else
             m_sprite->setTextureRect(animData.left.notMoving);
         break;
-    case PlayerMove::Right:
+    case Move::Right:
         if (playerPos.x + m_speed < width - tileSize && m_moveAllowed.right)
         {
             utilities.PlayAnimation(sprite, clock, animData.right.notMoving, animData.right.anim01);
@@ -137,7 +117,7 @@ void Player::HandleMove(sf::Clock &clock, Game *game)
         else
             m_sprite->setTextureRect(animData.right.notMoving);
         break;
-    case PlayerMove::Down:
+    case Move::Down:
         if (playerPos.y + m_speed < height - tileSize && m_moveAllowed.down)
         {
             utilities.PlayAnimation(sprite, clock, animData.down.anim01, animData.down.anim02);
@@ -147,7 +127,7 @@ void Player::HandleMove(sf::Clock &clock, Game *game)
             m_sprite->setTextureRect(animData.down.notMoving);
 
         break;
-    case PlayerMove::Up:
+    case Move::Up:
         if (playerPos.y - m_speed > 0 + (tileSize / 2) && m_moveAllowed.up)
         {
             utilities.PlayAnimation(sprite, clock, animData.up.anim01, animData.up.anim02);
@@ -157,19 +137,19 @@ void Player::HandleMove(sf::Clock &clock, Game *game)
             m_sprite->setTextureRect(animData.up.notMoving);
 
         break;
-    case PlayerMove::NotMoving:
+    case Move::NotMoving:
         switch (m_lastMove)
         {
-        case PlayerMove::Down:
+        case Move::Down:
             m_sprite->setTextureRect(animData.down.notMoving);
             break;
-        case PlayerMove::Up:
+        case Move::Up:
             m_sprite->setTextureRect(animData.up.notMoving);
             break;
-        case PlayerMove::Left:
+        case Move::Left:
             m_sprite->setTextureRect(animData.left.notMoving);
             break;
-        case PlayerMove::Right:
+        case Move::Right:
             m_sprite->setTextureRect(animData.right.notMoving);
             break;
         default:
@@ -283,31 +263,31 @@ void Player::Interact(Game &game)
                         posIncrease += 20;
                         switch (m_move)
                         {
-                        case PlayerMove::Up:
+                        case Move::Up:
                             itemPos = {playerPos.x, playerPos.y + posIncrease};
                             break;
-                        case PlayerMove::Down:
+                        case Move::Down:
                             itemPos = {playerPos.x, playerPos.y - posIncrease};
                             break;
-                        case PlayerMove::Right:
+                        case Move::Right:
                             itemPos = {playerPos.x - posIncrease, playerPos.y};
                             break;
-                        case PlayerMove::Left:
+                        case Move::Left:
                             itemPos = {playerPos.x + posIncrease, playerPos.y};
                             break;
-                        case PlayerMove::NotMoving:
+                        case Move::NotMoving:
                             switch (m_lastMove)
                             {
-                            case PlayerMove::Up:
+                            case Move::Up:
                                 itemPos = {playerPos.x, playerPos.y + posIncrease};
                                 break;
-                            case PlayerMove::Down:
+                            case Move::Down:
                                 itemPos = {playerPos.x, playerPos.y - posIncrease};
                                 break;
-                            case PlayerMove::Right:
+                            case Move::Right:
                                 itemPos = {playerPos.x - posIncrease, playerPos.y};
                                 break;
-                            case PlayerMove::Left:
+                            case Move::Left:
                                 itemPos = {playerPos.x + posIncrease, playerPos.y};
                                 break;
                             default:
@@ -347,9 +327,6 @@ void Player::CheckRenderHotkey(Game *game)
     }
 }
 
-/***
- * TODO: REWORK RENDER TRADER ITEMS
-*/
 void Player::InitTraderItems(Game &game)
 {
     game.ClearDialog();
@@ -408,11 +385,13 @@ void Player::InitTraderItems(Game &game)
                             auto textureData = data->GetTextureData();
                             auto fontID = data->GetFontID();
 
-                            auto text = format("Selling: {} - Inventory: {}", value, value1);
+                            auto messageFormat = utilities.GetMessageFormat(game, 8);
+                            auto message = vformat(messageFormat, make_format_args(value, value1));
+
                             auto spriteUnique = itemSprite.get();
                             auto textUnique = itemText.get();
 
-                            utilities.SetSFText(textUnique, 15U, fonts, fontID, text);
+                            utilities.SetSFText(textUnique, 15U, fonts, fontID, message);
 
                             utilities.SetSFSprite(spriteUnique, texture, textureData);
                             auto alignemntWidth = utilities.CalculateAlignmentWindowWidth(width, Alignment::Right);
@@ -460,11 +439,13 @@ void Player::InitTraderItems(Game &game)
                     auto textureData = data->GetTextureData();
                     auto fontID = data->GetFontID();
 
-                    auto text = format("Buying: {}", value);
+                    auto messageFormat = utilities.GetMessageFormat(game, 2);
+                    auto message = vformat(messageFormat, make_format_args(value));
+
                     auto spriteUnique = itemSprite.get();
                     auto textUnique = itemText.get();
 
-                    utilities.SetSFText(textUnique, 15U, fonts, fontID, text);
+                    utilities.SetSFText(textUnique, 15U, fonts, fontID, message);
 
                     utilities.SetSFSprite(spriteUnique, texture, textureData);
                     auto alignemntWidth = utilities.CalculateAlignmentWindowWidth(width, Alignment::Left);
@@ -552,158 +533,6 @@ void Player::InitInventoryItems(Game &game)
     }
 }
 
-// COLLISION
-void Player::CheckCollision(Game *game)
-{
-    Collision collision;
-    bool objectInFront = false;
-    auto world = game->GetWorld();
-    auto creature = game->GetCreature();
-
-    for (const auto &data : world)
-    {
-        auto objPos = data->GetSprite()->getPosition();
-
-        if (collision.InViewRange(game, objPos))
-        {
-            auto objCollision = data->GetCollision();
-            auto objSize = data->GetSprite()->getLocalBounds().getSize();
-            auto interactable = data->GetInteractable();
-
-            if (objCollision.x != 0 && objCollision.y != 0)
-                objectInFront = CheckInFront(interactable, objPos, objSize, objCollision);
-            else
-                objectInFront = CheckInFront(interactable, objPos, objSize);
-
-            if (objectInFront)
-            {
-                m_objectInFront = data;
-                break;
-            }
-            else
-                m_objectInFront = nullptr;
-        }
-    }
-
-    for (const auto &data : creature)
-    {
-        auto objPos = data->GetSprite()->getPosition();
-
-        if (collision.InViewRange(game, objPos))
-        {
-            auto objSize = data->GetSprite()->getLocalBounds().getSize();
-            auto interactable = data->GetInteractable();
-
-            objectInFront = CheckInFront(interactable, objPos, objSize);
-
-            if (objectInFront)
-            {
-                m_creatureInFront = data;
-                break;
-            }
-            else
-                m_creatureInFront = nullptr;
-        }
-    }
-}
-
-bool Player::CheckInFront(const bool interactable,
-                          const sf::Vector2f &objPos,
-                          const sf::Vector2f &objSize,
-                          const CollisionData objCollision)
-{
-    Collision collision;
-    auto playerPos = m_sprite->getPosition();
-    auto playerSize = m_sprite->getLocalBounds().getSize();
-
-    auto canMoveDownUpX = collision.CanMoveDownUpX(playerPos.x, objPos.x, objCollision.x);
-    auto canMoveUpY = collision.CanMoveUpY(playerPos.y, objPos.y, objSize.y, objCollision.y, m_speed);
-
-    if (!canMoveDownUpX && !canMoveUpY)
-    {
-        m_moveAllowed.up = false;
-        if (interactable && (m_lastMove == PlayerMove::Up || m_move == PlayerMove::Up))
-            return true;
-    }
-
-    auto canMoveDownY = collision.CanMoveDownY(playerPos.y, objPos.y, objCollision.y, m_speed);
-
-    if (!canMoveDownUpX && !canMoveDownY)
-    {
-        m_moveAllowed.down = false;
-        if (interactable && (m_lastMove == PlayerMove::Down || m_move == PlayerMove::Down))
-            return true;
-    }
-
-    auto canMoveLeftX = collision.CanMoveLeftX(playerPos.x, objPos.x, objCollision.x, m_speed);
-    auto canMoveRightLeftY = collision.CanMoveRightLeftY(playerPos.y, objPos.y, objSize.y, objCollision.y);
-
-    if (!canMoveLeftX && !canMoveRightLeftY)
-    {
-        m_moveAllowed.left = false;
-        if (interactable && (m_lastMove == PlayerMove::Left || m_move == PlayerMove::Left))
-            return true;
-    }
-
-    auto canMoveRightX = collision.CanMoveRightX(playerPos.x, objPos.x, m_speed);
-
-    if (!canMoveRightX && !canMoveRightLeftY)
-    {
-        m_moveAllowed.right = false;
-        if (interactable && (m_lastMove == PlayerMove::Right || m_move == PlayerMove::Right))
-            return true;
-    }
-
-    return false;
-}
-
-bool Player::CheckInFront(const bool interactable, const sf::Vector2f &objPos, const sf::Vector2f &objSize)
-{
-    Collision collision;
-    auto playerPos = m_sprite->getPosition();
-    auto playerSize = m_sprite->getLocalBounds().getSize();
-
-    auto canMoveDownUpX = collision.CanMoveDownUpX(playerPos.x, playerSize.x, objPos.x, objSize.x);
-    auto canMoveUpY = collision.CanMoveUpY(playerPos.y, playerSize.y, objPos.y, objSize.y, m_speed);
-
-    if (!canMoveDownUpX && !canMoveUpY)
-    {
-        m_moveAllowed.up = false;
-        if (interactable && (m_lastMove == PlayerMove::Up || m_move == PlayerMove::Up))
-            return true;
-    }
-
-    auto canMoveDownY = collision.CanMoveDownY(playerPos.y, playerSize.y, objPos.y, objSize.y, m_speed);
-
-    if (!canMoveDownUpX && !canMoveDownY)
-    {
-        m_moveAllowed.down = false;
-        if (interactable && (m_lastMove == PlayerMove::Down || m_move == PlayerMove::Down))
-            return true;
-    }
-
-    auto canMoveLeftX = collision.CanMoveLeftX(playerPos.x, objPos.x, objSize.x, m_speed);
-    auto canMoveRightLeftY = collision.CanMoveRightLeftY(playerPos.y, playerSize.y, objSize.y, objPos.y);
-
-    if (!canMoveLeftX && !canMoveRightLeftY)
-    {
-        m_moveAllowed.left = false;
-        if (interactable && (m_lastMove == PlayerMove::Left || m_move == PlayerMove::Left))
-            return true;
-    }
-
-    auto canMoveRightX = collision.CanMoveRightX(playerPos.x, playerSize.x, objPos.x, m_speed);
-
-    if (!canMoveRightX && !canMoveRightLeftY)
-    {
-        m_moveAllowed.right = false;
-        if (interactable && (m_lastMove == PlayerMove::Right || m_move == PlayerMove::Right))
-            return true;
-    }
-
-    return false;
-}
-
 // DATASTORE
 void Player::Load(const uint8_t id, Game *game)
 {
@@ -776,4 +605,16 @@ void Player::Save(Game *game)
 Trader *Player::GetTrader()
 {
     return m_trader;
+}
+
+// ObjectInFront
+
+void Player::SetWorldObjInFront(World *worldObj)
+{
+    m_objectInFront = worldObj;
+}
+
+void Player::SetCreatureObjInFront(Creature *creatureObj)
+{
+    m_creatureInFront = creatureObj;
 }

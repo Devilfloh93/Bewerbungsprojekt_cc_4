@@ -115,5 +115,14 @@
         "deDE": {
             "format": "Zuviele Spielstände!"
         }
+    },
+    {
+        "id": 14,
+        "enEN": {
+            "format": "{}. Savegame"
+        },
+        "deDE": {
+            "format": "{}. Spielstand"
+        }
     }
 ]
