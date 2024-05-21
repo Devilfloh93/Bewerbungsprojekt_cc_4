@@ -43,6 +43,9 @@ void Game::Init()
     InitAnim();
     cout << "InitAnim Done!" << endl;
 
+    InitMessageFormat();
+    cout << "InitMessageFormat Done!" << endl;
+
     InitItemCfg();
     cout << "InitItemCfg Done!" << endl;
 
@@ -336,7 +339,8 @@ bool Game::CreatePlayer()
     auto countFolders = CountSaveFolders();
     if (countFolders <= 0 || countFolders > 6)
     {
-        AddMessage("To Many Save Games!", MessageType::Error);
+        auto messageFormat = utilities.GetMessageFormat(*this, 13);
+        AddMessage(messageFormat, MessageType::Error);
         return false;
     }
 
@@ -344,7 +348,8 @@ bool Game::CreatePlayer()
 
     if (input.size() == 0)
     {
-        AddMessage("Please enter a Character Name!", MessageType::Information);
+        auto messageFormat = utilities.GetMessageFormat(*this, 12);
+        AddMessage(messageFormat, MessageType::Information);
         return false;
     }
 
@@ -644,7 +649,7 @@ void Game::CollectItem()
 void Game::InitItemCfg()
 {
     Utilities utilities;
-    ifstream fileLanguage("./data/language/menu.json");
+    ifstream fileLanguage("./data/language/item.json");
 
     ifstream fileItem("./data/entities/item/item.json");
     ifstream fileItemTemplate("./data/entities/item/itemTemplate.json");
@@ -1808,7 +1813,11 @@ void Game::ResizeWindow(const uint16_t width, const uint16_t height)
     }
     else
     {
-        auto message = format("Your Window has already the Resolution: {}x{}", width, height);
+        Utilities utilities;
+
+        auto messageFormat = utilities.GetMessageFormat(*this, 10);
+        auto message = vformat(messageFormat, make_format_args(width, height));
+
         AddMessage(message, MessageType::Information);
     }
 }
@@ -1980,7 +1989,10 @@ void Game::ChangeLanguage(const string language)
     }
     m_hotkeyMenu.clear();
 
+    m_messageFormat.clear();
+
     SaveGeneral();
+    InitMessageFormat();
     InitMenu();
     InitHotkeys();
 }
@@ -2169,9 +2181,6 @@ void Game::AddMessage(const string &message, const MessageType type)
 
     utilities.SetSFText(newText.get(), fontSize, m_fonts, 0U, message);
 
-    auto messageLSize = newText.get()->getLocalBounds().getSize();
-    auto width = utilities.CalculateAlignmentWindowWidth(m_windowWidth, Alignment::Left);
-
     for (const auto &data : m_titles)
     {
         auto state = data->GetMenuState();
@@ -2195,6 +2204,9 @@ void Game::AddMessage(const string &message, const MessageType type)
     case MessageType::Error:
         textColor = {255, 69, 0};
         break;
+    case MessageType::Success:
+        textColor = {0, 128, 0};
+        break;
     default:
         break;
     }
@@ -2202,4 +2214,29 @@ void Game::AddMessage(const string &message, const MessageType type)
     newText->setFillColor(textColor);
 
     m_messages.push_back(make_unique<Message>(move(newText), move(clock)));
+}
+
+void Game::InitMessageFormat()
+{
+    ifstream fileMessageFormat("./data/message/messageFormat.json");
+
+    if (fileMessageFormat.is_open())
+    {
+        auto jsonDataMessageFormat = json::parse(fileMessageFormat);
+
+        for (const auto &data : jsonDataMessageFormat)
+        {
+            uint16_t id = data["id"];
+            string format = data[m_language]["format"];
+
+            m_messageFormat.push_back(make_unique<MessageFormat>(id, format));
+        }
+
+        fileMessageFormat.close();
+    }
+}
+
+const vector<unique_ptr<MessageFormat>> *Game::GetMessageFormat() const
+{
+    return &m_messageFormat;
 }

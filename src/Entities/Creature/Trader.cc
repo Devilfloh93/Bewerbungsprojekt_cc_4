@@ -45,14 +45,15 @@ map<uint8_t, uint16_t> Trader::GetBuyingItem() const
 
 void Trader::Buy(Game &game)
 {
-    auto itemCfg = game.GetItemCfg();
+    Utilities utilities;
     auto dialogText = game.GetDialogText();
     auto selectedDialogID = game.GetDialogSelectedID(dialogText, SelectedTextCategorie::Buy);
 
+    auto messageFormat = utilities.GetMessageFormat(game, 1);
     auto input = game.GetInputString();
     if (input.size() == 0)
     {
-        game.AddMessage("Please enter how much you want to buy!", MessageType::Error);
+        game.AddMessage(messageFormat, MessageType::Error);
         return;
     }
 
@@ -62,28 +63,40 @@ void Trader::Buy(Game &game)
 
     if (maxCount >= inputNum)
     {
+        auto itemName = utilities.GetItemName(game, selectedDialogID);
         game.GetPlayer()->AddItem(selectedDialogID, inputNum);
         m_buyingItem[selectedDialogID] -= inputNum;
 
-        auto text = format("Buying: {}", m_buyingItem[selectedDialogID]);
-        UpdateTrader(game, dialogText, SelectedTextCategorie::Buy, text);
+        messageFormat = utilities.GetMessageFormat(game, 3);
+        auto message = vformat(messageFormat, make_format_args(inputNum, itemName));
+
+        game.AddMessage(message, MessageType::Success);
+
+        messageFormat = utilities.GetMessageFormat(game, 2);
+        message = vformat(messageFormat, make_format_args(m_buyingItem[selectedDialogID]));
+
+        UpdateTrader(game, dialogText, SelectedTextCategorie::Buy, message);
     }
     else
-        game.AddMessage("You can't buy that much!", MessageType::Error);
+    {
+        messageFormat = utilities.GetMessageFormat(game, 4);
+        game.AddMessage(messageFormat, MessageType::Error);
+    }
 }
 
 void Trader::Sell(Game &game)
 {
+    Utilities utilities;
     auto player = game.GetPlayer();
-    auto itemCfg = game.GetItemCfg();
     auto dialogText = game.GetDialogText();
     auto selectedDialogID = game.GetDialogSelectedID(dialogText, SelectedTextCategorie::Sell);
 
     auto input = game.GetInputString();
+    auto messageFormat = utilities.GetMessageFormat(game, 5);
 
     if (input.size() == 0)
     {
-        game.AddMessage("Please enter how much you want to sell!", MessageType::Error);
+        game.AddMessage(messageFormat, MessageType::Error);
         return;
     }
 
@@ -97,16 +110,31 @@ void Trader::Sell(Game &game)
 
         if (removed)
         {
+            auto itemName = utilities.GetItemName(game, selectedDialogID);
             m_sellingItem[selectedDialogID] -= inputNum;
             auto inventoryValue = player->GetItemCount(selectedDialogID);
-            auto text = format("Selling: {} - Inventory: {}", m_sellingItem[selectedDialogID], inventoryValue);
-            UpdateTrader(game, dialogText, SelectedTextCategorie::Sell, text);
+
+            messageFormat = utilities.GetMessageFormat(game, 9);
+            auto message = vformat(messageFormat, make_format_args(inputNum, itemName));
+
+            game.AddMessage(message, MessageType::Success);
+
+            messageFormat = utilities.GetMessageFormat(game, 8);
+            message = vformat(messageFormat, make_format_args(m_sellingItem[selectedDialogID], inventoryValue));
+
+            UpdateTrader(game, dialogText, SelectedTextCategorie::Sell, message);
         }
         else
-            game.AddMessage("Not Enough Items to sell!", MessageType::Error);
+        {
+            messageFormat = utilities.GetMessageFormat(game, 6);
+            game.AddMessage(messageFormat, MessageType::Error);
+        }
     }
     else
-        game.AddMessage("You can't sell that much!", MessageType::Error);
+    {
+        messageFormat = utilities.GetMessageFormat(game, 7);
+        game.AddMessage(messageFormat, MessageType::Error);
+    }
 }
 
 void Trader::UpdateTrader(Game &game,

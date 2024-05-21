@@ -8,6 +8,7 @@
 #include "ItemCfg.h"
 #include "ItemGround.h"
 #include "Message.h"
+#include "MessageFormat.h"
 #include "Player.h"
 #include "Stats.h"
 #include "Surface.h"
@@ -134,6 +135,8 @@ public:
     // MESSAGE
     void RenderMessage();
     void AddMessage(const string &message, const MessageType type);
+    void InitMessageFormat();
+    const vector<unique_ptr<MessageFormat>> *GetMessageFormat() const;
 
     // Render
     void Render(sf::Clock &clock);
@@ -220,7 +223,9 @@ private:
     vector<Input *> m_inputs;
     vector<unique_ptr<SelectableText>> m_saveFiles;
     vector<sf::Text *> m_hotkeyMenu; // TODO: TEMPORARY FIX
+
     vector<unique_ptr<Message>> m_messages;
+    vector<unique_ptr<MessageFormat>> m_messageFormat;
 
     vector<unique_ptr<Sprite>> m_dialogSprites;
     vector<unique_ptr<SelectableText>> m_dialogTexts;

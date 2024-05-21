@@ -1,6 +1,7 @@
 #pragma once
 #include "Anim.h"
 #include "Font.h"
+#include "Game.h"
 #include "Gui.h"
 #include "Texture.h"
 #include "Utilities.h"
@@ -52,8 +53,8 @@ public:
     void SetTextBeforeIcon(const uint16_t x, const uint16_t y, sf::Sprite &icon, sf::Text &text);
     void SetTextBeforeIcon(const uint16_t width, sf::Text *title, sf::Sprite &icon, sf::Text &text);
 
-    uint16_t CalculateAlignmentWindowWidth(const uint16_t width, const Alignment alignment);
-    float CalculateSpaceBetweenMenu(const Alignment alignment);
+    uint16_t CalculateAlignmentWindowWidth(const uint16_t width, const Alignment alignment) const;
+    float CalculateSpaceBetweenMenu(const Alignment alignment) const;
 
     void PlayAnimation(sf::Sprite *sprite, sf::Clock &clock, sf::IntRect &anim0, sf::IntRect &anim1);
 
@@ -95,25 +96,29 @@ public:
     const sf::Font *GetFont(const vector<Font *> &fonts, const uint8_t fontID) const;
     const sf::Texture *GetTexture(const vector<Texture *> &textures, const uint8_t textureID) const;
 
-    AnimTextureCombined GetAnim(const vector<Anim *> &anim, const uint8_t animID);
+    AnimTextureCombined GetAnim(const vector<Anim *> &anim, const uint8_t animID) const;
     const sf::Texture *GetAnimTexture(const vector<Anim *> &anim,
                                       const vector<Texture *> &textures,
                                       const uint8_t animID) const;
 
-    string GetLanguageText(const json &jsonData, const uint8_t languageID, string_view language);
+    string GetLanguageText(const json &jsonData, const uint8_t languageID, string_view language) const;
+    string_view GetItemName(const Game &game, const uint8_t itemID) const;
+    string GetMessageFormat(const Game &game, const uint16_t messageFormatID);
 
-    bool CheckMenuState(const vector<MenuState> &menuState, const MenuState currentState);
+    bool CheckMenuState(const vector<MenuState> &menuState, const MenuState currentState) const;
 
-    bool CheckTextClicked(const sf::Vector2f &mousePos, const sf::Vector2f &txtPos, const sf::Vector2f &txtLSize);
+    bool CheckTextClicked(const sf::Vector2f &mousePos, const sf::Vector2f &txtPos, const sf::Vector2f &txtLSize) const;
     bool CheckSpriteClicked(const sf::Vector2f &mousePos,
                             const sf::Vector2f &btnPos,
                             const sf::Vector2f &btnLSize,
-                            const sf::Vector2f &btnScale);
-    bool CheckCreatureIsNearSurfacePos(const sf::Vector2f &creaturePos, const sf::Vector2f &surfacePos, float tileSize);
+                            const sf::Vector2f &btnScale) const;
+    bool CheckCreatureIsNearSurfacePos(const sf::Vector2f &creaturePos,
+                                       const sf::Vector2f &surfacePos,
+                                       float tileSize) const;
     bool CheckCreatureIsNearItemPos(const sf::Vector2f &creaturePos,
                                     const sf::Vector2f &creatureSize,
                                     const sf::Vector2f &itemPos,
-                                    const sf::Vector2f &itemSize);
+                                    const sf::Vector2f &itemSize) const;
 
-    string GetAnsiString(const uint16_t key);
+    string GetAnsiString(const uint16_t key) const;
 };
