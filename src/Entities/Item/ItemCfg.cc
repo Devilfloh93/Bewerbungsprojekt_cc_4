@@ -45,3 +45,8 @@ uint8_t ItemCfg::GetFontID() const
 {
     return m_fontID;
 }
+
+string_view ItemCfg::GetName() const
+{
+    return m_name;
+}

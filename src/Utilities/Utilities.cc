@@ -103,9 +103,7 @@ void Utilities::SetSpriteAndTextPos(const uint16_t width,
                                          (btnPos.y + btnLSize.y) + spaceBetweenBtn));
     }
     else
-    {
         btnObj->setPosition(sf::Vector2f((width / 2U) - ((btnObjLSize.x * btnObjScale.x) / 2U), btnPos.y));
-    }
 
     auto btnObjPos = btnObj->getGlobalBounds().getPosition();
     auto btnObjSize = btnObj->getGlobalBounds().getSize();
@@ -152,7 +150,7 @@ void Utilities::SetTextBeforeIcon(const uint16_t x, const uint16_t y, sf::Sprite
     text.setPosition(sf::Vector2f(iconPos.x + (iconLSize.x + (iconLSize.x / 2)), iconPos.y));
 }
 
-uint16_t Utilities::CalculateAlignmentWindowWidth(const uint16_t width, const Alignment alignment)
+uint16_t Utilities::CalculateAlignmentWindowWidth(const uint16_t width, const Alignment alignment) const
 {
     auto alignmentWidth = width;
 
@@ -172,14 +170,13 @@ uint16_t Utilities::CalculateAlignmentWindowWidth(const uint16_t width, const Al
     return alignmentWidth;
 }
 
-float Utilities::CalculateSpaceBetweenMenu(const Alignment alignment)
+float Utilities::CalculateSpaceBetweenMenu(const Alignment alignment) const
 {
-    float spaceBetweenBtn = 50.0F;
 
     if (alignment != Alignment::Middle)
-        spaceBetweenBtn = 0.0F;
+        return 0.0F;
 
-    return spaceBetweenBtn;
+    return 50.0F;
 }
 
 void Utilities::PlayAnimation(sf::Sprite *sprite, sf::Clock &clock, sf::IntRect &anim0, sf::IntRect &anim1)
@@ -268,9 +265,7 @@ const sf::Font *Utilities::GetFont(const vector<Font *> &fonts, const uint8_t fo
     for (const auto &data : fonts)
     {
         if (fontID == data->GetID())
-        {
             return data->GetFont();
-        }
     }
     return nullptr;
 }
@@ -280,23 +275,18 @@ const sf::Texture *Utilities::GetTexture(const vector<Texture *> &textures, cons
     for (const auto &data : textures)
     {
         if (data->GetID() == textureID)
-        {
             return data->GetTexture();
-        }
     }
     return nullptr;
 }
 
-AnimTextureCombined Utilities::GetAnim(const vector<Anim *> &anim, const uint8_t animID)
+AnimTextureCombined Utilities::GetAnim(const vector<Anim *> &anim, const uint8_t animID) const
 {
     AnimTextureCombined animData;
     for (const auto &data : anim)
     {
         if (data->GetID() == animID)
-        {
             animData = data->GetAnim();
-            break;
-        }
     }
     return animData;
 }
@@ -317,36 +307,58 @@ const sf::Texture *Utilities::GetAnimTexture(const vector<Anim *> &anim,
     return nullptr;
 }
 
-string Utilities::GetLanguageText(const json &jsonData, const uint8_t languageID, string_view language)
+string Utilities::GetLanguageText(const json &jsonData, const uint8_t languageID, string_view language) const
 {
-    string text;
     for (const auto &data : jsonData)
     {
         uint8_t jsonLanguageId = data["id"];
         if (jsonLanguageId == languageID)
-        {
-            text = data[language]["title"];
-            break;
-        }
+            return data[language]["title"];
     }
-    return text;
+    return "";
 }
 
-bool Utilities::CheckMenuState(const vector<MenuState> &menuState, const MenuState currentState)
+string_view Utilities::GetItemName(const Game &game, const uint8_t itemID) const
 {
-    bool check = false;
+    auto itemCfg = game.GetItemCfg();
+
+    for (const auto &data : itemCfg)
+    {
+        auto ID = data->GetID();
+        if (ID == itemID)
+            return data->GetName();
+    }
+
+    return "";
+}
+
+string Utilities::GetMessageFormat(const Game &game, const uint16_t messageFormatID)
+{
+    auto messageFormat = game.GetMessageFormat();
+
+    for (const auto &data : *messageFormat)
+    {
+        auto ID = data.get()->GetID();
+        if (ID == messageFormatID)
+            return data.get()->GetFormat();
+    }
+
+    return "";
+}
+
+bool Utilities::CheckMenuState(const vector<MenuState> &menuState, const MenuState currentState) const
+{
     for (const auto &data : menuState)
     {
         if (currentState == data)
-        {
-            check = true;
-            break;
-        }
+            return true;
     }
-    return check;
+    return false;
 }
 
-bool Utilities::CheckTextClicked(const sf::Vector2f &mousePos, const sf::Vector2f &txtPos, const sf::Vector2f &txtLSize)
+bool Utilities::CheckTextClicked(const sf::Vector2f &mousePos,
+                                 const sf::Vector2f &txtPos,
+                                 const sf::Vector2f &txtLSize) const
 {
     if (mousePos.x > txtPos.x && mousePos.x < txtPos.x + txtLSize.x && mousePos.y > txtPos.y &&
         mousePos.y < txtPos.y + txtLSize.y)
@@ -358,7 +370,7 @@ bool Utilities::CheckTextClicked(const sf::Vector2f &mousePos, const sf::Vector2
 bool Utilities::CheckSpriteClicked(const sf::Vector2f &mousePos,
                                    const sf::Vector2f &btnPos,
                                    const sf::Vector2f &btnLSize,
-                                   const sf::Vector2f &btnScale)
+                                   const sf::Vector2f &btnScale) const
 {
     if (mousePos.x > btnPos.x && mousePos.x < btnPos.x + (btnLSize.x * btnScale.x) && mousePos.y > btnPos.y &&
         mousePos.y < btnPos.y + (btnLSize.y * btnScale.y))
@@ -369,7 +381,7 @@ bool Utilities::CheckSpriteClicked(const sf::Vector2f &mousePos,
 
 bool Utilities::CheckCreatureIsNearSurfacePos(const sf::Vector2f &creaturePos,
                                               const sf::Vector2f &surfacePos,
-                                              float tileSize)
+                                              float tileSize) const
 {
     if (creaturePos.x >= surfacePos.x - tileSize && creaturePos.x <= surfacePos.x + tileSize &&
         creaturePos.y >= surfacePos.y - tileSize && creaturePos.y <= surfacePos.y + tileSize)
@@ -381,7 +393,7 @@ bool Utilities::CheckCreatureIsNearSurfacePos(const sf::Vector2f &creaturePos,
 bool Utilities::CheckCreatureIsNearItemPos(const sf::Vector2f &creaturePos,
                                            const sf::Vector2f &creatureSize,
                                            const sf::Vector2f &itemPos,
-                                           const sf::Vector2f &itemSize)
+                                           const sf::Vector2f &itemSize) const
 {
     if ((creaturePos.x + (creatureSize.x / 2)) >= itemPos.x && creaturePos.x <= itemPos.x + (itemSize.x / 2) &&
         creaturePos.y + (creatureSize.y / 2) >= itemPos.y && creaturePos.y <= itemPos.y + (itemSize.y / 2))
@@ -390,7 +402,7 @@ bool Utilities::CheckCreatureIsNearItemPos(const sf::Vector2f &creaturePos,
     return false;
 }
 
-string Utilities::GetAnsiString(const uint16_t key)
+string Utilities::GetAnsiString(const uint16_t key) const
 {
     auto sfmlHotkey = sf::Keyboard::delocalize(static_cast<sf::Keyboard::Key>(key));
     return (sf::Keyboard::getDescription(sfmlHotkey).toAnsiString());

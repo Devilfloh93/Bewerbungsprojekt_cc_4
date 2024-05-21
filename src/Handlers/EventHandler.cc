@@ -346,7 +346,10 @@ void EventHandler::BtnPressed(Game &game)
                     m_break = true;
                 }
                 else
-                    game.AddMessage("Please select a Save Game.", MessageType::Error);
+                {
+                    auto messageFormat = utilities.GetMessageFormat(game, 11);
+                    game.AddMessage(messageFormat, MessageType::Error);
+                }
                 break;
             case BtnFunc::MainMenu:
                 game.Unload();

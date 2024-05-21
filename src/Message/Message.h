@@ -6,7 +6,8 @@ using namespace std;
 enum class MessageType
 {
     Information,
-    Error
+    Error,
+    Success
 };
 
 class Message : public Text

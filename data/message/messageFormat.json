@@ -1,0 +1,119 @@
+[
+    {
+        "id": 1,
+        "enEN": {
+            "format": "Please enter how much you want to buy!"
+        },
+        "deDE": {
+            "format": "Bitte gib an wieviel du kaufen möchtest!"
+        }
+    },
+    {
+        "id": 2,
+        "enEN": {
+            "format": "Buying: {}"
+        },
+        "deDE": {
+            "format": "Kaufen: {}"
+        }
+    },
+    {
+        "id": 3,
+        "enEN": {
+            "format": "You bought {}x {}."
+        },
+        "deDE": {
+            "format": "Du hast {}x {} gekauft."
+        }
+    },
+    {
+        "id": 4,
+        "enEN": {
+            "format": "You can't buy that much!"
+        },
+        "deDE": {
+            "format": "Du kannst nicht soviel kaufen!"
+        }
+    },
+    {
+        "id": 5,
+        "enEN": {
+            "format": "Please enter how much you want to sell!"
+        },
+        "deDE": {
+            "format": "Bitte gib ein wieviel du verkaufen möchtest!"
+        }
+    },
+    {
+        "id": 6,
+        "enEN": {
+            "format": "Not Enough Items to sell!"
+        },
+        "deDE": {
+            "format": "Soviele Items besitzt du nicht!"
+        }
+    },
+    {
+        "id": 7,
+        "enEN": {
+            "format": "You can't sell that much!"
+        },
+        "deDE": {
+            "format": "Du kannst nicht soviel verkaufen!"
+        }
+    },
+    {
+        "id": 8,
+        "enEN": {
+            "format": "Selling: {} - Inventory: {}"
+        },
+        "deDE": {
+            "format": "Verkaufen: {} - Inventar: {}"
+        }
+    },
+    {
+        "id": 9,
+        "enEN": {
+            "format": "You sold {}x {}."
+        },
+        "deDE": {
+            "format": "Du hast {}x {} verkauft."
+        }
+    },
+    {
+        "id": 10,
+        "enEN": {
+            "format": "Your Game is already running in: {}x{}"
+        },
+        "deDE": {
+            "format": "Dein Spiel läuft bereits in: {}x{}"
+        }
+    },
+    {
+        "id": 11,
+        "enEN": {
+            "format": "Please select a Save Game."
+        },
+        "deDE": {
+            "format": "Bitte wähle ein Spielstand aus."
+        }
+    },
+    {
+        "id": 12,
+        "enEN": {
+            "format": "Please enter a Character Name!"
+        },
+        "deDE": {
+            "format": "Bitte gib einen Charakter Namen ein!"
+        }
+    },
+    {
+        "id": 13,
+        "enEN": {
+            "format": "To Many Save Games!"
+        },
+        "deDE": {
+            "format": "Zuviele Spielstände!"
+        }
+    }
+]

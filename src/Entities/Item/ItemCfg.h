@@ -22,6 +22,7 @@ public:
     uint8_t GetTextureID() const;
     uint8_t GetMaxDrop() const;
     uint8_t GetFontID() const;
+    string_view GetName() const;
 
 private:
     sf::IntRect m_textureData;
