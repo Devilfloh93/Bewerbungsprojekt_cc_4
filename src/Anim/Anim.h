@@ -20,7 +20,7 @@ struct AnimTextureCombined
     AnimTexture right;
 };
 
-class Anim
+class Anim final
 {
 
 public:

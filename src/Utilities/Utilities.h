@@ -15,7 +15,7 @@
 using json = nlohmann::json;
 using namespace std;
 
-class Utilities
+class Utilities final
 {
 
 public:

@@ -11,7 +11,7 @@
 class Player;
 class Game;
 
-class Thread
+class Thread final
 {
 public:
     Thread(Game *game);

@@ -5,7 +5,7 @@
 
 using namespace std;
 
-class Btn : public Gui, public Text, public Sprite
+class Btn final : public Gui, public Text, public Sprite
 {
 public:
     Btn(const MenuState menuState,

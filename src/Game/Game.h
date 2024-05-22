@@ -28,7 +28,7 @@ struct StatDecay
 
 class Thread;
 
-class Game
+class Game final
 {
 public:
     Game();
@@ -195,6 +195,7 @@ public:
 
     void MoveCreature();
     void HandleCreatureMove(sf::Clock &clock);
+    void ExecuteMove(Unit *unit, sf::Clock &clock);
 
 private:
     // RUNNING

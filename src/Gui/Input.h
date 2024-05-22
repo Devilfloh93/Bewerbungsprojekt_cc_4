@@ -13,7 +13,7 @@ enum class AllowedInput
     Number
 };
 
-class Input : public Gui, public Text, public Sprite
+class Input final: public Gui, public Text, public Sprite
 {
 public:
     Input(const MenuState menuState,

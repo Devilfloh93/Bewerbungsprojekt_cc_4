@@ -10,7 +10,7 @@ enum class StatType
     Water
 };
 
-class Stats : public Sprite
+class Stats final : public Sprite
 {
 
 public:

@@ -16,7 +16,7 @@ struct SurvivalStats
 };
 
 
-class Player : public Unit
+class Player final : public Unit
 {
 public:
     Player(unique_ptr<sf::Sprite> sprite, const uint8_t animID, const string_view name, const uint8_t id);

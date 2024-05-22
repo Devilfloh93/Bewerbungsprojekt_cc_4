@@ -8,7 +8,7 @@
 using namespace std;
 
 class Game;
-class Trader : public Creature
+class Trader final : public Creature
 {
 public:
     Trader(unique_ptr<sf::Sprite> sprite,

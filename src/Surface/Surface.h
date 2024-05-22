@@ -2,7 +2,7 @@
 #include "Sprite.h"
 #include <SFML/Graphics.hpp>
 
-class Surface : public Sprite
+class Surface final : public Sprite
 {
 
 public:

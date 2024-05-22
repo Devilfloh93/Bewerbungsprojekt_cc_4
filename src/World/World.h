@@ -7,7 +7,7 @@
 
 using namespace std;
 
-class World : public Sprite
+class World final : public Sprite
 {
 
 public:

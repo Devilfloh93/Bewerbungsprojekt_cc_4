@@ -9,7 +9,7 @@ using json = nlohmann::json;
 using namespace std;
 using ClockType = chrono::steady_clock;
 
-class Performance
+class Performance final
 {
 
 public:
