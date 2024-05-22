@@ -19,12 +19,15 @@ public:
              const vector<string> dialogIntro,
              const vector<string> dialogOutro,
              const vector<string> dialogOffensive,
-             const bool interactable);
+             const bool interactable,
+             const float maxMoveRange);
     ~Creature() = default;
 
     bool GetInteractable() const;
     bool GetMoveable() const;
+
     sf::Vector2f GetSpawnPos() const;
+    float GetMaxMoveRange() const;
 
     vector<string> GetDialogIntro() const;
     vector<string> GetDialogOutro() const;
@@ -33,6 +36,7 @@ public:
 private:
     bool m_interactable;
     bool m_moveable;
+    float m_maxMoveRange;
     sf::Vector2f m_spawnPos;
     vector<string> m_dialogIntro;
     vector<string> m_dialogOutro;

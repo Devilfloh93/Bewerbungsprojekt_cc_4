@@ -5,6 +5,7 @@ Thread::Thread(Game *game)
 {
     m_threads.push_back(thread(&Thread::UpdateStats, this, game));
     m_threads.push_back(thread(&Thread::SaveGame, this, game));
+    m_threads.push_back(thread(&Thread::MoveCreature, this, game));
 }
 
 void Thread::Join()
@@ -49,5 +50,14 @@ void Thread::SaveGame(Game *game)
     {
         while (WaitFor(chrono::minutes(1)))
             game->Saving(false);
+    }
+}
+
+void Thread::MoveCreature(Game *game)
+{
+    while (game->GetWindow()->isOpen() && game->GetPlaying())
+    {
+        this_thread::sleep_for(chrono::seconds(1));
+        game->MoveCreature();
     }
 }

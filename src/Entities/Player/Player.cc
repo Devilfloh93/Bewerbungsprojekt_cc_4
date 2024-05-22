@@ -163,10 +163,7 @@ void Player::HandleMove(sf::Clock &clock, Game *game)
 
     game->CollectItem();
 
-    m_moveAllowed.up = true;
-    m_moveAllowed.down = true;
-    m_moveAllowed.left = true;
-    m_moveAllowed.right = true;
+    ResetMoveAllowed();
 }
 
 // STATS

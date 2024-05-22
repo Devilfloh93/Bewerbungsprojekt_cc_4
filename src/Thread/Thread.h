@@ -21,6 +21,7 @@ public:
 
     void UpdateStats(Game *game);
     void SaveGame(Game *game);
+    void MoveCreature(Game *game);
 
     // Function to returns false when
     // the thread is stopped

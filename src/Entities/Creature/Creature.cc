@@ -22,9 +22,11 @@ Creature::Creature(unique_ptr<sf::Sprite> sprite,
                    const vector<string> dialogIntro,
                    const vector<string> dialogOutro,
                    const vector<string> dialogOffensive,
-                   const bool interactable)
+                   const bool interactable,
+                   const float maxMoveRange)
     : Unit(move(sprite), health, speed, animID), m_moveable(moveable), m_dialogIntro(dialogIntro),
-      m_dialogOutro(dialogOutro), m_dialogOffensive(dialogOffensive), m_interactable(interactable)
+      m_dialogOutro(dialogOutro), m_dialogOffensive(dialogOffensive), m_interactable(interactable),
+      m_maxMoveRange(maxMoveRange)
 {
     m_spawnPos = m_sprite.get()->getPosition();
 }
@@ -42,6 +44,11 @@ bool Creature::GetMoveable() const
 sf::Vector2f Creature::GetSpawnPos() const
 {
     return m_spawnPos;
+}
+
+float Creature::GetMaxMoveRange() const
+{
+    return m_maxMoveRange;
 }
 
 vector<string> Creature::GetDialogIntro() const
