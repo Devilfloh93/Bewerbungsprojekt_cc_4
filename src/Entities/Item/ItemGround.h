@@ -5,7 +5,7 @@
 
 using namespace std;
 
-class ItemGround : public Sprite
+class ItemGround final: public Sprite
 {
 public:
     ItemGround(unique_ptr<sf::Sprite> sprite, const uint8_t ID, const uint16_t count);

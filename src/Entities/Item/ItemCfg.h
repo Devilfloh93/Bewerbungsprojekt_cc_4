@@ -5,7 +5,7 @@
 
 using namespace std;
 
-class ItemCfg
+class ItemCfg final
 {
 public:
     ItemCfg(const uint8_t textureID,

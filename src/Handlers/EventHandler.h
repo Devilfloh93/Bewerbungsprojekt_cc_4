@@ -8,7 +8,7 @@ using namespace std;
 class Game;
 class Player;
 
-class EventHandler
+class EventHandler final
 {
 public:
     EventHandler();

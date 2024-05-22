@@ -2301,80 +2301,88 @@ void Game::HandleCreatureMove(sf::Clock &clock)
         if (canMove)
         {
             collision.CheckCollision(this, data);
-            auto animID = data->GetAnimID();
-            auto animData = utilities.GetAnim(m_anim, animID);
 
-            auto sprite = data->GetSprite();
-            auto pos = sprite->getPosition();
-            auto spawnPos = data->GetSpawnPos();
-            auto moveAllowed = data->GetMoveAllowed();
-            auto move = data->GetMove();
-            auto lastMove = data->GetLastMove();
-            auto maxMoveRange = data->GetMaxMoveRange();
-
-            switch (move)
-            {
-            case Move::Left:
-                if (pos.x - (spawnPos.x - maxMoveRange) >= 0 && moveAllowed.left)
-                {
-                    utilities.PlayAnimation(sprite, clock, animData.left.notMoving, animData.left.anim01);
-                    sprite->setPosition(pos.x - 1, pos.y);
-                }
-                else
-                    sprite->setTextureRect(animData.left.notMoving);
-                break;
-            case Move::Right:
-                if (pos.x - spawnPos.x <= maxMoveRange && moveAllowed.right)
-                {
-                    utilities.PlayAnimation(sprite, clock, animData.right.notMoving, animData.right.anim01);
-                    sprite->setPosition(pos.x + 1, pos.y);
-                }
-                else
-                    sprite->setTextureRect(animData.right.notMoving);
-                break;
-            case Move::Down:
-                if (pos.y - spawnPos.y <= maxMoveRange && moveAllowed.down)
-                {
-                    utilities.PlayAnimation(sprite, clock, animData.down.anim01, animData.down.anim02);
-                    sprite->setPosition(pos.x, pos.y + 1);
-                }
-                else
-                    sprite->setTextureRect(animData.down.notMoving);
-                break;
-            case Move::Up:
-                if (pos.y - (spawnPos.y - maxMoveRange) >= 0 && moveAllowed.up)
-                {
-                    utilities.PlayAnimation(sprite, clock, animData.up.anim01, animData.up.anim02);
-                    sprite->setPosition(pos.x, pos.y - 1);
-                }
-                else
-                    sprite->setTextureRect(animData.up.notMoving);
-                break;
-            case Move::NotMoving:
-                switch (lastMove)
-                {
-                case Move::Down:
-                    sprite->setTextureRect(animData.down.notMoving);
-                    break;
-                case Move::Up:
-                    sprite->setTextureRect(animData.up.notMoving);
-                    break;
-                case Move::Left:
-                    sprite->setTextureRect(animData.left.notMoving);
-                    break;
-                case Move::Right:
-                    sprite->setTextureRect(animData.right.notMoving);
-                    break;
-                default:
-                    break;
-                }
-                break;
-
-            default:
-                break;
-            }
-
-            data->ResetMoveAllowed();
+            ExecuteMove(data, clock);
         }
     }
+}
+
+void Game::ExecuteMove(Unit *unit, sf::Clock &clock)
+{
+    Utilities utilities;
+    auto move = unit->GetMove();
+    auto lastMove = unit->GetLastMove();
+    auto speed = unit->GetSpeed();
+    auto sprite = unit->GetSprite();
+    auto pos = sprite->getPosition();
+    auto animID = unit->GetAnimID();
+    auto moveAllowed = unit->GetMoveAllowed();
+
+    auto animData = utilities.GetAnim(m_anim, animID);
+
+    switch (move)
+    {
+    case Move::Left:
+        if (pos.x - speed > 0 + (m_tileSize / 2) && moveAllowed.left)
+        {
+            utilities.PlayAnimation(sprite, clock, animData.left.notMoving, animData.left.anim01);
+            sprite->setPosition(pos.x - speed, pos.y);
+        }
+        else
+            sprite->setTextureRect(animData.left.notMoving);
+        break;
+    case Move::Right:
+        if (pos.x + speed < m_gameWidth - m_tileSize && moveAllowed.right)
+        {
+            utilities.PlayAnimation(sprite, clock, animData.right.notMoving, animData.right.anim01);
+            sprite->setPosition(pos.x + speed, pos.y);
+        }
+        else
+            sprite->setTextureRect(animData.right.notMoving);
+        break;
+    case Move::Down:
+        if (pos.y + speed < m_gameHeight - m_tileSize && moveAllowed.down)
+        {
+            utilities.PlayAnimation(sprite, clock, animData.down.anim01, animData.down.anim02);
+            sprite->setPosition(pos.x, pos.y + speed);
+        }
+        else
+            sprite->setTextureRect(animData.down.notMoving);
+
+        break;
+    case Move::Up:
+        if (pos.y - speed > 0 + (m_tileSize / 2) && moveAllowed.up)
+        {
+            utilities.PlayAnimation(sprite, clock, animData.up.anim01, animData.up.anim02);
+            sprite->setPosition(pos.x, pos.y - speed);
+        }
+        else
+            sprite->setTextureRect(animData.up.notMoving);
+
+        break;
+    case Move::NotMoving:
+        switch (lastMove)
+        {
+        case Move::Down:
+            sprite->setTextureRect(animData.down.notMoving);
+            break;
+        case Move::Up:
+            sprite->setTextureRect(animData.up.notMoving);
+            break;
+        case Move::Left:
+            sprite->setTextureRect(animData.left.notMoving);
+            break;
+        case Move::Right:
+            sprite->setTextureRect(animData.right.notMoving);
+            break;
+        default:
+            break;
+        }
+        break;
+
+    default:
+        break;
+    }
+
+    unit->ResetMoveAllowed();
 }

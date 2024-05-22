@@ -10,7 +10,7 @@ enum class MessageType
     Success
 };
 
-class Message : public Text
+class Message final: public Text
 {
 public:
     Message(unique_ptr<sf::Text> text, unique_ptr<sf::Clock> clock);

@@ -348,7 +348,10 @@ void Collision::CheckInFront(Creature *creature,
                              const CollisionData objCollision)
 {
     auto spritePos = creature->GetSprite()->getPosition();
+
     auto speed = creature->GetSpeed();
+    auto maxMoveRange = creature->GetMaxMoveRange();
+    auto spawnPos = creature->GetSpawnPos();
 
     auto canMoveDownUpX = CanMoveDownUpX(spritePos.x, objPos.x, objCollision.x);
     auto canMoveUpY = CanMoveUpY(spritePos.y, objPos.y, objSize.y, objCollision.y, speed);
@@ -357,16 +360,16 @@ void Collision::CheckInFront(Creature *creature,
     auto canMoveRightLeftY = CanMoveRightLeftY(spritePos.y, objPos.y, objSize.y, objCollision.y);
     auto canMoveRightX = CanMoveRightX(spritePos.x, objPos.x, speed);
 
-    if (!canMoveDownUpX && !canMoveUpY)
+    if (!canMoveDownUpX && !canMoveUpY || !(spritePos.y - (spawnPos.y - maxMoveRange) >= 0))
         creature->SetMoveAllowed(Move::Up, false);
 
-    if (!canMoveDownUpX && !canMoveDownY)
+    if (!canMoveDownUpX && !canMoveDownY || !(spritePos.y - spawnPos.y <= maxMoveRange))
         creature->SetMoveAllowed(Move::Down, false);
 
-    if (!canMoveLeftX && !canMoveRightLeftY)
+    if (!canMoveLeftX && !canMoveRightLeftY || !(spritePos.x - (spawnPos.x - maxMoveRange) >= 0))
         creature->SetMoveAllowed(Move::Left, false);
 
-    if (!canMoveRightX && !canMoveRightLeftY)
+    if (!canMoveRightX && !canMoveRightLeftY || !(spritePos.x - spawnPos.x <= maxMoveRange))
         creature->SetMoveAllowed(Move::Right, false);
 }
 
@@ -377,6 +380,8 @@ void Collision::CheckInFront(Creature *creature, const sf::Vector2f &objPos, con
     auto spriteSize = sprite->getLocalBounds().getSize();
 
     auto speed = creature->GetSpeed();
+    auto maxMoveRange = creature->GetMaxMoveRange();
+    auto spawnPos = creature->GetSpawnPos();
 
     auto canMoveDownUpX = CanMoveDownUpX(spritePos.x, spriteSize.x, objPos.x, objSize.x);
     auto canMoveUpY = CanMoveUpY(spritePos.y, spriteSize.y, objPos.y, objSize.y, speed);
@@ -385,15 +390,15 @@ void Collision::CheckInFront(Creature *creature, const sf::Vector2f &objPos, con
     auto canMoveRightLeftY = CanMoveRightLeftY(spritePos.y, spriteSize.y, objSize.y, objPos.y);
     auto canMoveRightX = CanMoveRightX(spritePos.x, spriteSize.x, objPos.x, speed);
 
-    if (!canMoveDownUpX && !canMoveUpY)
+    if (!canMoveDownUpX && !canMoveUpY || !(spritePos.y - (spawnPos.y - maxMoveRange) >= 0))
         creature->SetMoveAllowed(Move::Up, false);
 
-    if (!canMoveDownUpX && !canMoveDownY)
+    if (!canMoveDownUpX && !canMoveDownY || !(spritePos.y - spawnPos.y <= maxMoveRange))
         creature->SetMoveAllowed(Move::Down, false);
 
-    if (!canMoveLeftX && !canMoveRightLeftY)
+    if (!canMoveLeftX && !canMoveRightLeftY || !(spritePos.x - (spawnPos.x - maxMoveRange) >= 0))
         creature->SetMoveAllowed(Move::Left, false);
 
-    if (!canMoveRightX && !canMoveRightLeftY)
+    if (!canMoveRightX && !canMoveRightLeftY || !(spritePos.x - spawnPos.x <= maxMoveRange))
         creature->SetMoveAllowed(Move::Right, false);
 }

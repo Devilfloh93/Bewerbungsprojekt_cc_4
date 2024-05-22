@@ -4,7 +4,7 @@
 
 using namespace std;
 
-class Collision
+class Collision final
 {
 
 public:

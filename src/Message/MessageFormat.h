@@ -4,7 +4,7 @@
 
 using namespace std;
 
-class MessageFormat
+class MessageFormat final
 {
 public:
     MessageFormat(const uint16_t m_id, string_view format);

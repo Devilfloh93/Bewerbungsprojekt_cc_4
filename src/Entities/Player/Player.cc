@@ -87,83 +87,8 @@ uint16_t Player::GetItemCount(const uint8_t ID)
 
 void Player::HandleMove(sf::Clock &clock, Game *game)
 {
-    Utilities utilities;
-    auto anim = game->GetAnim();
-    auto tileSize = game->GetTileSize();
-    auto width = game->GetGameWidth();
-    auto height = game->GetGameHeight();
-    auto playerPos = m_sprite->getPosition();
-    auto sprite = m_sprite.get();
-
-    auto animData = utilities.GetAnim(anim, m_animID);
-
-    switch (m_move)
-    {
-    case Move::Left:
-        if (playerPos.x - m_speed > 0 + (tileSize / 2) && m_moveAllowed.left)
-        {
-            utilities.PlayAnimation(sprite, clock, animData.left.notMoving, animData.left.anim01);
-            m_sprite->setPosition(playerPos.x - m_speed, playerPos.y);
-        }
-        else
-            m_sprite->setTextureRect(animData.left.notMoving);
-        break;
-    case Move::Right:
-        if (playerPos.x + m_speed < width - tileSize && m_moveAllowed.right)
-        {
-            utilities.PlayAnimation(sprite, clock, animData.right.notMoving, animData.right.anim01);
-            m_sprite->setPosition(playerPos.x + m_speed, playerPos.y);
-        }
-        else
-            m_sprite->setTextureRect(animData.right.notMoving);
-        break;
-    case Move::Down:
-        if (playerPos.y + m_speed < height - tileSize && m_moveAllowed.down)
-        {
-            utilities.PlayAnimation(sprite, clock, animData.down.anim01, animData.down.anim02);
-            m_sprite->setPosition(playerPos.x, playerPos.y + m_speed);
-        }
-        else
-            m_sprite->setTextureRect(animData.down.notMoving);
-
-        break;
-    case Move::Up:
-        if (playerPos.y - m_speed > 0 + (tileSize / 2) && m_moveAllowed.up)
-        {
-            utilities.PlayAnimation(sprite, clock, animData.up.anim01, animData.up.anim02);
-            m_sprite->setPosition(playerPos.x, playerPos.y - m_speed);
-        }
-        else
-            m_sprite->setTextureRect(animData.up.notMoving);
-
-        break;
-    case Move::NotMoving:
-        switch (m_lastMove)
-        {
-        case Move::Down:
-            m_sprite->setTextureRect(animData.down.notMoving);
-            break;
-        case Move::Up:
-            m_sprite->setTextureRect(animData.up.notMoving);
-            break;
-        case Move::Left:
-            m_sprite->setTextureRect(animData.left.notMoving);
-            break;
-        case Move::Right:
-            m_sprite->setTextureRect(animData.right.notMoving);
-            break;
-        default:
-            break;
-        }
-        break;
-
-    default:
-        break;
-    }
-
+    game->ExecuteMove(this, clock);
     game->CollectItem();
-
-    ResetMoveAllowed();
 }
 
 // STATS
