@@ -27,8 +27,18 @@ Trader::Trader(unique_ptr<sf::Sprite> sprite,
                const vector<string> dialogOffensive,
                const bool interactable,
                const map<uint8_t, uint16_t> sellingItem,
-               const map<uint8_t, uint16_t> buyingItem)
-    : Creature(move(sprite), health, speed, animID, moving, dialogIntro, dialogOutro, dialogOffensive, interactable),
+               const map<uint8_t, uint16_t> buyingItem,
+               const float maxMoveRange)
+    : Creature(move(sprite),
+               health,
+               speed,
+               animID,
+               moving,
+               dialogIntro,
+               dialogOutro,
+               dialogOffensive,
+               interactable,
+               maxMoveRange),
       m_sellingItem(sellingItem), m_buyingItem(buyingItem)
 {
 }

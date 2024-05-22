@@ -27,11 +27,14 @@ public:
     void SetSpeed(const float speed);
     float GetSpeed() const;
 
+    uint8_t GetAnimID() const;
+
     Move GetMove() const;
     Move GetLastMove() const;
     void SetMove(const Move move);
     void SetMoveAllowed(const Move move, const bool moveAllowed);
     MoveAllowed GetMoveAllowed() const;
+    void ResetMoveAllowed();
 
 protected:
     float m_health;

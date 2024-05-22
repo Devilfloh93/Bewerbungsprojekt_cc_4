@@ -1089,6 +1089,7 @@ void Game::InitCreature()
             vector<string> dialogOffensive;
             map<uint8_t, uint16_t> sellingItem;
             map<uint8_t, uint16_t> buyingItem;
+            float maxMoveRange;
 
             for (const auto &data1 : jsonDataCreatureTemplate)
             {
@@ -1099,6 +1100,7 @@ void Game::InitCreature()
                     name = data1["name"];
                     animID = data1["animID"];
                     uint8_t dialogID = data1["dialogID"];
+                    maxMoveRange = data1["maxMoveRange"];
 
                     animData = utilities.GetAnim(m_anim, animID);
 
@@ -1165,7 +1167,8 @@ void Game::InitCreature()
                                              dialogOffensive,
                                              interactable,
                                              sellingItem,
-                                             buyingItem);
+                                             buyingItem,
+                                             maxMoveRange);
 
                     m_creature.push_back(trader);
                 }
@@ -1179,7 +1182,8 @@ void Game::InitCreature()
                                                  dialogIntro,
                                                  dialogOutro,
                                                  dialogOffensive,
-                                                 interactable);
+                                                 interactable,
+                                                 maxMoveRange);
 
                     m_creature.push_back(creature);
                 }
@@ -1371,56 +1375,11 @@ void Game::Render(sf::Clock &clock)
 
     m_player->HandleMove(clock, this);
 
+    HandleCreatureMove(clock);
+
     m_player->CheckRenderHotkey(this);
 
     RenderStats();
-
-    for (const auto &data : m_creature)
-    {
-        auto canMove = data->GetMoveable();
-
-        if (canMove)
-        {
-            collision.CheckCollision(this, data);
-            auto sprite = data->GetSprite();
-            auto pos = sprite->getPosition();
-            auto spawnPos = data->GetSpawnPos();
-            auto moveAllowed = data->GetMoveAllowed();
-            float maxMoveRange = 50.0F;
-
-            random_device rd;  // a seed source for the random number engine
-            mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
-            uniform_int_distribution<> dist(1U, 4U);
-
-            switch (dist(gen))
-            {
-            case 1:
-                if (pos.x - spawnPos.x <= maxMoveRange && moveAllowed.right)
-                    sprite->setPosition(pos.x + 1, pos.y);
-                break;
-            case 2:
-                if (pos.x - (spawnPos.x - maxMoveRange) >= 0 && moveAllowed.left)
-                    sprite->setPosition(pos.x - 1, pos.y);
-                break;
-            case 3:
-                if (pos.y - spawnPos.y <= maxMoveRange && moveAllowed.down)
-                    sprite->setPosition(pos.x, pos.y + 1);
-                break;
-            case 4:
-                if (pos.y - (spawnPos.y - maxMoveRange) >= 0 && moveAllowed.up)
-                    sprite->setPosition(pos.x, pos.y - 1);
-                break;
-
-            default:
-                break;
-            }
-
-            data->SetMoveAllowed(Move::Up, true);
-            data->SetMoveAllowed(Move::Down, true);
-            data->SetMoveAllowed(Move::Left, true);
-            data->SetMoveAllowed(Move::Right, true);
-        }
-    }
 }
 
 void Game::RenderItems()
@@ -2292,4 +2251,130 @@ void Game::InitMessageFormat()
 const vector<unique_ptr<MessageFormat>> *Game::GetMessageFormat() const
 {
     return &m_messageFormat;
+}
+
+void Game::MoveCreature()
+{
+    for (const auto &data : m_creature)
+    {
+        auto canMove = data->GetMoveable();
+
+        if (canMove)
+        {
+            random_device rd;  // a seed source for the random number engine
+            mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
+            uniform_int_distribution<> dist(1U, 5U);
+
+            switch (dist(gen))
+            {
+            case 1:
+                data->SetMove(Move::Left);
+                break;
+            case 2:
+                data->SetMove(Move::Right);
+                break;
+            case 3:
+                data->SetMove(Move::Down);
+                break;
+            case 4:
+                data->SetMove(Move::Up);
+                break;
+            case 5:
+                data->SetMove(Move::NotMoving);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+}
+
+void Game::HandleCreatureMove(sf::Clock &clock)
+{
+    Utilities utilities;
+    Collision collision;
+
+    for (const auto &data : m_creature)
+    {
+        auto canMove = data->GetMoveable();
+
+        if (canMove)
+        {
+            collision.CheckCollision(this, data);
+            auto animID = data->GetAnimID();
+            auto animData = utilities.GetAnim(m_anim, animID);
+
+            auto sprite = data->GetSprite();
+            auto pos = sprite->getPosition();
+            auto spawnPos = data->GetSpawnPos();
+            auto moveAllowed = data->GetMoveAllowed();
+            auto move = data->GetMove();
+            auto lastMove = data->GetLastMove();
+            auto maxMoveRange = data->GetMaxMoveRange();
+
+            switch (move)
+            {
+            case Move::Left:
+                if (pos.x - (spawnPos.x - maxMoveRange) >= 0 && moveAllowed.left)
+                {
+                    utilities.PlayAnimation(sprite, clock, animData.left.notMoving, animData.left.anim01);
+                    sprite->setPosition(pos.x - 1, pos.y);
+                }
+                else
+                    sprite->setTextureRect(animData.left.notMoving);
+                break;
+            case Move::Right:
+                if (pos.x - spawnPos.x <= maxMoveRange && moveAllowed.right)
+                {
+                    utilities.PlayAnimation(sprite, clock, animData.right.notMoving, animData.right.anim01);
+                    sprite->setPosition(pos.x + 1, pos.y);
+                }
+                else
+                    sprite->setTextureRect(animData.right.notMoving);
+                break;
+            case Move::Down:
+                if (pos.y - spawnPos.y <= maxMoveRange && moveAllowed.down)
+                {
+                    utilities.PlayAnimation(sprite, clock, animData.down.anim01, animData.down.anim02);
+                    sprite->setPosition(pos.x, pos.y + 1);
+                }
+                else
+                    sprite->setTextureRect(animData.down.notMoving);
+                break;
+            case Move::Up:
+                if (pos.y - (spawnPos.y - maxMoveRange) >= 0 && moveAllowed.up)
+                {
+                    utilities.PlayAnimation(sprite, clock, animData.up.anim01, animData.up.anim02);
+                    sprite->setPosition(pos.x, pos.y - 1);
+                }
+                else
+                    sprite->setTextureRect(animData.up.notMoving);
+                break;
+            case Move::NotMoving:
+                switch (lastMove)
+                {
+                case Move::Down:
+                    sprite->setTextureRect(animData.down.notMoving);
+                    break;
+                case Move::Up:
+                    sprite->setTextureRect(animData.up.notMoving);
+                    break;
+                case Move::Left:
+                    sprite->setTextureRect(animData.left.notMoving);
+                    break;
+                case Move::Right:
+                    sprite->setTextureRect(animData.right.notMoving);
+                    break;
+                default:
+                    break;
+                }
+                break;
+
+            default:
+                break;
+            }
+
+            data->ResetMoveAllowed();
+        }
+    }
 }

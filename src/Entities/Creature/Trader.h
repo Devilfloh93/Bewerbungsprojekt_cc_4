@@ -21,7 +21,8 @@ public:
            const vector<string> dialogOffensive,
            const bool interactable,
            const map<uint8_t, uint16_t> sellingItem,
-           const map<uint8_t, uint16_t> buyingItem);
+           const map<uint8_t, uint16_t> buyingItem,
+           const float maxMoveRange);
     ~Trader() = default;
 
     map<uint8_t, uint16_t> GetSellingItem() const;

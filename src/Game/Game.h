@@ -193,6 +193,9 @@ public:
     void ResetInputToDefault();
     string GetInputString() const;
 
+    void MoveCreature();
+    void HandleCreatureMove(sf::Clock &clock);
+
 private:
     // RUNNING
     bool m_playing;

@@ -26,6 +26,11 @@ float Unit::GetSpeed() const
     return m_speed;
 }
 
+uint8_t Unit::GetAnimID() const
+{
+    return m_animID;
+}
+
 // MOVE
 Move Unit::GetMove() const
 {
@@ -68,4 +73,12 @@ void Unit::SetMoveAllowed(const Move move, const bool moveAllowed)
 MoveAllowed Unit::GetMoveAllowed() const
 {
     return m_moveAllowed;
+}
+
+void Unit::ResetMoveAllowed()
+{
+    m_moveAllowed.up = true;
+    m_moveAllowed.down = true;
+    m_moveAllowed.left = true;
+    m_moveAllowed.right = true;
 }
