@@ -95,8 +95,23 @@ void EventHandler::KeyPressed(Game &game, const sf::Keyboard::Key &key)
         Playing(game, key);
     else
     {
-        game.SetMenuState();
-        m_break = true;
+        auto hotkeys = game.GetHotkeys();
+
+        for (const auto &data : hotkeys)
+        {
+            auto hotkey = static_cast<Hotkey>(data.first);
+            auto keyID = data.second;
+
+            if (key == keyID)
+            {
+                if (hotkey == Hotkey::Escape)
+                {
+                    game.SetMenuState();
+                    m_break = true;
+                    break;
+                }
+            }
+        }
     }
 }
 
