@@ -185,7 +185,7 @@ public:
     MenuState GetMenuState() const;
     void SetMenuState(const MenuState menuState);
     void SetMenuState();
-    void ResetMenuState(const MenuState menuState);
+    void ResetMenuState();
 
     // INPUT
     vector<Input *> GetInput() const;

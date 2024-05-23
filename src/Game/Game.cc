@@ -86,7 +86,7 @@ void Game::Unload()
 {
     Saving(true);
 
-    ResetMenuState(MenuState::Main);
+    ResetMenuState();
     m_playing = false;
 
     m_thread->Join();
@@ -2093,10 +2093,10 @@ void Game::SetMenuState()
     }
 }
 
-void Game::ResetMenuState(const MenuState menuState)
+void Game::ResetMenuState()
 {
     m_lastMenuState.clear();
-    m_menuState = menuState;
+    m_menuState = MenuState::Main;
 }
 
 uint8_t Game::GetDialogSelectedID(const vector<unique_ptr<SelectableText>> *vec,
