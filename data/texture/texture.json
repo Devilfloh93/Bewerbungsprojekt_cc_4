@@ -42,5 +42,9 @@
     {
         "id": 10,
         "path": "./ressources/textures/entities/creature/Human-Worker-Cyan.png"
+    },
+    {
+        "id": 11,
+        "path": "./ressources/textures/entities/item/Food.png"
     }
 ]

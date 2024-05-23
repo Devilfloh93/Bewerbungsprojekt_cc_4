@@ -16,8 +16,11 @@ ItemCfg::ItemCfg(const uint8_t textureID,
                  const uint8_t ID,
                  const string_view name,
                  const uint8_t maxDrop,
-                 const uint8_t fontID)
-    : m_textureID(textureID), m_textureData(textureData), m_ID(ID), m_name(name), m_maxDrop(maxDrop), m_fontID(fontID)
+                 const uint8_t fontID,
+                 const ItemFnc usableFnc,
+                 const float usableValue)
+    : m_textureID(textureID), m_textureData(textureData), m_ID(ID), m_name(name), m_maxDrop(maxDrop), m_fontID(fontID),
+      m_usableFnc(usableFnc), m_usableValue(usableValue)
 {
 }
 
@@ -49,4 +52,14 @@ uint8_t ItemCfg::GetFontID() const
 string_view ItemCfg::GetName() const
 {
     return m_name;
+}
+
+ItemFnc ItemCfg::GetUsableFnc() const
+{
+    return m_usableFnc;
+}
+
+float ItemCfg::GetUsableValue() const
+{
+    return m_usableValue;
 }

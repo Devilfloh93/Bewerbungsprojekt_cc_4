@@ -5,6 +5,14 @@
 
 using namespace std;
 
+enum class ItemFnc
+{
+    Nothing = 0,
+    Food,
+    Water,
+    Health
+};
+
 class ItemCfg final
 {
 public:
@@ -13,7 +21,9 @@ public:
             const uint8_t ID,
             const string_view name,
             const uint8_t maxDrop,
-            const uint8_t fontID);
+            const uint8_t fontID,
+            const ItemFnc usableFnc,
+            const float usableValue);
     ~ItemCfg() = default;
 
     sf::IntRect GetTextureData() const;
@@ -23,6 +33,8 @@ public:
     uint8_t GetMaxDrop() const;
     uint8_t GetFontID() const;
     string_view GetName() const;
+    ItemFnc GetUsableFnc() const;
+    float GetUsableValue() const;
 
 private:
     sf::IntRect m_textureData;
@@ -31,4 +43,6 @@ private:
     string m_name;
     uint8_t m_maxDrop;
     uint8_t m_fontID;
+    ItemFnc m_usableFnc;
+    float m_usableValue;
 };

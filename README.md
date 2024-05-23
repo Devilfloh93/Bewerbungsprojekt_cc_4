@@ -55,3 +55,4 @@
 * <https://beeler.itch.io/top-down-earth-tileset>
 * <https://pokekas.itch.io/pixelart-buttons>
 * <https://opengameart.org/content/puny-characters>
+* <https://henrysoftware.itch.io/pixel-food>

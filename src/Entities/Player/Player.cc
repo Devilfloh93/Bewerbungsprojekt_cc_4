@@ -85,6 +85,78 @@ uint16_t Player::GetItemCount(const uint8_t ID)
     return m_items[ID];
 }
 
+void Player::UseItem(Game &game)
+{
+    Utilities utilities;
+    auto selectedDialogID = game.GetDialogSelectedID(SelectedTextCategorie::Nothing);
+
+    auto messageFormat = utilities.GetMessageFormat(game, 15);
+    if (selectedDialogID == 0)
+    {
+        game.AddMessage(messageFormat, MessageType::Error);
+        return;
+    }
+
+    uint16_t newValue = 0;
+    for (auto &[key, value] : m_items)
+    {
+        if (key == selectedDialogID)
+        {
+            value -= 1;
+            newValue = value;
+            break;
+        }
+    }
+
+    auto itemCfg = game.GetItemCfg();
+    for (const auto &data : itemCfg)
+    {
+        auto ID = data->GetID();
+        if (selectedDialogID == ID)
+        {
+            auto name = data->GetName();
+
+            messageFormat = utilities.GetMessageFormat(game, 18);
+            auto message = vformat(messageFormat, make_format_args(1, name));
+            game.AddMessage(message, MessageType::Success);
+
+            auto usableFnc = data->GetUsableFnc();
+            auto usableValue = data->GetUsableValue();
+
+            switch (usableFnc)
+            {
+            case ItemFnc::Food:
+                if (m_survivalStats.food + usableValue > 100)
+                    m_survivalStats.food = 100;
+                else
+                    m_survivalStats.food += usableValue;
+                break;
+            case ItemFnc::Water:
+                if (m_survivalStats.water + usableValue > 100)
+                    m_survivalStats.water = 100;
+                else
+                    m_survivalStats.water += usableValue;
+                break;
+            case ItemFnc::Health:
+                if (m_health + usableValue > 100)
+                    m_health = 100;
+                else
+                    m_health += usableValue;
+                break;
+
+            default:
+                break;
+            }
+
+            break;
+        }
+    }
+
+    auto message = format("{}", newValue);
+
+    game.UpdateDialog(SelectedTextCategorie::Nothing, message);
+}
+
 void Player::HandleMove(sf::Clock &clock, Game *game)
 {
     game->ExecuteMove(this, clock);
@@ -121,7 +193,7 @@ void Player::UpdateStats(Game *game)
     if (game->GetPlaying() && game->GetMenuState() == MenuState::Playing)
     {
         if (m_survivalStats.food - statDecay.food < 0U)
-            m_survivalStats.water = 0;
+            m_survivalStats.food = 0;
         else
             m_survivalStats.food -= statDecay.food;
 
