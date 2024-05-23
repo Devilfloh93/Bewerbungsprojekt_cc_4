@@ -26,7 +26,8 @@ enum class BtnFunc
     Resolution1280x720,
     OpenHotkeys,
     Buy,
-    Sell
+    Sell,
+    Use
 };
 
 enum class MenuState

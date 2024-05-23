@@ -280,6 +280,27 @@ const sf::Texture *Utilities::GetTexture(const vector<Texture *> &textures, cons
     return nullptr;
 }
 
+sf::Text *Utilities::GetTitle(const vector<Title *> &titles, const MenuState menuState) const
+{
+    for (const auto &data : titles)
+    {
+        if (data->GetMenuState() == menuState)
+            return data->GetText();
+    }
+    return nullptr;
+}
+
+sf::Text *Utilities::GetInput(const vector<Input *> &inputs, const MenuState menuState) const
+{
+    sf::Text *input = nullptr;
+    for (const auto &data : inputs)
+    {
+        if (data->GetMenuState() == menuState)
+            input = data->GetText();
+    }
+    return input;
+}
+
 AnimTextureCombined Utilities::GetAnim(const vector<Anim *> &anim, const uint8_t animID) const
 {
     AnimTextureCombined animData;

@@ -69,7 +69,6 @@ void EventHandler::Playing(Game &game, const sf::Keyboard::Key &key)
             case Hotkey::RightMove:
                 if (collision.InViewRange(&game, {playerPos.x, playerPos.y}))
                     player->SetMove(Move::Right);
-
                 break;
             case Hotkey::UpMove:
                 if (collision.InViewRange(&game, {playerPos.x, playerPos.y}))
@@ -209,29 +208,10 @@ void EventHandler::BtnPressed(Game &game)
     auto menuState = game.GetMenuState();
     auto btns = game.GetBtn();
 
-    if (menuState == MenuState::OpenLoad)
-    {
-        auto saveFiles = game.GetSaveFiles();
-
-        for (const auto &data : *saveFiles)
-        {
-            auto text = data.get()->GetText();
-            auto newSelectedTextID = data.get()->GetID();
-
-            auto txtPos = text->getPosition();
-            auto txtLSize = text->getLocalBounds().getSize();
-
-            auto clicked = utilities.CheckTextClicked(worldPos, txtPos, txtLSize);
-            if (clicked)
-            {
-                game.SetSelectedTextID(newSelectedTextID);
-            }
-        }
-    }
-
-    if (menuState == MenuState::Trader)
+    if (menuState == MenuState::OpenLoad || menuState == MenuState::Trader)
     {
         auto dialogText = game.GetDialogText();
+
         for (const auto &data : *dialogText)
         {
             auto text = data.get()->GetText();
@@ -239,8 +219,8 @@ void EventHandler::BtnPressed(Game &game)
 
             auto txtPos = text->getPosition();
             auto txtLSize = text->getLocalBounds().getSize();
-            auto clicked = utilities.CheckTextClicked(worldPos, txtPos, txtLSize);
 
+            auto clicked = utilities.CheckTextClicked(worldPos, txtPos, txtLSize);
             if (clicked)
             {
                 game.SetSelectedTextID(newSelectedTextID);
@@ -331,7 +311,7 @@ void EventHandler::BtnPressed(Game &game)
                 m_break = true;
                 break;
             case BtnFunc::Load:
-                if (game.GetDialogSelectedID(game.GetSaveFiles(), SelectedTextCategorie::Nothing) > 0)
+                if (game.GetDialogSelectedID(game.GetDialogText(), SelectedTextCategorie::Nothing) > 0)
                 {
                     game.SetMenuState(MenuState::Load);
                     game.InitPlayer();

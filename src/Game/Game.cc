@@ -213,11 +213,6 @@ vector<Input *> Game::GetInput() const
     return m_inputs;
 }
 
-const vector<unique_ptr<SelectableText>> *Game::GetSaveFiles() const
-{
-    return &m_saveFiles;
-}
-
 vector<Btn *> Game::GetBtn() const
 {
     return m_btns;
@@ -549,19 +544,19 @@ void Game::LoadHotkeys()
 void Game::InitPlayer()
 {
     bool startGame = false;
-    if (m_menuState == MenuState::Create)
+    switch (m_menuState)
     {
+    case MenuState::Create:
         if (CreatePlayer())
         {
             CreateSaveFolder(m_player->GetID());
             cout << "Player Create Done!" << endl;
             startGame = true;
         }
-    }
-
-    if (m_menuState == MenuState::Load)
+        break;
+    case MenuState::Load:
     {
-        auto saveGameID = GetDialogSelectedID(&m_saveFiles, SelectedTextCategorie::Nothing);
+        auto saveGameID = GetDialogSelectedID(&m_dialogTexts, SelectedTextCategorie::Nothing);
 
         if (LoadPlayer(saveGameID))
         {
@@ -570,6 +565,11 @@ void Game::InitPlayer()
             cout << "Player Load Done!" << endl;
             startGame = true;
         }
+    }
+    break;
+
+    default:
+        break;
     }
 
     if (startGame)
@@ -1484,18 +1484,6 @@ void Game::RenderMenu()
             auto prevText = data->GetText();
             m_window->draw(*prevText);
 
-            for (const auto &data1 : m_hotkeyMenu)
-            {
-                if (m_menuState == MenuState::Hotkeys)
-                {
-                    auto spaceBetween = utilities.CalculateSpaceBetweenMenu(Alignment::Middle);
-
-                    utilities.SetTitlePos(m_windowWidth, prevText, data1, spaceBetween);
-                    m_window->draw(*data1);
-                    prevText = data1;
-                }
-            }
-
             for (const auto &data1 : m_inputs)
             {
                 if (m_menuState == data1->GetMenuState())
@@ -1515,31 +1503,26 @@ void Game::RenderMenu()
                 }
             }
 
-            for (const auto &data1 : m_saveFiles)
+            switch (m_menuState)
             {
-                if (m_menuState == MenuState::OpenLoad)
+            case MenuState::Hotkeys:
+                for (const auto &data1 : m_hotkeyMenu)
                 {
-                    auto text = data1.get()->GetText();
-
-                    text->setColor(sf::Color(255, 255, 255));
-
-                    auto textID = data1.get()->GetID();
-
-                    if (m_selectedTextID == textID)
-                        text->setColor(sf::Color(0, 255, 0));
-
                     auto spaceBetween = utilities.CalculateSpaceBetweenMenu(Alignment::Middle);
 
-                    utilities.SetTitlePos(m_windowWidth, prevText, text, spaceBetween);
-                    m_window->draw(*text);
-                    prevText = text;
+                    utilities.SetTitlePos(m_windowWidth, prevText, data1, spaceBetween);
+                    m_window->draw(*data1);
+                    prevText = data1;
                 }
-            }
-
-            if (m_menuState == MenuState::Inventory || m_menuState == MenuState::Trader)
-            {
+                break;
+            case MenuState::OpenLoad:
+            case MenuState::Inventory:
+            case MenuState::Trader:
                 if (m_dialogTexts.size() > 0)
                     prevText = RenderDialog();
+                break;
+            default:
+                break;
             }
 
             for (const auto &data1 : m_btns)
@@ -1581,21 +1564,29 @@ void Game::RenderMenu()
 void Game::CreateLoadMenu()
 {
     Utilities utilities;
-    m_saveFiles.clear();
+    ClearDialog();
     m_selectedTextID = 0;
 
     auto count = CountSaveFolders();
 
     auto font = utilities.GetFont(m_fonts, 0);
+    auto spaceBetween = utilities.CalculateSpaceBetweenMenu(Alignment::Middle);
+
+    auto prevTxt = utilities.GetTitle(m_titles, MenuState::OpenLoad);
 
     for (uint8_t i = 1; i < count; ++i)
     {
         auto messageFormat = utilities.GetMessageFormat(*this, 14);
         auto message = vformat(messageFormat, make_format_args(i));
 
-        auto text = make_unique<sf::Text>(message, *font, 20U);
+        auto newSaveFileText = make_unique<sf::Text>(message, *font, 20U);
+        auto saveFileText = newSaveFileText.get();
 
-        m_saveFiles.push_back(make_unique<SelectableText>(move(text), i, i, SelectedTextCategorie::Nothing));
+        utilities.SetTitlePos(m_windowWidth, prevTxt, saveFileText, spaceBetween);
+        prevTxt = saveFileText;
+
+        m_dialogTexts.push_back(
+            make_unique<SelectableText>(move(newSaveFileText), i, i, SelectedTextCategorie::Nothing));
     }
 }
 
@@ -2098,11 +2089,6 @@ void Game::SetMenuState()
 {
     m_menuState = m_lastMenuState.back();
     m_lastMenuState.pop_back();
-}
-
-vector<MenuState> Game::GetLastMenuState() const
-{
-    return m_lastMenuState;
 }
 
 uint8_t Game::GetDialogSelectedID(const vector<unique_ptr<SelectableText>> *vec,

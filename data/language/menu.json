@@ -273,5 +273,16 @@
             "title": "Wieviele Items willst du verkaufen?",
             "description": ""
         }
+    },
+    {
+        "id": 26,
+        "enEN": {
+            "title": "Use",
+            "description": ""
+        },
+        "deDE": {
+            "title": "Benutzen",
+            "description": ""
+        }
     }
 ]
