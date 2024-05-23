@@ -185,6 +185,8 @@ public:
 
     MenuState GetMenuState() const;
     void SetMenuState(const MenuState menuState);
+    void SetMenuState();
+    vector<MenuState> GetLastMenuState() const;
 
     // INPUT
     vector<Input *> GetInput() const;
@@ -253,6 +255,7 @@ private:
     sf::Text *m_hotkeyRender;
 
     MenuState m_menuState;
+    vector<MenuState> m_lastMenuState;
     // INPUT
     Input *m_selectedInput;
 };

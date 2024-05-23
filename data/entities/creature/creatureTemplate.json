@@ -25,6 +25,6 @@
         "name": "Trader",
         "animID": 4,
         "dialogID": 1,
-        "maxMoveRange": 0
+        "maxMoveRange": 10
     }
 ]
