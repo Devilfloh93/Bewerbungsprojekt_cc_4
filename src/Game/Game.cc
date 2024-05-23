@@ -86,7 +86,7 @@ void Game::Unload()
 {
     Saving(true);
 
-    m_menuState = MenuState::Main;
+    SetMenuState(MenuState::Main);
     m_playing = false;
 
     m_thread->Join();
@@ -579,7 +579,7 @@ void Game::InitPlayer()
         ResizeStats();
 
         m_playing = true;
-        m_menuState = MenuState::Playing;
+        SetMenuState(MenuState::Playing);
 
         // Thread Init
         m_thread = new Thread(this);
@@ -2090,7 +2090,19 @@ MenuState Game::GetMenuState() const
 
 void Game::SetMenuState(const MenuState menuState)
 {
+    m_lastMenuState.push_back(m_menuState);
     m_menuState = menuState;
+}
+
+void Game::SetMenuState()
+{
+    m_menuState = m_lastMenuState.back();
+    m_lastMenuState.pop_back();
+}
+
+vector<MenuState> Game::GetLastMenuState() const
+{
+    return m_lastMenuState;
 }
 
 uint8_t Game::GetDialogSelectedID(const vector<unique_ptr<SelectableText>> *vec,

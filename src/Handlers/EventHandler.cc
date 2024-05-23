@@ -295,18 +295,7 @@ void EventHandler::BtnPressed(Game &game)
                 m_break = true;
                 break;
             case BtnFunc::Back:
-                if (game.GetPlaying())
-                {
-                    if (menuState == MenuState::Inventory || menuState == MenuState::Trader)
-                    {
-                        game.SetMenuState(MenuState::Playing);
-                    }
-                    else
-                        game.SetMenuState(MenuState::Pause);
-                }
-                else
-                    game.SetMenuState(MenuState::Main);
-
+                game.SetMenuState();
                 m_break = true;
                 break;
             case BtnFunc::OpenResolution:
