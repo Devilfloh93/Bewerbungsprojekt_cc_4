@@ -556,7 +556,7 @@ void Game::InitPlayer()
         break;
     case MenuState::Load:
     {
-        auto saveGameID = GetDialogSelectedID(&m_dialogTexts, SelectedTextCategorie::Nothing);
+        auto saveGameID = GetDialogSelectedID(SelectedTextCategorie::Nothing);
 
         if (LoadPlayer(saveGameID))
         {
@@ -661,13 +661,22 @@ void Game::InitItemCfg()
 
         auto jsonDataLanguage = json::parse(fileLanguage);
 
+        uint8_t fontID = jsonDataItemTemplate["fontID"];
+
         for (const auto &data : jsonDataItem)
         {
+            ItemFnc usableFnc = jsonDataItemTemplate["usable"]["fnc"];
+            float usableValue = jsonDataItemTemplate["usable"]["value"];
             uint8_t ID = data["id"];
             uint8_t languageID = data["languageID"];
             uint8_t maxDrop = data["maxDrop"];
             uint8_t textureID = data["textureID"];
-            uint8_t fontID = jsonDataItemTemplate["fontID"];
+
+            if (data.contains("usable"))
+                usableFnc = data["usable"]["fnc"];
+
+            if (data.contains("usable"))
+                usableValue = data["usable"]["value"];
 
             auto textureData = sf::IntRect(data["textureData"][0],
                                            data["textureData"][1],
@@ -676,7 +685,7 @@ void Game::InitItemCfg()
 
             auto text = utilities.GetLanguageText(jsonDataLanguage, languageID, m_language);
 
-            auto itemCfg = new ItemCfg(textureID, textureData, ID, text, maxDrop, fontID);
+            auto itemCfg = new ItemCfg(textureID, textureData, ID, text, maxDrop, fontID, usableFnc, usableValue);
             m_itemCfg.push_back(itemCfg);
         }
         fileItemTemplate.close();
@@ -1128,14 +1137,20 @@ void Game::InitCreature()
             {
                 if (data1["id"] == traderID)
                 {
-                    for (const auto &data2 : data1["selling"])
+                    if (data1.contains("selling"))
                     {
-                        sellingItem[data2["itemID"]] = data2["count"];
+                        for (const auto &data2 : data1["selling"])
+                        {
+                            sellingItem[data2["itemID"]] = data2["count"];
+                        }
                     }
 
-                    for (const auto &data2 : data1["buying"])
+                    if (data1.contains("buying"))
                     {
-                        buyingItem[data2["itemID"]] = data2["count"];
+                        for (const auto &data2 : data1["buying"])
+                        {
+                            buyingItem[data2["itemID"]] = data2["count"];
+                        }
                     }
 
                     interactable = true;
@@ -2036,6 +2051,22 @@ void Game::ClearDialog()
     m_selectedInput = nullptr;
 }
 
+void Game::UpdateDialog(const SelectedTextCategorie selectedCategorie, const string &text)
+{
+    for (auto const &data : m_dialogTexts)
+    {
+        auto ID = data.get()->GetID();
+        auto categorie = data.get()->GetSelectedCategorie();
+
+        if (ID == m_selectedTextID && categorie == selectedCategorie)
+        {
+            data.get()->GetText()->setString(text);
+            break;
+        }
+    }
+    m_selectedTextID = 0;
+}
+
 sf::Text *Game::RenderDialog()
 {
     sf::Text *prevTxt;
@@ -2099,10 +2130,9 @@ void Game::ResetMenuState()
     m_menuState = MenuState::Main;
 }
 
-uint8_t Game::GetDialogSelectedID(const vector<unique_ptr<SelectableText>> *vec,
-                                  const SelectedTextCategorie selectedCategorie) const
+uint8_t Game::GetDialogSelectedID(const SelectedTextCategorie selectedCategorie) const
 {
-    for (const auto &data : *vec)
+    for (const auto &data : m_dialogTexts)
     {
         auto textID = data.get()->GetID();
         auto categorie = data.get()->GetSelectedCategorie();

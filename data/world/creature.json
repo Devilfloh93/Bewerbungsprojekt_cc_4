@@ -53,5 +53,16 @@
                 false
             ]
         ]
+    },
+    {
+        "creatureTemplateID": 4,
+        "traderID": 3,
+        "pos": [
+            [
+                70,
+                350,
+                false
+            ]
+        ]
     }
 ]

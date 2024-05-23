@@ -41,6 +41,7 @@ public:
     void AddItem(const uint8_t ID, const uint16_t count);
     bool RemoveItem(const uint8_t ID, const uint16_t count);
     uint16_t GetItemCount(const uint8_t ID);
+    void UseItem(Game &game);
 
     // Render
     void CheckRenderHotkey(Game *game);

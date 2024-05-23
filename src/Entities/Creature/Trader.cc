@@ -56,12 +56,18 @@ map<uint8_t, uint16_t> Trader::GetBuyingItem() const
 void Trader::Buy(Game &game)
 {
     Utilities utilities;
-    auto dialogText = game.GetDialogText();
-    auto selectedDialogID = game.GetDialogSelectedID(dialogText, SelectedTextCategorie::Buy);
+    auto selectedDialogID = game.GetDialogSelectedID(SelectedTextCategorie::Buy);
 
     auto messageFormat = utilities.GetMessageFormat(game, 1);
     auto input = game.GetInputString();
     if (input.size() == 0)
+    {
+        game.AddMessage(messageFormat, MessageType::Error);
+        return;
+    }
+
+    messageFormat = utilities.GetMessageFormat(game, 16);
+    if (selectedDialogID == 0)
     {
         game.AddMessage(messageFormat, MessageType::Error);
         return;
@@ -85,7 +91,7 @@ void Trader::Buy(Game &game)
         messageFormat = utilities.GetMessageFormat(game, 2);
         message = vformat(messageFormat, make_format_args(m_buyingItem[selectedDialogID]));
 
-        UpdateTrader(game, dialogText, SelectedTextCategorie::Buy, message);
+        game.UpdateDialog(SelectedTextCategorie::Buy, message);
     }
     else
     {
@@ -98,13 +104,19 @@ void Trader::Sell(Game &game)
 {
     Utilities utilities;
     auto player = game.GetPlayer();
-    auto dialogText = game.GetDialogText();
-    auto selectedDialogID = game.GetDialogSelectedID(dialogText, SelectedTextCategorie::Sell);
+    auto selectedDialogID = game.GetDialogSelectedID(SelectedTextCategorie::Sell);
 
     auto input = game.GetInputString();
     auto messageFormat = utilities.GetMessageFormat(game, 5);
 
     if (input.size() == 0)
+    {
+        game.AddMessage(messageFormat, MessageType::Error);
+        return;
+    }
+
+    messageFormat = utilities.GetMessageFormat(game, 17);
+    if (selectedDialogID == 0)
     {
         game.AddMessage(messageFormat, MessageType::Error);
         return;
@@ -132,7 +144,7 @@ void Trader::Sell(Game &game)
             messageFormat = utilities.GetMessageFormat(game, 8);
             message = vformat(messageFormat, make_format_args(m_sellingItem[selectedDialogID], inventoryValue));
 
-            UpdateTrader(game, dialogText, SelectedTextCategorie::Sell, message);
+            game.UpdateDialog(SelectedTextCategorie::Sell, message);
         }
         else
         {
@@ -145,23 +157,4 @@ void Trader::Sell(Game &game)
         messageFormat = utilities.GetMessageFormat(game, 7);
         game.AddMessage(messageFormat, MessageType::Error);
     }
-}
-
-void Trader::UpdateTrader(Game &game,
-                          const vector<unique_ptr<SelectableText>> *vec,
-                          const SelectedTextCategorie selectedCategorie,
-                          const string &text)
-{
-    for (auto const &data : *vec)
-    {
-        auto ID = data.get()->GetID();
-        auto categorie = data.get()->GetSelectedCategorie();
-
-        if (ID == game.GetSelectedTextID() && categorie == selectedCategorie)
-        {
-            data.get()->GetText()->setString(text);
-            break;
-        }
-    }
-    game.SetSelectedTextID(0);
 }

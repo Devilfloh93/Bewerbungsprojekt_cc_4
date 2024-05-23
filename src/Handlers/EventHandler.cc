@@ -171,7 +171,7 @@ void EventHandler::BtnPressed(Game &game)
     auto menuState = game.GetMenuState();
     auto btns = game.GetBtn();
 
-    if (menuState == MenuState::OpenLoad || menuState == MenuState::Trader)
+    if (menuState == MenuState::OpenLoad || menuState == MenuState::Trader || menuState == MenuState::Inventory)
     {
         auto dialogText = game.GetDialogText();
 
@@ -220,6 +220,7 @@ void EventHandler::BtnPressed(Game &game)
         auto clicked = utilities.CheckSpriteClicked(worldPos, btnPos, btnLSize, btnScale);
         if (clicked && menuState == state)
         {
+            auto player = game.GetPlayer();
             switch (data->GetBtnFnc())
             {
             case BtnFunc::Play:
@@ -274,7 +275,7 @@ void EventHandler::BtnPressed(Game &game)
                 m_break = true;
                 break;
             case BtnFunc::Load:
-                if (game.GetDialogSelectedID(game.GetDialogText(), SelectedTextCategorie::Nothing) > 0)
+                if (game.GetDialogSelectedID(SelectedTextCategorie::Nothing) != 0)
                 {
                     game.SetMenuState(MenuState::Load);
                     game.InitPlayer();
@@ -307,11 +308,15 @@ void EventHandler::BtnPressed(Game &game)
                 m_break = true;
                 break;
             case BtnFunc::Buy:
-                game.GetPlayer()->GetTrader()->Buy(game);
+                player->GetTrader()->Buy(game);
                 m_break = true;
                 break;
             case BtnFunc::Sell:
-                game.GetPlayer()->GetTrader()->Sell(game);
+                player->GetTrader()->Sell(game);
+                m_break = true;
+                break;
+            case BtnFunc::Use:
+                player->UseItem(game);
                 m_break = true;
                 break;
             default:

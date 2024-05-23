@@ -124,5 +124,41 @@
         "deDE": {
             "format": "{}. Spielstand"
         }
+    },
+    {
+        "id": 15,
+        "enEN": {
+            "format": "Please select a Item you want to use."
+        },
+        "deDE": {
+            "format": "Bitte wähle ein Item aus was du benutzen möchtest."
+        }
+    },
+    {
+        "id": 16,
+        "enEN": {
+            "format": "Please select a Item you want to buy."
+        },
+        "deDE": {
+            "format": "Bitte wähle ein Item aus was du kaufen möchtest."
+        }
+    },
+    {
+        "id": 17,
+        "enEN": {
+            "format": "Please select a Item you want to sell."
+        },
+        "deDE": {
+            "format": "Bitte wähle ein Item aus was du verkaufen möchtest."
+        }
+    },
+    {
+        "id": 18,
+        "enEN": {
+            "format": "You used {}x {}."
+        },
+        "deDE": {
+            "format": "Du hast {}x {} benutzt."
+        }
     }
 ]

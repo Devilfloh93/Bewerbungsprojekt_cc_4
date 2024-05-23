@@ -1,3 +1,7 @@
 {
-    "fontID": 0
+    "fontID": 0,
+    "usable": {
+        "fnc": 0,
+        "value": 0
+    }
 }

@@ -30,10 +30,6 @@ public:
 
     void Buy(Game &game);
     void Sell(Game &game);
-    void UpdateTrader(Game &game,
-                      const vector<unique_ptr<SelectableText>> *vec,
-                      const SelectedTextCategorie selectedCategorie,
-                      const string &text);
 
 private:
     map<uint8_t, uint16_t> m_sellingItem;

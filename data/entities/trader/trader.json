@@ -36,5 +36,18 @@
                 "count": 7
             }
         ]
+    },
+    {
+        "id": 3,
+        "buying": [
+            {
+                "itemID": 3,
+                "count": 100
+            },
+            {
+                "itemID": 4,
+                "count": 150
+            }
+        ]
     }
 ]
