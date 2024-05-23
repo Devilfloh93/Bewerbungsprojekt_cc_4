@@ -95,6 +95,8 @@ public:
 
     const sf::Font *GetFont(const vector<Font *> &fonts, const uint8_t fontID) const;
     const sf::Texture *GetTexture(const vector<Texture *> &textures, const uint8_t textureID) const;
+    sf::Text *GetTitle(const vector<Title *> &titles, const MenuState menuState) const;
+    sf::Text *GetInput(const vector<Input *> &inputs, const MenuState menuState) const;
 
     AnimTextureCombined GetAnim(const vector<Anim *> &anim, const uint8_t animID) const;
     const sf::Texture *GetAnimTexture(const vector<Anim *> &anim,

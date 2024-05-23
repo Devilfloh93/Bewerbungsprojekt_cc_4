@@ -92,7 +92,6 @@ public:
     void InitPlayer();
 
     // LOAD SAVE FILE
-    const vector<unique_ptr<SelectableText>> *GetSaveFiles() const;
     void CreateLoadMenu();
     void Saving(const bool destroy);
     void SaveCreatures(const bool destroy);
@@ -186,7 +185,6 @@ public:
     MenuState GetMenuState() const;
     void SetMenuState(const MenuState menuState);
     void SetMenuState();
-    vector<MenuState> GetLastMenuState() const;
 
     // INPUT
     vector<Input *> GetInput() const;
@@ -227,7 +225,6 @@ private:
     vector<Font *> m_fonts;
     vector<Anim *> m_anim;
     vector<Input *> m_inputs;
-    vector<unique_ptr<SelectableText>> m_saveFiles;
     vector<sf::Text *> m_hotkeyMenu; // TODO: TEMPORARY FIX
 
     vector<unique_ptr<Message>> m_messages;

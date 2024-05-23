@@ -264,26 +264,12 @@ void Player::InitTraderItems(Game &game)
     auto buyingItems = m_trader->GetBuyingItem();
     auto titles = game.GetTitles();
     auto input = game.GetInput();
-    sf::Text *previousTxt;
     uint16_t selectableID = 1;
 
-    for (const auto &data : titles)
-    {
+    auto prevTxt = utilities.GetInput(input, MenuState::Trader);
 
-        if (data->GetMenuState() == MenuState::Trader)
-        {
-            previousTxt = data->GetText();
-            break;
-        }
-    }
-
-    for (const auto &data : input)
-    {
-        if (data->GetMenuState() == MenuState::Trader)
-        {
-            previousTxt = data->GetText();
-        }
-    }
+    if (prevTxt == nullptr)
+        prevTxt = utilities.GetTitle(titles, MenuState::Trader);
 
     for (const auto &[key, value] : sellingItems)
     {
@@ -320,7 +306,7 @@ void Player::InitTraderItems(Game &game)
 
                             if (firstIcon)
                             {
-                                utilities.SetTextBeforeIcon(alignemntWidth, previousTxt, *spriteUnique, *textUnique);
+                                utilities.SetTextBeforeIcon(alignemntWidth, prevTxt, *spriteUnique, *textUnique);
                                 firstIcon = false;
                             }
                             else
@@ -374,7 +360,7 @@ void Player::InitTraderItems(Game &game)
 
                     if (firstIcon)
                     {
-                        utilities.SetTextBeforeIcon(alignemntWidth, previousTxt, *spriteUnique, *textUnique);
+                        utilities.SetTextBeforeIcon(alignemntWidth, prevTxt, *spriteUnique, *textUnique);
                         firstIcon = false;
                     }
                     else
@@ -403,17 +389,9 @@ void Player::InitInventoryItems(Game &game)
     auto width = game.GetWindowWidth();
     auto titles = game.GetTitles();
     auto textures = game.GetTexture();
-    sf::Text *previousTxt;
     uint16_t selectableID = 1;
 
-    for (const auto &data : titles)
-    {
-        if (data->GetMenuState() == MenuState::Inventory)
-        {
-            previousTxt = data->GetText();
-            break;
-        }
-    }
+    auto prevTxt = utilities.GetTitle(titles, MenuState::Inventory);
 
     for (const auto &[key, value] : m_items)
     {
@@ -438,7 +416,7 @@ void Player::InitInventoryItems(Game &game)
 
                 if (firstIcon)
                 {
-                    utilities.SetTextBeforeIcon(width, previousTxt, *spriteUnique, *textUnique);
+                    utilities.SetTextBeforeIcon(width, prevTxt, *spriteUnique, *textUnique);
                     firstIcon = false;
                 }
                 else
