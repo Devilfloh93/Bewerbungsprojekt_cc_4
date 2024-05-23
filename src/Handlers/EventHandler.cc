@@ -87,68 +87,16 @@ void EventHandler::Playing(Game &game, const sf::Keyboard::Key &key)
     }
 }
 
-void EventHandler::Inventory(Game &game, const sf::Keyboard::Key &key)
-{
-    switch (key)
-    {
-    case sf::Keyboard::Key::I:
-        game.SetMenuState(MenuState::Playing);
-        m_break = true;
-        break;
-    default:
-        break;
-    }
-}
-
-void EventHandler::Pause(Game &game, const sf::Keyboard::Key &key)
-{
-    switch (key)
-    {
-    case sf::Keyboard::Key::Escape:
-        game.SetMenuState(MenuState::Playing);
-        m_break = true;
-        break;
-    default:
-        break;
-    }
-}
-
-void EventHandler::Options(Game &game, const sf::Keyboard::Key &key)
-{
-    switch (key)
-    {
-    case sf::Keyboard::Key::Escape:
-        game.SetMenuState(MenuState::Pause);
-        break;
-    default:
-        break;
-    }
-}
-
 void EventHandler::KeyPressed(Game &game, const sf::Keyboard::Key &key)
 {
     auto state = game.GetMenuState();
 
-    if (game.GetPlaying())
+    if (game.GetPlaying() && game.GetMenuState() == MenuState::Playing)
+        Playing(game, key);
+    else
     {
-        switch (state)
-        {
-        case MenuState::Playing:
-            Playing(game, key);
-            break;
-        case MenuState::Inventory:
-            Inventory(game, key);
-            break;
-        case MenuState::Pause:
-            Pause(game, key);
-            break;
-        case MenuState::Options:
-            Options(game, key);
-            break;
-
-        default:
-            break;
-        }
+        game.SetMenuState();
+        m_break = true;
     }
 }
 

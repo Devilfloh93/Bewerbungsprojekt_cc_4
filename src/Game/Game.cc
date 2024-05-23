@@ -86,7 +86,7 @@ void Game::Unload()
 {
     Saving(true);
 
-    SetMenuState(MenuState::Main);
+    ResetMenuState(MenuState::Main);
     m_playing = false;
 
     m_thread->Join();
@@ -1565,7 +1565,6 @@ void Game::CreateLoadMenu()
 {
     Utilities utilities;
     ClearDialog();
-    m_selectedTextID = 0;
 
     auto count = CountSaveFolders();
 
@@ -2087,8 +2086,17 @@ void Game::SetMenuState(const MenuState menuState)
 
 void Game::SetMenuState()
 {
-    m_menuState = m_lastMenuState.back();
-    m_lastMenuState.pop_back();
+    if (!m_lastMenuState.empty())
+    {
+        m_menuState = m_lastMenuState.back();
+        m_lastMenuState.pop_back();
+    }
+}
+
+void Game::ResetMenuState(const MenuState menuState)
+{
+    m_lastMenuState.clear();
+    m_menuState = menuState;
 }
 
 uint8_t Game::GetDialogSelectedID(const vector<unique_ptr<SelectableText>> *vec,

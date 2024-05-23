@@ -25,9 +25,6 @@ public:
 
     void BtnPressed(Game &game);
     void Playing(Game &game, const sf::Keyboard::Key &key);
-    void Inventory(Game &game, const sf::Keyboard::Key &key);
-    void Pause(Game &game, const sf::Keyboard::Key &key);
-    void Options(Game &game, const sf::Keyboard::Key &key);
 
     // QUIT
     void Quit(Game &game);
