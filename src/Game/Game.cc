@@ -1493,6 +1493,7 @@ void Game::RenderMenu()
     for (const auto &data : m_titles)
     {
         bool firstMenuEntry = true;
+        bool dialogRenderExecuted = false;
 
         if (m_menuState == data->GetMenuState())
         {
@@ -1534,7 +1535,10 @@ void Game::RenderMenu()
             case MenuState::Inventory:
             case MenuState::Trader:
                 if (m_dialogTexts.size() > 0)
+                {
                     prevText = RenderDialog();
+                    dialogRenderExecuted = true;
+                }
                 break;
             default:
                 break;
@@ -1546,6 +1550,7 @@ void Game::RenderMenu()
 
                 if (m_menuState == menuStates)
                 {
+                    bool useDefaultSpaceBetweenBtns = false;
                     auto btnSprite = data1->GetSprite();
                     auto btnText = data1->GetText();
                     if (m_menuState == MenuState::OpenLoad || m_menuState == MenuState::Hotkeys ||
@@ -1553,13 +1558,21 @@ void Game::RenderMenu()
                     {
                         auto alignment = data1->GetAlignment();
 
+                        if (!dialogRenderExecuted)
+                        {
+                            useDefaultSpaceBetweenBtns = true;
+                            firstMenuEntry = false;
+                            dialogRenderExecuted = true;
+                        }
+
                         firstMenuEntry = utilities.UpdateSpriteAndText(firstMenuEntry,
                                                                        alignment,
                                                                        m_windowWidth,
                                                                        btnSprite,
                                                                        prevText,
                                                                        prevSprite,
-                                                                       btnText);
+                                                                       btnText,
+                                                                       useDefaultSpaceBetweenBtns);
 
                         prevSprite = btnSprite;
                     }
@@ -2031,7 +2044,7 @@ void Game::SaveGeneral()
 }
 
 // DIALOG
-void Game::SetDialogSprite(unique_ptr<Sprite> sprite)
+void Game::SetDialogSprite(unique_ptr<SelectableSprite> sprite)
 {
     m_dialogSprites.push_back(move(sprite));
 }
@@ -2055,16 +2068,50 @@ void Game::UpdateDialog(const SelectedTextCategorie selectedCategorie, const str
 {
     for (auto const &data : m_dialogTexts)
     {
-        auto ID = data.get()->GetID();
+        auto selectedTextID = data.get()->GetSelectedTextID();
         auto categorie = data.get()->GetSelectedCategorie();
 
-        if (ID == m_selectedTextID && categorie == selectedCategorie)
+        if (selectedTextID == m_selectedTextID && categorie == selectedCategorie)
         {
             data.get()->GetText()->setString(text);
             break;
         }
     }
     m_selectedTextID = 0;
+    ResetInputToDefault();
+}
+
+void Game::UpdateDialog(const SelectedTextCategorie selectedCategorie)
+{
+    for (auto itr = m_dialogTexts.begin(); itr != m_dialogTexts.end();)
+    {
+        auto selectedTextID = (*itr).get()->GetSelectedTextID();
+        auto categorie = (*itr).get()->GetSelectedCategorie();
+
+        if (selectedTextID == m_selectedTextID && categorie == selectedCategorie)
+        {
+            m_dialogTexts.erase(itr);
+            break;
+        }
+        else
+            ++itr;
+    }
+
+    for (auto itr = m_dialogSprites.begin(); itr != m_dialogSprites.end();)
+    {
+        auto selectedTextID = (*itr).get()->GetSelectedTextID();
+        auto categorie = (*itr).get()->GetSelectedCategorie();
+
+        if (selectedTextID == m_selectedTextID && categorie == selectedCategorie)
+        {
+            m_dialogSprites.erase(itr);
+            break;
+        }
+        else
+            ++itr;
+    }
+    m_selectedTextID = 0;
+    ResetInputToDefault();
 }
 
 sf::Text *Game::RenderDialog()
@@ -2081,7 +2128,7 @@ sf::Text *Game::RenderDialog()
 
         text->setColor(sf::Color(255, 255, 255));
 
-        auto textID = data.get()->GetID();
+        auto textID = data.get()->GetSelectedTextID();
         auto txt = data.get()->GetText();
 
         if (txt->getPosition().y >= i)
@@ -2134,7 +2181,7 @@ uint8_t Game::GetDialogSelectedID(const SelectedTextCategorie selectedCategorie)
 {
     for (const auto &data : m_dialogTexts)
     {
-        auto textID = data.get()->GetID();
+        auto textID = data.get()->GetSelectedTextID();
         auto categorie = data.get()->GetSelectedCategorie();
 
         if (m_selectedTextID == textID && categorie == selectedCategorie)

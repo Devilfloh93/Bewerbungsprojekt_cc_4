@@ -171,13 +171,14 @@ public:
     void InitHotkeys();
 
     // DIALOG
-    void SetDialogSprite(unique_ptr<Sprite> sprite);
+    void SetDialogSprite(unique_ptr<SelectableSprite> sprite);
     void SetDialogText(unique_ptr<SelectableText> text);
     void ClearDialog();
     sf::Text *RenderDialog();
     const vector<unique_ptr<SelectableText>> *GetDialogText() const;
     uint8_t GetDialogSelectedID(const SelectedTextCategorie selectedCategorie) const;
     void UpdateDialog(const SelectedTextCategorie selectedCategorie, const string &text);
+    void UpdateDialog(const SelectedTextCategorie selectedCategorie);
 
     void SetSelectedTextID(const uint8_t ID);
     uint8_t GetSelectedTextID() const;
@@ -231,7 +232,7 @@ private:
     vector<unique_ptr<Message>> m_messages;
     vector<unique_ptr<MessageFormat>> m_messageFormat;
 
-    vector<unique_ptr<Sprite>> m_dialogSprites;
+    vector<unique_ptr<SelectableSprite>> m_dialogSprites;
     vector<unique_ptr<SelectableText>> m_dialogTexts;
     uint8_t m_selectedTextID;
     // SETTINGS

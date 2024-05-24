@@ -49,7 +49,8 @@ enum class MenuState
 
 enum class Hotkey
 {
-    Interact = 0,
+    Unknown = 0,
+    Interact,
     Escape,
     Inventory,
     LeftMove,

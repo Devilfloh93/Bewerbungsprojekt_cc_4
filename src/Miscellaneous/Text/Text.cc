@@ -10,16 +10,17 @@ sf::Text *Text::GetText() const
 }
 
 SelectableText::SelectableText(unique_ptr<sf::Text> text,
-                               const uint16_t ID,
+                               const uint16_t selectedTextID,
                                const uint8_t selectedID,
                                const SelectedTextCategorie selectedCategorie)
-    : Text(move(text)), m_ID(ID), m_selectedID(selectedID), m_selectedCategorie(selectedCategorie)
+    : Text(move(text)), m_selectedTextID(selectedTextID), m_selectedID(selectedID),
+      m_selectedCategorie(selectedCategorie)
 {
 }
 
-uint16_t SelectableText::GetID() const
+uint16_t SelectableText::GetSelectedTextID() const
 {
-    return m_ID;
+    return m_selectedTextID;
 }
 
 uint8_t SelectableText::GetSelectedID() const

@@ -160,5 +160,14 @@
         "deDE": {
             "format": "Du hast {}x {} benutzt."
         }
+    },
+    {
+        "id": 19,
+        "enEN": {
+            "format": "You can't use {}."
+        },
+        "deDE": {
+            "format": "Du kannst {} nicht benutzen."
+        }
     }
 ]

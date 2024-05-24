@@ -72,10 +72,16 @@ bool Utilities::UpdateSpriteAndText(const bool firstMenuEntry,
                                     sf::Sprite *sprite,
                                     sf::Text *prevText,
                                     sf::Sprite *prevSprite,
-                                    sf::Text *text)
+                                    sf::Text *text,
+                                    const bool useDefaultSpaceBetweenBtns)
 {
     auto windowWidth = CalculateAlignmentWindowWidth(width, alignment);
-    auto spaceBetween = CalculateSpaceBetweenMenu(alignment);
+    float spaceBetween = 0.0F;
+
+    if (useDefaultSpaceBetweenBtns)
+        spaceBetween = CalculateSpaceBetweenMenu(Alignment::Middle);
+    else
+        spaceBetween = CalculateSpaceBetweenMenu(alignment);
 
     if (firstMenuEntry)
         SetSpriteAndTextPos(windowWidth, sprite, prevText, text, spaceBetween);
@@ -351,6 +357,46 @@ string_view Utilities::GetItemName(const Game &game, const uint8_t itemID) const
     }
 
     return "";
+}
+
+Hotkey Utilities::GetHotkey(const Game &game, const sf::Keyboard::Key &key) const
+{
+    auto hotkeys = game.GetHotkeys();
+
+    for (const auto &data : hotkeys)
+    {
+        auto hotkey = static_cast<Hotkey>(data.first);
+        auto keyID = data.second;
+
+        if (key == keyID)
+        {
+            return hotkey;
+        }
+    }
+    return Hotkey::Unknown;
+}
+
+ItemRemoved Utilities::RemoveItem(map<uint8_t, uint16_t> &items, const uint8_t ID, const uint16_t count)
+{
+    for (auto &[key, value] : items)
+    {
+        if (key == ID && value >= count)
+        {
+            uint16_t newValue = value - count;
+            if (newValue > 0)
+            {
+                value = newValue;
+                return ItemRemoved::Updated;
+            }
+            else
+            {
+                items.erase(key);
+                return ItemRemoved::Removed;
+            }
+        }
+    }
+
+    return ItemRemoved::Failed;
 }
 
 string Utilities::GetMessageFormat(const Game &game, const uint16_t messageFormatID)
