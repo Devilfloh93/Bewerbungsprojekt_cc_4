@@ -36,81 +36,63 @@ void EventHandler::MouseBtnPressed(Game &game)
 void EventHandler::Playing(Game &game, const sf::Keyboard::Key &key)
 {
     Collision collision;
+    Utilities utilities;
     auto player = game.GetPlayer();
-    auto hotkeys = game.GetHotkeys();
     auto playerPos = player->GetSprite()->getPosition();
 
-    for (const auto &data : hotkeys)
+    auto hotkey = utilities.GetHotkey(game, key);
+
+    switch (hotkey)
     {
-        auto hotkey = static_cast<Hotkey>(data.first);
-        auto keyID = data.second;
-
-        if (key == keyID)
-        {
-            switch (hotkey)
-            {
-            case Hotkey::Interact:
-                player->Interact(game);
-                m_break = true;
-                break;
-            case Hotkey::Escape:
-                game.SetMenuState(MenuState::Pause);
-                m_break = true;
-                break;
-            case Hotkey::Inventory:
-                game.SetMenuState(MenuState::Inventory);
-                player->InitInventoryItems(game);
-                m_break = true;
-                break;
-            case Hotkey::LeftMove:
-                if (collision.InViewRange(&game, {playerPos.x, playerPos.y}))
-                    player->SetMove(Move::Left);
-                break;
-            case Hotkey::RightMove:
-                if (collision.InViewRange(&game, {playerPos.x, playerPos.y}))
-                    player->SetMove(Move::Right);
-                break;
-            case Hotkey::UpMove:
-                if (collision.InViewRange(&game, {playerPos.x, playerPos.y}))
-                    player->SetMove(Move::Up);
-                break;
-            case Hotkey::DownMove:
-                if (collision.InViewRange(&game, {playerPos.x, playerPos.y}))
-                    player->SetMove(Move::Down);
-                break;
-
-            default:
-                break;
-            }
-            break;
-        }
+    case Hotkey::Interact:
+        player->Interact(game);
+        m_break = true;
+        break;
+    case Hotkey::Escape:
+        game.SetMenuState(MenuState::Pause);
+        m_break = true;
+        break;
+    case Hotkey::Inventory:
+        game.SetMenuState(MenuState::Inventory);
+        player->InitInventoryItems(game);
+        m_break = true;
+        break;
+    case Hotkey::LeftMove:
+        if (collision.InViewRange(&game, {playerPos.x, playerPos.y}))
+            player->SetMove(Move::Left);
+        break;
+    case Hotkey::RightMove:
+        if (collision.InViewRange(&game, {playerPos.x, playerPos.y}))
+            player->SetMove(Move::Right);
+        break;
+    case Hotkey::UpMove:
+        if (collision.InViewRange(&game, {playerPos.x, playerPos.y}))
+            player->SetMove(Move::Up);
+        break;
+    case Hotkey::DownMove:
+        if (collision.InViewRange(&game, {playerPos.x, playerPos.y}))
+            player->SetMove(Move::Down);
+        break;
+    default:
+        break;
     }
 }
 
 void EventHandler::KeyPressed(Game &game, const sf::Keyboard::Key &key)
 {
+    Utilities utilities;
     auto state = game.GetMenuState();
 
     if (game.GetPlaying() && game.GetMenuState() == MenuState::Playing)
         Playing(game, key);
     else
     {
-        auto hotkeys = game.GetHotkeys();
+        auto hotkey = utilities.GetHotkey(game, key);
 
-        for (const auto &data : hotkeys)
+        if (hotkey == Hotkey::Escape)
         {
-            auto hotkey = static_cast<Hotkey>(data.first);
-            auto keyID = data.second;
-
-            if (key == keyID)
-            {
-                if (hotkey == Hotkey::Escape)
-                {
-                    game.SetMenuState();
-                    m_break = true;
-                    break;
-                }
-            }
+            game.SetMenuState();
+            m_break = true;
         }
     }
 }
@@ -178,7 +160,7 @@ void EventHandler::BtnPressed(Game &game)
         for (const auto &data : *dialogText)
         {
             auto text = data.get()->GetText();
-            auto newSelectedTextID = data.get()->GetID();
+            auto newSelectedTextID = data.get()->GetSelectedTextID();
 
             auto txtPos = text->getPosition();
             auto txtLSize = text->getLocalBounds().getSize();

@@ -54,6 +54,7 @@ void Player::AddItem(const uint8_t ID, const uint16_t count)
         {
             m_items[key] = value + count;
             newItem = false;
+            break;
         }
     }
 
@@ -61,52 +62,28 @@ void Player::AddItem(const uint8_t ID, const uint16_t count)
         m_items[ID] = count;
 }
 
-bool Player::RemoveItem(const uint8_t ID, const uint16_t count)
-{
-    for (const auto &[key, value] : m_items)
-    {
-        if (key == ID && value >= count)
-        {
-            uint16_t newValue = value - count;
-            if (newValue > 0)
-                m_items[key] = newValue;
-            else
-                m_items.erase(key);
-
-            return true;
-        }
-    }
-
-    return false;
-}
-
 uint16_t Player::GetItemCount(const uint8_t ID)
 {
     return m_items[ID];
+}
+
+map<uint8_t, uint16_t> Player::GetItems() const
+{
+    return m_items;
 }
 
 void Player::UseItem(Game &game)
 {
     Utilities utilities;
     auto selectedDialogID = game.GetDialogSelectedID(SelectedTextCategorie::Nothing);
-
     auto messageFormat = utilities.GetMessageFormat(game, 15);
     if (selectedDialogID == 0)
     {
         game.AddMessage(messageFormat, MessageType::Error);
         return;
     }
-
-    uint16_t newValue = 0;
-    for (auto &[key, value] : m_items)
-    {
-        if (key == selectedDialogID)
-        {
-            value -= 1;
-            newValue = value;
-            break;
-        }
-    }
+    string name = "";
+    bool itemUsed = false;
 
     auto itemCfg = game.GetItemCfg();
     for (const auto &data : itemCfg)
@@ -114,12 +91,8 @@ void Player::UseItem(Game &game)
         auto ID = data->GetID();
         if (selectedDialogID == ID)
         {
-            auto name = data->GetName();
-
-            messageFormat = utilities.GetMessageFormat(game, 18);
-            auto message = vformat(messageFormat, make_format_args(1, name));
-            game.AddMessage(message, MessageType::Success);
-
+            name = data->GetName();
+            itemUsed = true;
             auto usableFnc = data->GetUsableFnc();
             auto usableValue = data->GetUsableValue();
 
@@ -145,6 +118,7 @@ void Player::UseItem(Game &game)
                 break;
 
             default:
+                itemUsed = false;
                 break;
             }
 
@@ -152,9 +126,31 @@ void Player::UseItem(Game &game)
         }
     }
 
-    auto message = format("{}", newValue);
+    if (itemUsed)
+    {
+        auto removed = utilities.RemoveItem(m_items, selectedDialogID, 1);
 
-    game.UpdateDialog(SelectedTextCategorie::Nothing, message);
+        if (removed != ItemRemoved::Failed)
+        {
+            messageFormat = utilities.GetMessageFormat(game, 18);
+            auto message = vformat(messageFormat, make_format_args(1, name));
+            game.AddMessage(message, MessageType::Success);
+
+            if (removed == ItemRemoved::Updated)
+            {
+                message = format("{}", m_items[selectedDialogID]);
+                game.UpdateDialog(SelectedTextCategorie::Nothing, message);
+            }
+            else if (removed == ItemRemoved::Removed)
+                game.UpdateDialog(SelectedTextCategorie::Nothing);
+        }
+    }
+    else
+    {
+        messageFormat = utilities.GetMessageFormat(game, 19);
+        auto message = vformat(messageFormat, make_format_args(name));
+        game.AddMessage(message, MessageType::Error);
+    }
 }
 
 void Player::HandleMove(sf::Clock &clock, Game *game)
@@ -386,7 +382,9 @@ void Player::InitTraderItems(Game &game)
 
                             prevPos = spriteUnique->getGlobalBounds().getPosition();
 
-                            game.SetDialogSprite(make_unique<Sprite>(move(itemSprite)));
+                            game.SetDialogSprite(make_unique<SelectableSprite>(move(itemSprite),
+                                                                               selectableID,
+                                                                               SelectedTextCategorie::Sell));
                             game.SetDialogText(make_unique<SelectableText>(move(itemText),
                                                                            selectableID,
                                                                            key,
@@ -439,7 +437,8 @@ void Player::InitTraderItems(Game &game)
                         utilities.SetTextBeforeIcon(*spriteUnique, *textUnique, prevPos);
 
                     prevPos = spriteUnique->getGlobalBounds().getPosition();
-                    game.SetDialogSprite(make_unique<Sprite>(move(itemSprite)));
+                    game.SetDialogSprite(
+                        make_unique<SelectableSprite>(move(itemSprite), selectableID, SelectedTextCategorie::Buy));
                     game.SetDialogText(
                         make_unique<SelectableText>(move(itemText), selectableID, key, SelectedTextCategorie::Buy));
                     ++selectableID;
@@ -495,7 +494,8 @@ void Player::InitInventoryItems(Game &game)
                     utilities.SetTextBeforeIcon(*spriteUnique, *textUnique, prevPos);
 
                 prevPos = spriteUnique->getGlobalBounds().getPosition();
-                game.SetDialogSprite(make_unique<Sprite>(move(itemSprite)));
+                game.SetDialogSprite(
+                    make_unique<SelectableSprite>(move(itemSprite), selectableID, SelectedTextCategorie::Nothing));
                 game.SetDialogText(
                     make_unique<SelectableText>(move(itemText), selectableID, key, SelectedTextCategorie::Nothing));
                 ++selectableID;

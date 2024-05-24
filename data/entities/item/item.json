@@ -25,7 +25,7 @@
     },
     {
         "id": 3,
-        "languageID": 2,
+        "languageID": 3,
         "maxDrop": 2,
         "textureID": 11,
         "textureData": [
@@ -41,7 +41,7 @@
     },
     {
         "id": 4,
-        "languageID": 2,
+        "languageID": 4,
         "maxDrop": 2,
         "textureID": 11,
         "textureData": [

@@ -81,17 +81,22 @@ void Trader::Buy(Game &game)
     {
         auto itemName = utilities.GetItemName(game, selectedDialogID);
         game.GetPlayer()->AddItem(selectedDialogID, inputNum);
-        m_buyingItem[selectedDialogID] -= inputNum;
+
+        auto removed = utilities.RemoveItem(m_buyingItem, selectedDialogID, inputNum);
 
         messageFormat = utilities.GetMessageFormat(game, 3);
         auto message = vformat(messageFormat, make_format_args(inputNum, itemName));
 
         game.AddMessage(message, MessageType::Success);
 
-        messageFormat = utilities.GetMessageFormat(game, 2);
-        message = vformat(messageFormat, make_format_args(m_buyingItem[selectedDialogID]));
-
-        game.UpdateDialog(SelectedTextCategorie::Buy, message);
+        if (removed == ItemRemoved::Updated)
+        {
+            messageFormat = utilities.GetMessageFormat(game, 2);
+            message = vformat(messageFormat, make_format_args(m_buyingItem[selectedDialogID]));
+            game.UpdateDialog(SelectedTextCategorie::Buy, message);
+        }
+        else if (removed == ItemRemoved::Removed)
+            game.UpdateDialog(SelectedTextCategorie::Buy);
     }
     else
     {
@@ -128,23 +133,28 @@ void Trader::Sell(Game &game)
 
     if (maxCount >= inputNum)
     {
-        auto removed = player->RemoveItem(selectedDialogID, inputNum);
+        auto playerItems = player->GetItems();
+        auto removed = utilities.RemoveItem(playerItems, selectedDialogID, inputNum);
 
-        if (removed)
+        if (removed != ItemRemoved::Failed)
         {
             auto itemName = utilities.GetItemName(game, selectedDialogID);
-            m_sellingItem[selectedDialogID] -= inputNum;
-            auto inventoryValue = player->GetItemCount(selectedDialogID);
+            removed = utilities.RemoveItem(m_sellingItem, selectedDialogID, inputNum);
 
             messageFormat = utilities.GetMessageFormat(game, 9);
             auto message = vformat(messageFormat, make_format_args(inputNum, itemName));
 
             game.AddMessage(message, MessageType::Success);
 
-            messageFormat = utilities.GetMessageFormat(game, 8);
-            message = vformat(messageFormat, make_format_args(m_sellingItem[selectedDialogID], inventoryValue));
-
-            game.UpdateDialog(SelectedTextCategorie::Sell, message);
+            if (removed == ItemRemoved::Updated)
+            {
+                auto inventoryValue = player->GetItemCount(selectedDialogID);
+                messageFormat = utilities.GetMessageFormat(game, 8);
+                message = vformat(messageFormat, make_format_args(m_sellingItem[selectedDialogID], inventoryValue));
+                game.UpdateDialog(SelectedTextCategorie::Sell, message);
+            }
+            else if (removed == ItemRemoved::Removed)
+                game.UpdateDialog(SelectedTextCategorie::Sell);
         }
         else
         {

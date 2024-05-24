@@ -9,6 +9,7 @@
 
 class Game;
 class Trader;
+class SelectableSprite;
 struct SurvivalStats
 {
     float water;
@@ -39,9 +40,9 @@ public:
     // ITEMS
     void Interact(Game &game);
     void AddItem(const uint8_t ID, const uint16_t count);
-    bool RemoveItem(const uint8_t ID, const uint16_t count);
     uint16_t GetItemCount(const uint8_t ID);
     void UseItem(Game &game);
+    map<uint8_t, uint16_t> GetItems() const;
 
     // Render
     void CheckRenderHotkey(Game *game);

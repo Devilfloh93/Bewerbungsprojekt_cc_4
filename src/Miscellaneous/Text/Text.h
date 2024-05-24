@@ -16,22 +16,21 @@ protected:
     unique_ptr<sf::Text> m_text;
 };
 
-
 class SelectableText : public Text
 {
 public:
     SelectableText(unique_ptr<sf::Text> text,
-                   const uint16_t ID,
+                   const uint16_t selectedTextID,
                    const uint8_t selectedID,
                    const SelectedTextCategorie selectedCategorie);
     ~SelectableText() = default;
 
-    uint16_t GetID() const;
+    uint16_t GetSelectedTextID() const;
     uint8_t GetSelectedID() const;
     SelectedTextCategorie GetSelectedCategorie() const;
 
 protected:
-    uint16_t m_ID;
+    uint16_t m_selectedTextID;
     uint8_t m_selectedID;
     SelectedTextCategorie m_selectedCategorie;
 };

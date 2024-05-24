@@ -47,7 +47,8 @@ public:
                              sf::Sprite *sprite,
                              sf::Text *prevText,
                              sf::Sprite *prevSprite,
-                             sf::Text *text);
+                             sf::Text *text,
+                             const bool useDefaultSpaceBetweenBtns = false);
 
     void SetTextBeforeIcon(sf::Sprite &icon, sf::Text &text, const sf::Vector2f &prevPos);
     void SetTextBeforeIcon(const uint16_t x, const uint16_t y, sf::Sprite &icon, sf::Text &text);
@@ -97,6 +98,8 @@ public:
     const sf::Texture *GetTexture(const vector<Texture *> &textures, const uint8_t textureID) const;
     sf::Text *GetTitle(const vector<Title *> &titles, const MenuState menuState) const;
     sf::Text *GetInput(const vector<Input *> &inputs, const MenuState menuState) const;
+    Hotkey GetHotkey(const Game &game, const sf::Keyboard::Key &key) const;
+    ItemRemoved RemoveItem(map<uint8_t, uint16_t> &items, const uint8_t ID, const uint16_t count);
 
     AnimTextureCombined GetAnim(const vector<Anim *> &anim, const uint8_t animID) const;
     const sf::Texture *GetAnimTexture(const vector<Anim *> &anim,

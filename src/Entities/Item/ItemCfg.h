@@ -13,6 +13,13 @@ enum class ItemFnc
     Health
 };
 
+enum class ItemRemoved
+{
+    Failed = 0,
+    Updated,
+    Removed
+};
+
 class ItemCfg final
 {
 public:
