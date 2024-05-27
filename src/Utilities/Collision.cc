@@ -197,6 +197,7 @@ void Collision::CheckCollision(Game *game, Creature *creature)
     auto creatures = game->GetCreature();
     auto playerSprite = game->GetPlayer()->GetSprite();
     auto playerObjPos = playerSprite->getPosition();
+    auto fraction = creature->GetFraction();
 
     if (InViewRange(game, playerObjPos))
     {

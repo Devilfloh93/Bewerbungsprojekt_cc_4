@@ -1,7 +1,7 @@
 [
     {
         "creatureTemplateID": 1,
-        "traderID": 0,
+        "fraction": 1,
         "pos": [
             [
                 200,
@@ -12,7 +12,7 @@
     },
     {
         "creatureTemplateID": 2,
-        "traderID": 0,
+        "fraction": 2,
         "pos": [
             [
                 400,
@@ -23,7 +23,7 @@
     },
     {
         "creatureTemplateID": 3,
-        "traderID": 0,
+        "fraction": 2,
         "pos": [
             [
                 600,

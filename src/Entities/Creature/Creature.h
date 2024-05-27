@@ -6,6 +6,12 @@
 
 using namespace std;
 
+enum class Fraction
+{
+    Neutral = 0,
+    Friend,
+    Enemy
+};
 
 class Creature : public Unit
 {
@@ -20,7 +26,8 @@ public:
              const vector<string> dialogOutro,
              const vector<string> dialogOffensive,
              const bool interactable,
-             const float maxMoveRange);
+             const float maxMoveRange,
+             const Fraction fraction);
     ~Creature() = default;
 
     bool GetInteractable() const;
@@ -28,6 +35,8 @@ public:
 
     sf::Vector2f GetSpawnPos() const;
     float GetMaxMoveRange() const;
+
+    Fraction GetFraction() const;
 
     vector<string> GetDialogIntro() const;
     vector<string> GetDialogOutro() const;
@@ -41,4 +50,5 @@ private:
     vector<string> m_dialogIntro;
     vector<string> m_dialogOutro;
     vector<string> m_dialogOffensive;
+    Fraction m_fraction;
 };
