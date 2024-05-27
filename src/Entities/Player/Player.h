@@ -16,7 +16,6 @@ struct SurvivalStats
     float food;
 };
 
-
 class Player final : public Unit
 {
 public:

@@ -326,7 +326,7 @@ void Player::InitTraderItems(Game &game)
     sf::Vector2f prevPos;
     auto itemCfg = game.GetItemCfg();
     auto fonts = game.GetFont();
-    auto width = game.GetWindowWidth();
+    auto windowSizeWidth = game.GetWindowSize().width;
     auto textures = game.GetTexture();
     auto sellingItems = m_trader->GetSellingItem();
     auto buyingItems = m_trader->GetBuyingItem();
@@ -370,7 +370,8 @@ void Player::InitTraderItems(Game &game)
                             utilities.SetSFText(textUnique, 15U, fonts, fontID, message);
 
                             utilities.SetSFSprite(spriteUnique, texture, textureData);
-                            auto alignemntWidth = utilities.CalculateAlignmentWindowWidth(width, Alignment::Right);
+                            auto alignemntWidth =
+                                utilities.CalculateAlignmentWindowWidth(windowSizeWidth, Alignment::Right);
 
                             if (firstIcon)
                             {
@@ -426,7 +427,7 @@ void Player::InitTraderItems(Game &game)
                     utilities.SetSFText(textUnique, 15U, fonts, fontID, message);
 
                     utilities.SetSFSprite(spriteUnique, texture, textureData);
-                    auto alignemntWidth = utilities.CalculateAlignmentWindowWidth(width, Alignment::Left);
+                    auto alignemntWidth = utilities.CalculateAlignmentWindowWidth(windowSizeWidth, Alignment::Left);
 
                     if (firstIcon)
                     {
@@ -457,7 +458,7 @@ void Player::InitInventoryItems(Game &game)
     sf::Vector2f prevPos;
     auto itemCfg = game.GetItemCfg();
     auto fonts = game.GetFont();
-    auto width = game.GetWindowWidth();
+    auto windowSizeWidth = game.GetWindowSize().width;
     auto titles = game.GetTitles();
     auto textures = game.GetTexture();
     uint16_t selectableID = 1;
@@ -487,7 +488,7 @@ void Player::InitInventoryItems(Game &game)
 
                 if (firstIcon)
                 {
-                    utilities.SetTextBeforeIcon(width, prevTxt, *spriteUnique, *textUnique);
+                    utilities.SetTextBeforeIcon(windowSizeWidth, prevTxt, *spriteUnique, *textUnique);
                     firstIcon = false;
                 }
                 else
@@ -524,9 +525,9 @@ void Player::Load(const uint8_t id, Game *game)
         m_sprite->setPosition(jsonData["playerPosX"], jsonData["playerPosY"]);
         view->setCenter(jsonData["viewPosX"], jsonData["viewPosY"]);
 
-        while (game->GetZoom() != jsonData["zoom"])
+        while (auto curZoom = game->GetZoom().curZoom != jsonData["zoom"])
         {
-            if (game->GetZoom() < jsonData["zoom"])
+            if (curZoom < jsonData["zoom"])
             {
                 view->zoom(0.5F);
                 game->SetZoom(1U);
@@ -566,7 +567,7 @@ void Player::Save(Game *game)
                          {"items", m_items},
                          {"viewPosX", game->GetView()->getCenter().x},
                          {"viewPosY", game->GetView()->getCenter().y},
-                         {"zoom", game->GetZoom()}};
+                         {"zoom", game->GetZoom().curZoom}};
 
         file << jsonData;
         file.close();
