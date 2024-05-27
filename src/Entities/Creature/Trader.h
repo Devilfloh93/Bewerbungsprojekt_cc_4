@@ -22,7 +22,8 @@ public:
            const bool interactable,
            const map<uint8_t, uint16_t> sellingItem,
            const map<uint8_t, uint16_t> buyingItem,
-           const float maxMoveRange);
+           const float maxMoveRange,
+           const Fraction fraction);
     ~Trader() = default;
 
     map<uint8_t, uint16_t> GetSellingItem() const;

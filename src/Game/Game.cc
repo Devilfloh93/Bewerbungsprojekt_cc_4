@@ -531,6 +531,7 @@ void Game::LoadHotkeys()
 
         for (const auto &data : jsonData)
         {
+
             uint8_t hotkeyID = data["hotkeyID"];
             uint16_t sfmlHotkey = data["SFMLHotkey"];
 
@@ -1092,13 +1093,20 @@ void Game::InitCreature()
             const sf::Texture *texture;
             AnimTextureCombined animData;
             uint8_t templateId = data["creatureTemplateID"];
-            uint8_t traderID = data["traderID"];
+            Fraction fraction = Fraction::Neutral;
+            uint8_t traderID = 0;
             vector<string> dialogIntro;
             vector<string> dialogOutro;
             vector<string> dialogOffensive;
             map<uint8_t, uint16_t> sellingItem;
             map<uint8_t, uint16_t> buyingItem;
             float maxMoveRange;
+
+            if (data.contains("traderID"))
+                traderID = data["traderID"];
+
+            if (data.contains("fraction"))
+                fraction = data["fraction"];
 
             for (const auto &data1 : jsonDataCreatureTemplate)
             {
@@ -1183,7 +1191,8 @@ void Game::InitCreature()
                                              interactable,
                                              sellingItem,
                                              buyingItem,
-                                             maxMoveRange);
+                                             maxMoveRange,
+                                             fraction);
 
                     m_creature.push_back(trader);
                 }
@@ -1198,7 +1207,8 @@ void Game::InitCreature()
                                                  dialogOutro,
                                                  dialogOffensive,
                                                  interactable,
-                                                 maxMoveRange);
+                                                 maxMoveRange,
+                                                 fraction);
 
                     m_creature.push_back(creature);
                 }
@@ -1492,7 +1502,7 @@ void Game::RenderMenu()
 
     for (const auto &data : m_titles)
     {
-        bool firstMenuEntry = true;
+        bool usePrevText = true;
         bool dialogRenderExecuted = false;
 
         if (m_menuState == data->GetMenuState())
@@ -1516,6 +1526,7 @@ void Game::RenderMenu()
                     m_window->draw(*text);
 
                     prevSprite = sprite;
+                    usePrevText = false;
                 }
             }
 
@@ -1534,9 +1545,10 @@ void Game::RenderMenu()
             case MenuState::OpenLoad:
             case MenuState::Inventory:
             case MenuState::Trader:
-                if (m_dialogTexts.size() > 0)
+                if (!m_dialogTexts.empty())
                 {
                     prevText = RenderDialog();
+                    usePrevText = true;
                     dialogRenderExecuted = true;
                 }
                 break;
@@ -1561,18 +1573,17 @@ void Game::RenderMenu()
                         if (!dialogRenderExecuted)
                         {
                             useDefaultSpaceBetweenBtns = true;
-                            firstMenuEntry = false;
                             dialogRenderExecuted = true;
                         }
 
-                        firstMenuEntry = utilities.UpdateSpriteAndText(firstMenuEntry,
-                                                                       alignment,
-                                                                       m_windowWidth,
-                                                                       btnSprite,
-                                                                       prevText,
-                                                                       prevSprite,
-                                                                       btnText,
-                                                                       useDefaultSpaceBetweenBtns);
+                        usePrevText = utilities.UpdateSpriteAndText(usePrevText,
+                                                                    alignment,
+                                                                    m_windowWidth,
+                                                                    btnSprite,
+                                                                    prevText,
+                                                                    prevSprite,
+                                                                    btnText,
+                                                                    useDefaultSpaceBetweenBtns);
 
                         prevSprite = btnSprite;
                     }
