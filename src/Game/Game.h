@@ -183,8 +183,8 @@ public:
     void SetSelectedTextID(const uint8_t ID);
     uint8_t GetSelectedTextID() const;
 
-    MenuState GetMenuState() const;
-    void SetMenuState(const MenuState menuState);
+    pair<MenuState, bool> GetMenuState() const;
+    void SetMenuState(const MenuState menuState, const bool rePositioning);
     void SetMenuState();
     void ResetMenuState();
 
@@ -253,8 +253,8 @@ private:
     float m_renderPuffer;
     sf::Text *m_hotkeyRender;
 
-    MenuState m_menuState;
-    vector<MenuState> m_lastMenuState;
+    pair<MenuState, bool> m_menuState;
+    vector<pair<MenuState, bool>> m_lastMenuState;
     // INPUT
     Input *m_selectedInput;
 };

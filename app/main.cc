@@ -66,7 +66,7 @@ int main()
          * @brief While the Game is running the Render() will be executed and while we are in a Menu the RenderMenu() will be executed
          *
          */
-        if (game.GetPlaying() && game.GetMenuState() == MenuState::Playing)
+        if (game.GetPlaying() && game.GetMenuState().first == MenuState::Playing)
             game.Render(clock);
         else
             game.RenderMenu();

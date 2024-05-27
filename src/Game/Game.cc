@@ -11,7 +11,7 @@
 using json = nlohmann::json;
 using namespace std;
 
-Game::Game() : m_menuState(MenuState::Main)
+Game::Game() : m_menuState(MenuState::Main, false)
 {
     m_selectedInput = nullptr;
     m_renderPuffer = 200.0F;
@@ -545,7 +545,7 @@ void Game::LoadHotkeys()
 void Game::InitPlayer()
 {
     bool startGame = false;
-    switch (m_menuState)
+    switch (m_menuState.first)
     {
     case MenuState::Create:
         if (CreatePlayer())
@@ -580,7 +580,7 @@ void Game::InitPlayer()
         ResizeStats();
 
         m_playing = true;
-        SetMenuState(MenuState::Playing);
+        SetMenuState(MenuState::Playing, false);
 
         // Thread Init
         m_thread = new Thread(this);
@@ -1499,20 +1499,21 @@ void Game::RenderMenu()
     m_window->setView(*m_menuView);
     Utilities utilities;
     sf::Sprite *prevSprite;
+    auto gameMenuState = m_menuState.first;
 
     for (const auto &data : m_titles)
     {
         bool usePrevText = true;
         bool dialogRenderExecuted = false;
 
-        if (m_menuState == data->GetMenuState())
+        if (gameMenuState == data->GetMenuState())
         {
             auto prevText = data->GetText();
             m_window->draw(*prevText);
 
             for (const auto &data1 : m_inputs)
             {
-                if (m_menuState == data1->GetMenuState())
+                if (gameMenuState == data1->GetMenuState())
                 {
                     auto text = data1->GetText();
                     auto sprite = data1->GetSprite();
@@ -1530,7 +1531,7 @@ void Game::RenderMenu()
                 }
             }
 
-            switch (m_menuState)
+            switch (gameMenuState)
             {
             case MenuState::Hotkeys:
                 for (const auto &data1 : m_hotkeyMenu)
@@ -1560,12 +1561,11 @@ void Game::RenderMenu()
             {
                 auto menuStates = data1->GetMenuState();
 
-                if (m_menuState == menuStates)
+                if (gameMenuState == menuStates)
                 {
                     auto btnSprite = data1->GetSprite();
                     auto btnText = data1->GetText();
-                    if (m_menuState == MenuState::OpenLoad || m_menuState == MenuState::Hotkeys ||
-                        m_menuState == MenuState::Trader || m_menuState == MenuState::Inventory)
+                    if (m_menuState.second == true)
                     {
                         bool useDefaultSpaceBetweenBtns = false;
                         auto alignment = data1->GetAlignment();
@@ -2162,22 +2162,24 @@ const vector<unique_ptr<SelectableText>> *Game::GetDialogText() const
     return &m_dialogTexts;
 }
 
-MenuState Game::GetMenuState() const
+pair<MenuState, bool> Game::GetMenuState() const
 {
     return m_menuState;
 }
 
-void Game::SetMenuState(const MenuState menuState)
+void Game::SetMenuState(const MenuState menuState, const bool rePositioning)
 {
     m_lastMenuState.push_back(m_menuState);
-    m_menuState = menuState;
+    m_menuState.first = menuState;
+    m_menuState.second = rePositioning;
 }
 
 void Game::SetMenuState()
 {
     if (!m_lastMenuState.empty())
     {
-        m_menuState = m_lastMenuState.back();
+        m_menuState.first = m_lastMenuState.back().first;
+        m_menuState.second = m_lastMenuState.back().second;
         m_lastMenuState.pop_back();
     }
 }
@@ -2185,7 +2187,8 @@ void Game::SetMenuState()
 void Game::ResetMenuState()
 {
     m_lastMenuState.clear();
-    m_menuState = MenuState::Main;
+    m_menuState.first = MenuState::Main;
+    m_menuState.second = false;
 }
 
 uint8_t Game::GetDialogSelectedID(const SelectedTextCategorie selectedCategorie) const
@@ -2228,7 +2231,7 @@ void Game::ResetInputToDefault()
 {
     for (const auto &data : m_inputs)
     {
-        if (data->GetMenuState() == m_menuState)
+        if (data->GetMenuState() == m_menuState.first)
             data->ResetToDefaultString(m_windowWidth);
     }
 }
@@ -2239,7 +2242,7 @@ string Game::GetInputString() const
     {
         for (const auto &data : m_inputs)
         {
-            if (m_menuState == data->GetMenuState() && m_selectedInput == data)
+            if (m_menuState.first == data->GetMenuState() && m_selectedInput == data)
                 return data->GetString();
         }
     }
@@ -2290,7 +2293,7 @@ void Game::AddMessage(const string &message, const MessageType type)
     for (const auto &data : m_titles)
     {
         auto state = data->GetMenuState();
-        if (state == m_menuState)
+        if (state == m_menuState.first)
         {
             auto textPosition = data->GetText()->getPosition();
             auto textSize = data->GetText()->getLocalBounds().getSize();
