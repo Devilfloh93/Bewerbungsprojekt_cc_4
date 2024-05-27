@@ -1562,12 +1562,12 @@ void Game::RenderMenu()
 
                 if (m_menuState == menuStates)
                 {
-                    bool useDefaultSpaceBetweenBtns = false;
                     auto btnSprite = data1->GetSprite();
                     auto btnText = data1->GetText();
                     if (m_menuState == MenuState::OpenLoad || m_menuState == MenuState::Hotkeys ||
                         m_menuState == MenuState::Trader || m_menuState == MenuState::Inventory)
                     {
+                        bool useDefaultSpaceBetweenBtns = false;
                         auto alignment = data1->GetAlignment();
 
                         if (!dialogRenderExecuted)
