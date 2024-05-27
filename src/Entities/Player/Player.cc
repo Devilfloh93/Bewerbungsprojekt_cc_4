@@ -186,7 +186,7 @@ void Player::UpdateStats(Game *game)
 {
     auto statDecay = game->GetStatDecay();
 
-    if (game->GetPlaying() && game->GetMenuState() == MenuState::Playing)
+    if (game->GetPlaying() && game->GetMenuState().first == MenuState::Playing)
     {
         if (m_survivalStats.food - statDecay.food < 0U)
             m_survivalStats.food = 0;
@@ -215,7 +215,7 @@ void Player::Interact(Game &game)
         if (tradeable)
         {
             m_trader = static_cast<Trader *>(m_creatureInFront);
-            game.SetMenuState(MenuState::Trader);
+            game.SetMenuState(MenuState::Trader, true);
             InitTraderItems(game);
         }
     }

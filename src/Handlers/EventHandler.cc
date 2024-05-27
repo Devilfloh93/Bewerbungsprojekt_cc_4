@@ -25,7 +25,7 @@ void EventHandler::Quit(Game &game)
 
 void EventHandler::MouseBtnPressed(Game &game)
 {
-    auto state = game.GetMenuState();
+    auto state = game.GetMenuState().first;
 
     if (state != MenuState::Playing)
         BtnPressed(game);
@@ -49,11 +49,11 @@ void EventHandler::Playing(Game &game, const sf::Keyboard::Key &key)
         m_break = true;
         break;
     case Hotkey::Escape:
-        game.SetMenuState(MenuState::Pause);
+        game.SetMenuState(MenuState::Pause, false);
         m_break = true;
         break;
     case Hotkey::Inventory:
-        game.SetMenuState(MenuState::Inventory);
+        game.SetMenuState(MenuState::Inventory, true);
         player->InitInventoryItems(game);
         m_break = true;
         break;
@@ -81,9 +81,9 @@ void EventHandler::Playing(Game &game, const sf::Keyboard::Key &key)
 void EventHandler::KeyPressed(Game &game, const sf::Keyboard::Key &key)
 {
     Utilities utilities;
-    auto state = game.GetMenuState();
+    auto state = game.GetMenuState().first;
 
-    if (game.GetPlaying() && game.GetMenuState() == MenuState::Playing)
+    if (game.GetPlaying() && state == MenuState::Playing)
         Playing(game, key);
     else
     {
@@ -102,7 +102,7 @@ void EventHandler::TxtEntered(Game &game, const sf::Uint32 character)
     auto selectedInput = game.GetSelectedInput();
     if (selectedInput != nullptr)
     {
-        auto state = game.GetMenuState();
+        auto state = game.GetMenuState().first;
         auto width = game.GetWindowWidth();
 
         for (const auto &data : game.GetInput())
@@ -120,7 +120,7 @@ void EventHandler::TxtEntered(Game &game, const sf::Uint32 character)
 
 void EventHandler::KeyReleased(const Game &game)
 {
-    auto state = game.GetMenuState();
+    auto state = game.GetMenuState().first;
     auto player = game.GetPlayer();
 
     if (game.GetPlaying() && state == MenuState::Playing)
@@ -135,7 +135,7 @@ void EventHandler::KeyReleased(const Game &game)
 }
 void EventHandler::MouseWheelScrolled(Game &game, float delta)
 {
-    auto state = game.GetMenuState();
+    auto state = game.GetMenuState().first;
 
     if (game.GetPlaying() && state == MenuState::Playing)
         game.UpdateZoom(delta);
@@ -150,7 +150,7 @@ void EventHandler::BtnPressed(Game &game)
     // convert it to world coordinates
     auto worldPos = window->mapPixelToCoords(pixelPos);
 
-    auto menuState = game.GetMenuState();
+    auto menuState = game.GetMenuState().first;
     auto btns = game.GetBtn();
 
     if (menuState == MenuState::OpenLoad || menuState == MenuState::Trader || menuState == MenuState::Inventory)
@@ -210,14 +210,14 @@ void EventHandler::BtnPressed(Game &game)
                 m_break = true;
                 break;
             case BtnFunc::Resume:
-                game.SetMenuState(MenuState::Playing);
+                game.SetMenuState(MenuState::Playing, false);
                 m_break = true;
                 break;
             case BtnFunc::Quit:
                 Quit(game);
                 break;
             case BtnFunc::Options:
-                game.SetMenuState(MenuState::Options);
+                game.SetMenuState(MenuState::Options, false);
                 m_break = true;
                 break;
             case BtnFunc::Back:
@@ -225,7 +225,7 @@ void EventHandler::BtnPressed(Game &game)
                 m_break = true;
                 break;
             case BtnFunc::OpenResolution:
-                game.SetMenuState(MenuState::Resolution);
+                game.SetMenuState(MenuState::Resolution, false);
                 m_break = true;
                 break;
             case BtnFunc::Resolution1280x720:
@@ -241,17 +241,17 @@ void EventHandler::BtnPressed(Game &game)
                 m_break = true;
                 break;
             case BtnFunc::Save:
-                game.SetMenuState(MenuState::Save);
+                game.SetMenuState(MenuState::Save, false);
                 game.Saving(false);
                 m_break = true;
                 break;
             case BtnFunc::OpenLoad:
-                game.SetMenuState(MenuState::OpenLoad);
+                game.SetMenuState(MenuState::OpenLoad, true);
                 game.CreateLoadMenu();
                 m_break = true;
                 break;
             case BtnFunc::Create:
-                game.SetMenuState(MenuState::Create);
+                game.SetMenuState(MenuState::Create, false);
                 game.SetSelectedInput(nullptr);
                 game.ResetInputToDefault();
                 m_break = true;
@@ -259,7 +259,7 @@ void EventHandler::BtnPressed(Game &game)
             case BtnFunc::Load:
                 if (game.GetDialogSelectedID(SelectedTextCategorie::Nothing) != 0)
                 {
-                    game.SetMenuState(MenuState::Load);
+                    game.SetMenuState(MenuState::Load, false);
                     game.InitPlayer();
                     m_break = true;
                 }
@@ -274,7 +274,7 @@ void EventHandler::BtnPressed(Game &game)
                 m_break = true;
                 break;
             case BtnFunc::Language:
-                game.SetMenuState(MenuState::Language);
+                game.SetMenuState(MenuState::Language, false);
                 m_break = true;
                 break;
             case BtnFunc::ChangeLanguageEN:
@@ -286,7 +286,7 @@ void EventHandler::BtnPressed(Game &game)
                 m_break = true;
                 break;
             case BtnFunc::OpenHotkeys:
-                game.SetMenuState(MenuState::Hotkeys);
+                game.SetMenuState(MenuState::Hotkeys, true);
                 m_break = true;
                 break;
             case BtnFunc::Buy:
