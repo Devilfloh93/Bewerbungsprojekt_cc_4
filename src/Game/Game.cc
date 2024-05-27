@@ -15,14 +15,14 @@ Game::Game() : m_menuState(MenuState::Main, false)
 {
     m_selectedInput = nullptr;
     m_renderPuffer = 200.0F;
-    m_maxZoom = 3U;
     m_playing = false;
     m_defaultAnimID = 0;
+
+    m_zoom = {.curZoom = 0U, .maxZoom = 3U};
     m_statDecay = {.food = 0.2F, .water = 0.5F};
-    m_gameWidth = 8800U;
-    m_gameHeight = 4800U;
-    m_tileSize = 32U;
-    m_maxTiles = ((m_gameWidth * m_gameHeight) / m_tileSize) / m_tileSize;
+    m_gameSize = {.width = 8800U, .height = 4800U};
+    m_surfaceSize = {.tileSize = 32U, .maxTiles = 0U};
+    m_surfaceSize.maxTiles = ((m_gameSize.width * m_gameSize.height) / m_surfaceSize.tileSize) / m_surfaceSize.tileSize;
 }
 
 // BE CAREFUL WITH CHANGING INITIALIZING ORDER
@@ -98,35 +98,20 @@ void Game::Unload()
 }
 
 // AREA
-uint8_t Game::GetTileSize() const
+SurfaceSize Game::GetSurfaceSize() const
 {
-    return m_tileSize;
+    return m_surfaceSize;
 }
 
-uint16_t Game::GetGameWidth() const
+GameSize Game::GetGameSize() const
 {
-    return m_gameWidth;
-}
-
-uint16_t Game::GetGameHeight() const
-{
-    return m_gameHeight;
+    return m_gameSize;
 }
 
 // WINDOW
-uint16_t Game::GetWindowWidth() const
+WindowSize Game::GetWindowSize() const
 {
-    return m_windowWidth;
-}
-
-void Game::SetWindowHeight(uint16_t height)
-{
-    m_windowHeight = height;
-}
-
-void Game::SetWindowWidth(uint16_t width)
-{
-    m_windowWidth = width;
+    return m_windowSize;
 }
 
 sf::RenderWindow *Game::GetWindow()
@@ -137,37 +122,34 @@ sf::RenderWindow *Game::GetWindow()
 // ZOOM
 void Game::SetZoom(const uint8_t zoom)
 {
-    m_zoom += zoom;
-}
-
-uint8_t Game::GetMaxZoom() const
-{
-    return m_maxZoom;
+    m_zoom.curZoom += zoom;
 }
 
 void Game::SetZoom(const uint8_t zoom, const float zoomLevel)
 {
     m_view->zoom(zoomLevel);
-    m_zoom += zoom;
+    m_zoom.curZoom += zoom;
 }
 
 void Game::UpdateZoom(const float delta)
 {
+    auto curZoom = m_zoom.curZoom;
+
     if (delta > 0U)
     {
-        if (m_zoom < m_maxZoom)
+        if (curZoom < m_zoom.maxZoom)
             SetZoom(1U, 0.5F);
     }
     else
     {
-        if (m_zoom > 0U)
+        if (curZoom > 0U)
             SetZoom(-1, 2.0F);
     }
 
     UpdateView();
 }
 
-uint8_t Game::GetZoom() const
+Zoom Game::GetZoom() const
 {
     return m_zoom;
 }
@@ -237,9 +219,11 @@ sf::View *Game::GetView()
 void Game::UpdateView()
 {
     auto size = m_view->getSize();
+    auto gameSizeWidth = m_gameSize.width;
+    auto gameSizeHeight = m_gameSize.height;
 
-    if (m_view->getCenter().x >= m_gameWidth - (size.x / 2U))
-        m_view->setCenter({m_gameWidth - (size.x / 2U), m_view->getCenter().y});
+    if (m_view->getCenter().x >= gameSizeWidth - (size.x / 2U))
+        m_view->setCenter({gameSizeWidth - (size.x / 2U), m_view->getCenter().y});
 
     if (m_view->getCenter().x <= 0U + (size.x / 2U))
         m_view->setCenter({size.x / 2U, m_view->getCenter().y});
@@ -247,14 +231,16 @@ void Game::UpdateView()
     if (m_view->getCenter().y <= 0U + (size.y / 2U))
         m_view->setCenter({m_view->getCenter().x, size.y / 2U});
 
-    if (m_view->getCenter().y >= m_gameHeight - (size.y / 2U))
-        m_view->setCenter({m_view->getCenter().x, m_gameHeight - (size.y / 2U)});
+    if (m_view->getCenter().y >= gameSizeHeight - (size.y / 2U))
+        m_view->setCenter({m_view->getCenter().x, gameSizeHeight - (size.y / 2U)});
 
     ResizeStats();
 }
 
 void Game::HandleViewPosition()
 {
+    auto gameSizeWidth = m_gameSize.width;
+    auto gameSizeHeight = m_gameSize.height;
     // get the current mouse position in the window
     sf::Vector2i pixelPos = sf::Mouse::getPosition(*m_window);
     // convert it to world coordinates
@@ -269,8 +255,8 @@ void Game::HandleViewPosition()
     // RIGHT
     if (moveX > 0U)
     {
-        if (moveX + center.x >= m_gameWidth - (size.x / 2U))
-            m_view->setCenter({m_gameWidth - (size.x / 2U), center.y});
+        if (moveX + center.x >= gameSizeWidth - (size.x / 2U))
+            m_view->setCenter({gameSizeWidth - (size.x / 2U), center.y});
         else
             m_view->move({moveX, 0U});
     }
@@ -293,8 +279,8 @@ void Game::HandleViewPosition()
     }
     else // DOWN
     {
-        if (moveY + center.y >= m_gameHeight - (size.y / 2U))
-            m_view->setCenter({center.x, m_gameHeight - (size.y / 2U)});
+        if (moveY + center.y >= gameSizeHeight - (size.y / 2U))
+            m_view->setCenter({center.x, gameSizeHeight - (size.y / 2U)});
         else
             m_view->move({0U, moveY});
     }
@@ -456,9 +442,11 @@ void Game::LoadGeneral()
         auto jsonData = json::parse(file);
 
         m_language = jsonData["language"];
-        m_windowWidth = jsonData["resolutionWidth"];
-        m_windowHeight = jsonData["resolutionHeight"];
-        m_windowStyle = jsonData["resolutionStyle"];
+
+        uint16_t windowWidth = jsonData["windowWidth"];
+        uint16_t windowHeight = jsonData["windowHeight"];
+        m_windowSize = {.width = windowWidth, .height = windowHeight};
+        m_windowStyle = jsonData["windowStyle"];
 
         file.close();
     }
@@ -478,8 +466,7 @@ void Game::LoadGeneral()
          * @brief Comment this back in to enable a standalone window for better testing
          * @test
          */
-        m_windowWidth = 1280U;
-        m_windowHeight = 720U;
+        m_windowSize = {.width = 1280U, .height = 720U};
         m_windowStyle = 4;
     }
 }
@@ -493,18 +480,26 @@ void Game::InitHotkeys()
     {
         auto jsonDataLanguage = json::parse(fileLanguage);
 
-        for (const auto &[key, value] : m_hotkeys)
+        auto prevTxt = utilities.GetTitle(m_titles, MenuState::Hotkeys);
+
+        for (uint8_t i = 1; const auto &[key, value] : m_hotkeys)
         {
             auto hotkeyName = utilities.GetLanguageText(jsonDataLanguage, key, m_language);
             auto hotkeyString = utilities.GetAnsiString(value);
+            auto spaceBetween = utilities.CalculateSpaceBetweenMenu(Alignment::Middle);
 
             auto string = format("{} : {}", hotkeyName, hotkeyString);
 
-            auto newText = new sf::Text();
+            auto newText = make_unique<sf::Text>();
+            auto uniqueText = newText.get();
 
-            utilities.SetSFText(newText, 20U, m_fonts, 0U, string);
+            utilities.SetSFText(uniqueText, 20U, m_fonts, 0U, string);
 
-            m_hotkeyMenu.push_back(newText);
+            utilities.SetTitlePos(m_windowSize.width, prevTxt, uniqueText, spaceBetween);
+            prevTxt = uniqueText;
+
+            m_hotkeyMenu.push_back(make_unique<SelectableText>(move(newText), i, key, SelectedTextCategorie::Nothing));
+            ++i;
         }
 
         auto interact = m_hotkeys[static_cast<uint8_t>(Hotkey::Interact)];
@@ -592,7 +587,7 @@ void Game::InitPlayer()
 
 void Game::InitViews()
 {
-    sf::FloatRect visibleArea(0, 0, m_windowWidth, m_windowHeight);
+    sf::FloatRect visibleArea(0, 0, m_windowSize.width, m_windowSize.height);
 
     m_view = new sf::View(visibleArea);
     m_menuView = new sf::View(visibleArea);
@@ -605,7 +600,7 @@ void Game::InitZoom()
     auto center = m_view->getCenter();
 
     m_view->zoom(0.5F);
-    m_zoom = 1U;
+    m_zoom.curZoom = 1U;
 
     m_view->move({-(center.x / 2), -(center.y / 2)});
 }
@@ -768,6 +763,8 @@ void Game::InitMenu()
         auto jsonDataInput = nlohmann::ordered_json::parse(fileInput);
         auto jsonDataInputTemplate = json::parse(fileInputTemplate);
 
+        auto windowSizeWidth = m_windowSize.width;
+
         for (const auto &dataTitle : jsonDataTitle)
         {
             Alignment alignment = jsonDataTitleTemplate["alignment"];
@@ -784,7 +781,7 @@ void Game::InitMenu()
 
             utilities.SetSFText(titleText.get(), fontSize, m_fonts, fontID, jsonDataLanguage, languageID, m_language);
 
-            utilities.SetTitlePos(m_windowWidth, titleText.get());
+            utilities.SetTitlePos(windowSizeWidth, titleText.get());
 
             auto newTitle = new Title(state, move(titleText), alignment);
             m_titles.push_back(newTitle);
@@ -835,7 +832,7 @@ void Game::InitMenu()
 
                     firstMenuEntry = utilities.UpdateSpriteAndText(firstMenuEntry,
                                                                    alignment,
-                                                                   m_windowWidth,
+                                                                   windowSizeWidth,
                                                                    newSprite.get(),
                                                                    prevText,
                                                                    prevSprite,
@@ -884,7 +881,7 @@ void Game::InitMenu()
 
                     firstMenuEntry = utilities.UpdateSpriteAndText(firstMenuEntry,
                                                                    alignment,
-                                                                   m_windowWidth,
+                                                                   windowSizeWidth,
                                                                    newSprite.get(),
                                                                    prevText,
                                                                    prevSprite,
@@ -924,8 +921,11 @@ void Game::InitSurface()
     if (file.is_open())
     {
         auto jsonData = json::parse(file);
+        auto tileSize = m_surfaceSize.tileSize;
+        auto gameSizeWidth = m_gameSize.width;
+        auto gameSizeHeight = m_gameSize.height;
 
-        for (size_t i = 0; i < m_maxTiles; ++i)
+        for (size_t i = 0; i < m_surfaceSize.maxTiles; ++i)
         {
             sf::Texture *texture;
             uint8_t id;
@@ -935,7 +935,7 @@ void Game::InitSurface()
             auto rnd = dist(gen);
             bool canCreate = false;
 
-            if (j * m_tileSize >= m_gameWidth)
+            if (j * tileSize >= gameSizeWidth)
             {
                 j = 0;
                 ++k;
@@ -945,7 +945,7 @@ void Game::InitSurface()
             {
                 id = data["id"];
                 textureID = data["textureID"];
-                textureData = sf::IntRect(data["textureData"][0], data["textureData"][1], m_tileSize, m_tileSize);
+                textureData = sf::IntRect(data["textureData"][0], data["textureData"][1], tileSize, tileSize);
                 speed = data["speed"];
 
                 auto texture = utilities.GetTexture(m_textures, textureID);
@@ -953,9 +953,9 @@ void Game::InitSurface()
                 switch (id)
                 {
                 case 0:
-                    if (j == 0 && k == 0 || (j * m_tileSize == (m_gameWidth - m_tileSize) && k == 0) ||
-                        (k * m_tileSize == (m_gameHeight - m_tileSize) && j == 0) ||
-                        (j * m_tileSize == (m_gameWidth - m_tileSize) && k * m_tileSize == (m_gameHeight - m_tileSize)))
+                    if (j == 0 && k == 0 || (j * tileSize == (gameSizeWidth - tileSize) && k == 0) ||
+                        (k * tileSize == (gameSizeHeight - tileSize) && j == 0) ||
+                        (j * tileSize == (gameSizeWidth - tileSize) && k * tileSize == (gameSizeHeight - tileSize)))
                         canCreate = true;
                     break;
                 case 1:
@@ -963,7 +963,7 @@ void Game::InitSurface()
                         canCreate = true;
                     break;
                 case 2:
-                    if (j * m_tileSize == (m_gameWidth - m_tileSize))
+                    if (j * tileSize == (gameSizeWidth - tileSize))
                         canCreate = true;
                     break;
                 case 3:
@@ -971,7 +971,7 @@ void Game::InitSurface()
                         canCreate = true;
                     break;
                 case 4:
-                    if (k * m_tileSize == (m_gameHeight - m_tileSize))
+                    if (k * tileSize == (gameSizeHeight - tileSize))
                         canCreate = true;
                     break;
                 case 5:
@@ -998,12 +998,8 @@ void Game::InitSurface()
                 {
                     auto tileSprite = make_unique<sf::Sprite>();
 
-                    utilities.SetSFSprite(tileSprite.get(),
-                                          m_textures,
-                                          textureID,
-                                          textureData,
-                                          j * m_tileSize,
-                                          k * m_tileSize);
+                    utilities
+                        .SetSFSprite(tileSprite.get(), m_textures, textureID, textureData, j * tileSize, k * tileSize);
 
                     auto surfaces = new Surface(move(tileSprite), speed);
                     m_surfaces.push_back(surfaces);
@@ -1064,7 +1060,7 @@ void Game::InitAnim()
 
 void Game::InitWindow()
 {
-    m_window = new sf::RenderWindow(sf::VideoMode(m_windowWidth, m_windowHeight), "Good Game", m_windowStyle);
+    m_window = new sf::RenderWindow(sf::VideoMode(m_windowSize.width, m_windowSize.height), "Good Game", m_windowStyle);
     m_window->setVerticalSyncEnabled(true);
     m_window->setFramerateLimit(60U);
     m_window->setKeyRepeatEnabled(false);
@@ -1434,7 +1430,7 @@ void Game::RenderSurface()
 
         if (collision.InViewRange(this, spritePos))
         {
-            float tileSize = m_tileSize / 2;
+            float tileSize = m_surfaceSize.tileSize / 2;
             auto isNear = utilities.CheckCreatureIsNearSurfacePos(playerPos, spritePos, tileSize);
 
             if (isNear)
@@ -1500,6 +1496,7 @@ void Game::RenderMenu()
     Utilities utilities;
     sf::Sprite *prevSprite;
     auto gameMenuState = m_menuState.first;
+    auto windowSizeWidth = m_windowSize.width;
 
     for (const auto &data : m_titles)
     {
@@ -1534,21 +1531,16 @@ void Game::RenderMenu()
             switch (gameMenuState)
             {
             case MenuState::Hotkeys:
-                for (const auto &data1 : m_hotkeyMenu)
-                {
-                    auto spaceBetween = utilities.CalculateSpaceBetweenMenu(Alignment::Middle);
-
-                    utilities.SetTitlePos(m_windowWidth, prevText, data1, spaceBetween);
-                    m_window->draw(*data1);
-                    prevText = data1;
-                }
+                prevText = RenderSelectableTextDialog(&m_hotkeyMenu);
+                usePrevText = true;
                 break;
             case MenuState::OpenLoad:
             case MenuState::Inventory:
             case MenuState::Trader:
                 if (!m_dialogTexts.empty())
                 {
-                    prevText = RenderDialog();
+                    RenderSelectableSpriteDialog();
+                    prevText = RenderSelectableTextDialog(&m_dialogTexts);
                     usePrevText = true;
                     dialogRenderExecuted = true;
                 }
@@ -1578,7 +1570,7 @@ void Game::RenderMenu()
 
                         usePrevText = utilities.UpdateSpriteAndText(usePrevText,
                                                                     alignment,
-                                                                    m_windowWidth,
+                                                                    windowSizeWidth,
                                                                     btnSprite,
                                                                     prevText,
                                                                     prevSprite,
@@ -1620,7 +1612,7 @@ void Game::CreateLoadMenu()
         auto newSaveFileText = make_unique<sf::Text>(message, *font, 20U);
         auto saveFileText = newSaveFileText.get();
 
-        utilities.SetTitlePos(m_windowWidth, prevTxt, saveFileText, spaceBetween);
+        utilities.SetTitlePos(m_windowSize.width, prevTxt, saveFileText, spaceBetween);
         prevTxt = saveFileText;
 
         m_dialogTexts.push_back(
@@ -1824,18 +1816,18 @@ void Game::SaveGroundItems(const bool destroy)
 // RESIZE
 void Game::ResizeWindow(const uint16_t width, const uint16_t height)
 {
-    if (m_windowWidth != width || m_windowHeight != height)
+    if (m_windowSize.width != width || m_windowSize.height != height)
     {
-        m_windowWidth = width;
-        m_windowHeight = height;
+        m_windowSize.width = width;
+        m_windowSize.height = height;
 
         delete m_window;
         m_window = nullptr;
 
-        m_window = new sf::RenderWindow(sf::VideoMode(m_windowWidth, m_windowHeight), "Good Game", m_windowStyle);
+        m_window = new sf::RenderWindow(sf::VideoMode(width, height), "Good Game", m_windowStyle);
         SetWindowProperties();
 
-        sf::FloatRect visibleArea(0, 0, m_windowWidth, m_windowHeight);
+        sf::FloatRect visibleArea(0, 0, width, height);
 
         delete m_menuView;
         m_menuView = nullptr;
@@ -1844,7 +1836,7 @@ void Game::ResizeWindow(const uint16_t width, const uint16_t height)
 
         m_menuView = new sf::View(visibleArea);
         m_view = new sf::View(visibleArea);
-        m_window->setSize({m_windowWidth, m_windowHeight});
+        m_window->setSize({width, height});
 
         SaveGeneral();
         InitZoom();
@@ -1872,7 +1864,8 @@ void Game::FullscreenWindow()
         delete m_window;
         m_window = nullptr;
 
-        m_window = new sf::RenderWindow(sf::VideoMode(m_windowWidth, m_windowHeight), "Good Game", m_windowStyle);
+        m_window =
+            new sf::RenderWindow(sf::VideoMode(m_windowSize.width, m_windowSize.height), "Good Game", m_windowStyle);
         SetWindowProperties();
         SaveGeneral();
     }
@@ -1888,6 +1881,7 @@ void Game::SetWindowProperties()
 void Game::ResizeMenu()
 {
     Utilities utilities;
+    auto windowSizeWidth = m_windowSize.width;
 
     for (const auto &data : m_titles)
     {
@@ -1896,7 +1890,7 @@ void Game::ResizeMenu()
         auto titleState = data->GetMenuState();
 
         auto prevText = data->GetText();
-        utilities.SetTitlePos(m_windowWidth, prevText);
+        utilities.SetTitlePos(windowSizeWidth, prevText);
 
         for (const auto &dataInput : m_inputs)
         {
@@ -1911,7 +1905,7 @@ void Game::ResizeMenu()
 
                 firstMenuEntry = utilities.UpdateSpriteAndText(firstMenuEntry,
                                                                alignment,
-                                                               m_windowWidth,
+                                                               windowSizeWidth,
                                                                inputSprite,
                                                                prevText,
                                                                prevSprite,
@@ -1933,7 +1927,7 @@ void Game::ResizeMenu()
 
                 firstMenuEntry = utilities.UpdateSpriteAndText(firstMenuEntry,
                                                                alignment,
-                                                               m_windowWidth,
+                                                               windowSizeWidth,
                                                                btnSprite,
                                                                prevText,
                                                                prevSprite,
@@ -1995,6 +1989,11 @@ map<uint8_t, uint16_t> Game::GetHotkeys() const
     return m_hotkeys;
 }
 
+const vector<unique_ptr<SelectableText>> *Game::GetHotkeyMenu() const
+{
+    return &m_hotkeyMenu;
+}
+
 void Game::ChangeLanguage(const string language)
 {
     if (language == m_language)
@@ -2023,13 +2022,10 @@ void Game::ChangeLanguage(const string language)
     }
     m_inputs.clear();
 
-    for (auto &data : m_hotkeyMenu)
-    {
-        delete data;
-        data = nullptr;
-    }
-    m_hotkeyMenu.clear();
+    delete m_hotkeyRender;
+    m_hotkeyRender = nullptr;
 
+    m_hotkeyMenu.clear();
     m_messageFormat.clear();
 
     SaveGeneral();
@@ -2045,9 +2041,9 @@ void Game::SaveGeneral()
     if (file.is_open())
     {
         json jsonData = {{"language", m_language},
-                         {"resolutionWidth", m_windowWidth},
-                         {"resolutionHeight", m_windowHeight},
-                         {"resolutionStyle", m_windowStyle}};
+                         {"windowWidth", m_windowSize.width},
+                         {"windowHeight", m_windowSize.height},
+                         {"windowStyle", m_windowStyle}};
 
         file << jsonData;
         file.close();
@@ -2125,33 +2121,36 @@ void Game::UpdateDialog(const SelectedTextCategorie selectedCategorie)
     ResetInputToDefault();
 }
 
-sf::Text *Game::RenderDialog()
+void Game::RenderSelectableSpriteDialog()
 {
-    sf::Text *prevTxt;
     for (const auto &data : m_dialogSprites)
     {
-        m_window->draw(*(data.get()->GetSprite()));
+        auto sprite = data.get()->GetSprite();
+        m_window->draw(*sprite);
     }
+}
 
-    for (float i = 0.0F; const auto &data : m_dialogTexts)
+sf::Text *Game::RenderSelectableTextDialog(const vector<unique_ptr<SelectableText>> *selectableTexts)
+{
+    sf::Text *prevTxt;
+    for (float i = 0.0F; const auto &data : *selectableTexts)
     {
         auto text = data.get()->GetText();
 
         text->setColor(sf::Color(255, 255, 255));
 
         auto textID = data.get()->GetSelectedTextID();
-        auto txt = data.get()->GetText();
 
-        if (txt->getPosition().y >= i)
+        if (text->getPosition().y >= i)
         {
-            prevTxt = txt;
-            i = txt->getPosition().y;
+            prevTxt = text;
+            i = text->getPosition().y;
         }
 
         if (m_selectedTextID == textID)
             text->setColor(sf::Color(0, 255, 0));
 
-        m_window->draw(*txt);
+        m_window->draw(*text);
     }
 
     return prevTxt;
@@ -2232,7 +2231,7 @@ void Game::ResetInputToDefault()
     for (const auto &data : m_inputs)
     {
         if (data->GetMenuState() == m_menuState.first)
-            data->ResetToDefaultString(m_windowWidth);
+            data->ResetToDefaultString(m_windowSize.width);
     }
 }
 
@@ -2416,11 +2415,12 @@ void Game::ExecuteMove(Unit *unit, sf::Clock &clock)
     auto moveAllowed = unit->GetMoveAllowed();
 
     auto animData = utilities.GetAnim(m_anim, animID);
+    auto tileSize = m_surfaceSize.tileSize;
 
     switch (move)
     {
     case Move::Left:
-        if (pos.x - speed > 0 + (m_tileSize / 2) && moveAllowed.left)
+        if (pos.x - speed > 0 + (tileSize / 2) && moveAllowed.left)
         {
             utilities.PlayAnimation(sprite, clock, animData.left.notMoving, animData.left.anim01);
             sprite->setPosition(pos.x - speed, pos.y);
@@ -2429,7 +2429,7 @@ void Game::ExecuteMove(Unit *unit, sf::Clock &clock)
             sprite->setTextureRect(animData.left.notMoving);
         break;
     case Move::Right:
-        if (pos.x + speed < m_gameWidth - m_tileSize && moveAllowed.right)
+        if (pos.x + speed < m_gameSize.width - tileSize && moveAllowed.right)
         {
             utilities.PlayAnimation(sprite, clock, animData.right.notMoving, animData.right.anim01);
             sprite->setPosition(pos.x + speed, pos.y);
@@ -2438,7 +2438,7 @@ void Game::ExecuteMove(Unit *unit, sf::Clock &clock)
             sprite->setTextureRect(animData.right.notMoving);
         break;
     case Move::Down:
-        if (pos.y + speed < m_gameHeight - m_tileSize && moveAllowed.down)
+        if (pos.y + speed < m_gameSize.height - tileSize && moveAllowed.down)
         {
             utilities.PlayAnimation(sprite, clock, animData.down.anim01, animData.down.anim02);
             sprite->setPosition(pos.x, pos.y + speed);
@@ -2448,7 +2448,7 @@ void Game::ExecuteMove(Unit *unit, sf::Clock &clock)
 
         break;
     case Move::Up:
-        if (pos.y - speed > 0 + (m_tileSize / 2) && moveAllowed.up)
+        if (pos.y - speed > 0 + (tileSize / 2) && moveAllowed.up)
         {
             utilities.PlayAnimation(sprite, clock, animData.up.anim01, animData.up.anim02);
             sprite->setPosition(pos.x, pos.y - speed);

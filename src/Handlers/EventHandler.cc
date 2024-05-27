@@ -103,16 +103,16 @@ void EventHandler::TxtEntered(Game &game, const sf::Uint32 character)
     if (selectedInput != nullptr)
     {
         auto state = game.GetMenuState().first;
-        auto width = game.GetWindowWidth();
+        auto windowSize = game.GetWindowSize();
 
         for (const auto &data : game.GetInput())
         {
             if (data->GetMenuState() == state && selectedInput == data)
             {
                 if (character == 0x00000008)
-                    data->Popback(width);
+                    data->Popback(windowSize.width);
                 else
-                    data->Write(width, character);
+                    data->Write(windowSize.width, character);
             }
         }
     }
@@ -141,6 +141,31 @@ void EventHandler::MouseWheelScrolled(Game &game, float delta)
         game.UpdateZoom(delta);
 }
 
+void EventHandler::CheckTextClicked(Game &game, const vector<unique_ptr<SelectableText>> *selectableTexts)
+{
+    Utilities utilities;
+    auto window = game.GetWindow();
+    // get the current mouse position in the window
+    auto pixelPos = sf::Mouse::getPosition(*window);
+    // convert it to world coordinates
+    auto worldPos = window->mapPixelToCoords(pixelPos);
+
+    for (const auto &data : *selectableTexts)
+    {
+        auto text = data.get()->GetText();
+        auto newSelectedTextID = data.get()->GetSelectedTextID();
+
+        auto txtPos = text->getPosition();
+        auto txtLSize = text->getLocalBounds().getSize();
+
+        auto clicked = utilities.CheckTextClicked(worldPos, txtPos, txtLSize);
+        if (clicked)
+        {
+            game.SetSelectedTextID(newSelectedTextID);
+        }
+    }
+}
+
 void EventHandler::BtnPressed(Game &game)
 {
     Utilities utilities;
@@ -156,21 +181,13 @@ void EventHandler::BtnPressed(Game &game)
     if (menuState == MenuState::OpenLoad || menuState == MenuState::Trader || menuState == MenuState::Inventory)
     {
         auto dialogText = game.GetDialogText();
+        CheckTextClicked(game, dialogText);
+    }
 
-        for (const auto &data : *dialogText)
-        {
-            auto text = data.get()->GetText();
-            auto newSelectedTextID = data.get()->GetSelectedTextID();
-
-            auto txtPos = text->getPosition();
-            auto txtLSize = text->getLocalBounds().getSize();
-
-            auto clicked = utilities.CheckTextClicked(worldPos, txtPos, txtLSize);
-            if (clicked)
-            {
-                game.SetSelectedTextID(newSelectedTextID);
-            }
-        }
+    if (menuState == MenuState::Hotkeys)
+    {
+        auto hotkeyMenu = game.GetHotkeyMenu();
+        CheckTextClicked(game, hotkeyMenu);
     }
 
     for (const auto &data : game.GetInput())

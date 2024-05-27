@@ -26,6 +26,30 @@ struct StatDecay
     float water;
 };
 
+struct GameSize
+{
+    uint16_t width;
+    uint16_t height;
+};
+
+struct WindowSize
+{
+    uint16_t width;
+    uint16_t height;
+};
+
+struct SurfaceSize
+{
+    uint8_t tileSize;
+    uint32_t maxTiles;
+};
+
+struct Zoom
+{
+    uint8_t curZoom;
+    uint8_t maxZoom;
+};
+
 class Thread;
 
 class Game final
@@ -42,15 +66,12 @@ public:
     void Unload();
 
     // AREA
-    uint8_t GetTileSize() const;
-    uint16_t GetGameWidth() const;
-    uint16_t GetGameHeight() const;
+    SurfaceSize GetSurfaceSize() const;
+    GameSize GetGameSize() const;
 
     // WINDOW
     vector<World *> GetWorld() const;
-    uint16_t GetWindowWidth() const;
-    void SetWindowHeight(uint16_t width);
-    void SetWindowWidth(uint16_t height);
+    WindowSize GetWindowSize() const;
     sf::RenderWindow *GetWindow();
     void InitWindow();
 
@@ -58,8 +79,7 @@ public:
     void SetZoom(const uint8_t zoom);
     void SetZoom(const uint8_t zoom, const float zoomLevel);
     void UpdateZoom(const float delta);
-    uint8_t GetZoom() const;
-    uint8_t GetMaxZoom() const;
+    Zoom GetZoom() const;
     void InitZoom();
 
     // ANIM
@@ -163,6 +183,7 @@ public:
 
     // SETTINGS
     map<uint8_t, uint16_t> GetHotkeys() const;
+    const vector<unique_ptr<SelectableText>> *GetHotkeyMenu() const;
     void ChangeLanguage(const string language);
     void InitSettings();
     void SaveGeneral();
@@ -174,7 +195,8 @@ public:
     void SetDialogSprite(unique_ptr<SelectableSprite> sprite);
     void SetDialogText(unique_ptr<SelectableText> text);
     void ClearDialog();
-    sf::Text *RenderDialog();
+    sf::Text *RenderSelectableTextDialog(const vector<unique_ptr<SelectableText>> *selectableTexts);
+    void RenderSelectableSpriteDialog();
     const vector<unique_ptr<SelectableText>> *GetDialogText() const;
     uint8_t GetDialogSelectedID(const SelectedTextCategorie selectedCategorie) const;
     void UpdateDialog(const SelectedTextCategorie selectedCategorie, const string &text);
@@ -203,18 +225,14 @@ private:
     // RUNNING
     bool m_playing;
     // AREA
-    uint8_t m_tileSize;
-    uint32_t m_maxTiles;
-    uint16_t m_gameWidth;
-    uint16_t m_gameHeight;
+    SurfaceSize m_surfaceSize;
+    GameSize m_gameSize;
     // WINDOW
-    uint16_t m_windowWidth;
-    uint16_t m_windowHeight;
+    WindowSize m_windowSize;
     sf::RenderWindow *m_window;
     uint8_t m_windowStyle;
     // ZOOM
-    uint8_t m_maxZoom;
-    uint8_t m_zoom;
+    Zoom m_zoom;
     // VECTOR
     vector<ItemCfg *> m_itemCfg;
     vector<World *> m_world;
@@ -227,10 +245,11 @@ private:
     vector<Font *> m_fonts;
     vector<Anim *> m_anim;
     vector<Input *> m_inputs;
-    vector<sf::Text *> m_hotkeyMenu; // TODO: TEMPORARY FIX
 
     vector<unique_ptr<Message>> m_messages;
     vector<unique_ptr<MessageFormat>> m_messageFormat;
+
+    vector<unique_ptr<SelectableText>> m_hotkeyMenu;
 
     vector<unique_ptr<SelectableSprite>> m_dialogSprites;
     vector<unique_ptr<SelectableText>> m_dialogTexts;
