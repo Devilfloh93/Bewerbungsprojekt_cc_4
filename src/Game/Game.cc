@@ -146,7 +146,7 @@ void Game::UpdateZoom(const float delta)
             SetZoom(-1, 2.0F);
     }
 
-    UpdateView();
+    UpdateViewPosition();
 }
 
 Zoom Game::GetZoom() const
@@ -216,73 +216,57 @@ sf::View *Game::GetView()
     return m_view;
 }
 
-void Game::UpdateView()
+void Game::UpdateViewPosition()
 {
     auto size = m_view->getSize();
-    auto gameSizeWidth = m_gameSize.width;
-    auto gameSizeHeight = m_gameSize.height;
+    auto minGameSizeWidth = (size.x / 2U);
+    auto minGameSizeHeight = (size.y / 2U);
+    auto maxGameSizeWidth = m_gameSize.width - minGameSizeWidth;
+    auto maxGameSizeHeight = m_gameSize.height - minGameSizeHeight;
+    auto center = m_view->getCenter();
 
-    if (m_view->getCenter().x >= gameSizeWidth - (size.x / 2U))
-        m_view->setCenter({gameSizeWidth - (size.x / 2U), m_view->getCenter().y});
+    if (center.x >= maxGameSizeWidth)
+        m_view->setCenter({maxGameSizeWidth, center.y});
+    else if (center.x <= minGameSizeWidth)
+        m_view->setCenter({minGameSizeWidth, center.y});
 
-    if (m_view->getCenter().x <= 0U + (size.x / 2U))
-        m_view->setCenter({size.x / 2U, m_view->getCenter().y});
-
-    if (m_view->getCenter().y <= 0U + (size.y / 2U))
-        m_view->setCenter({m_view->getCenter().x, size.y / 2U});
-
-    if (m_view->getCenter().y >= gameSizeHeight - (size.y / 2U))
-        m_view->setCenter({m_view->getCenter().x, gameSizeHeight - (size.y / 2U)});
+    center = m_view->getCenter();
+    if (center.y >= maxGameSizeHeight)
+        m_view->setCenter({center.x, maxGameSizeHeight});
+    else if (center.y <= minGameSizeHeight)
+        m_view->setCenter({center.x, minGameSizeHeight});
 
     ResizeStats();
 }
 
-void Game::HandleViewPosition()
+void Game::UpdateViewPosition(const float posX, const float posY)
 {
-    auto gameSizeWidth = m_gameSize.width;
-    auto gameSizeHeight = m_gameSize.height;
-    // get the current mouse position in the window
-    sf::Vector2i pixelPos = sf::Mouse::getPosition(*m_window);
-    // convert it to world coordinates
-    sf::Vector2f worldPos = m_window->mapPixelToCoords(pixelPos);
-
-    auto center = m_view->getCenter();
     auto size = m_view->getSize();
+    auto minGameSizeWidth = (size.x / 2U);
+    auto minGameSizeHeight = (size.y / 2U);
+    auto maxGameSizeWidth = m_gameSize.width - minGameSizeWidth;
+    auto maxGameSizeHeight = m_gameSize.height - minGameSizeHeight;
+    auto center = m_view->getCenter();
 
-    auto moveX = worldPos.x - center.x;
-    auto moveY = worldPos.y - center.y;
+    if (posX != 0)
+    {
+        if (posX >= maxGameSizeWidth)
+            m_view->setCenter({maxGameSizeWidth, center.y});
+        else if (posX <= minGameSizeWidth)
+            m_view->setCenter({minGameSizeWidth, center.y});
+        else
+            m_view->move({(posX - center.x), 0U});
+    }
 
-    // RIGHT
-    if (moveX > 0U)
+    if (posY != 0)
     {
-        if (moveX + center.x >= gameSizeWidth - (size.x / 2U))
-            m_view->setCenter({gameSizeWidth - (size.x / 2U), center.y});
+        center = m_view->getCenter();
+        if (posY >= maxGameSizeHeight)
+            m_view->setCenter({center.x, maxGameSizeHeight});
+        else if (posY <= minGameSizeHeight)
+            m_view->setCenter({center.x, minGameSizeHeight});
         else
-            m_view->move({moveX, 0U});
-    }
-    else // LEFT
-    {
-        if (center.x + (moveX) <= 0U + (size.x / 2U))
-            m_view->setCenter({size.x / 2U, center.y});
-        else
-            m_view->move({moveX, 0U});
-    }
-    center = m_view->getCenter();
-
-    // UP
-    if (moveY < 0U)
-    {
-        if (moveY + center.y <= 0U + (size.y / 2U))
-            m_view->setCenter({center.x, size.y / 2U});
-        else
-            m_view->move({0U, moveY});
-    }
-    else // DOWN
-    {
-        if (moveY + center.y >= gameSizeHeight - (size.y / 2U))
-            m_view->setCenter({center.x, gameSizeHeight - (size.y / 2U)});
-        else
-            m_view->move({0U, moveY});
+            m_view->move({0U, (posY - center.y)});
     }
 
     ResizeStats();
@@ -309,7 +293,7 @@ bool Game::LoadPlayer(const uint8_t id)
 
     utilities.SetSFSprite(sprite.get(), texture, animData.down.notMoving);
 
-    m_player = new Player(move(sprite), m_defaultAnimID, id);
+    m_player = new Player(move(sprite), m_defaultAnimID, id, Guid::Player);
 
     return true;
 }
@@ -341,7 +325,7 @@ bool Game::CreatePlayer()
 
     utilities.SetSFSprite(sprite.get(), texture, animData.down.notMoving);
 
-    m_player = new Player(move(sprite), m_defaultAnimID, input, countFolders);
+    m_player = new Player(move(sprite), m_defaultAnimID, input, countFolders, Guid::Player);
     return true;
 }
 
@@ -1188,7 +1172,8 @@ void Game::InitCreature()
                                              sellingItem,
                                              buyingItem,
                                              maxMoveRange,
-                                             fraction);
+                                             fraction,
+                                             Guid::Creature);
 
                     m_creature.push_back(trader);
                 }
@@ -1204,7 +1189,8 @@ void Game::InitCreature()
                                                  dialogOffensive,
                                                  interactable,
                                                  maxMoveRange,
-                                                 fraction);
+                                                 fraction,
+                                                 Guid::Creature);
 
                     m_creature.push_back(creature);
                 }
@@ -1840,7 +1826,7 @@ void Game::ResizeWindow(const uint16_t width, const uint16_t height)
 
         SaveGeneral();
         InitZoom();
-        UpdateView();
+        UpdateViewPosition();
         ResizeMenu();
         ResizeStats();
     }
@@ -2403,6 +2389,44 @@ void Game::HandleCreatureMove(sf::Clock &clock)
     }
 }
 
+void Game::UpdateAutomatedView(Unit *unit)
+{
+    if (unit->GetGuid() == Guid::Player)
+    {
+        auto move = unit->GetMove();
+        auto sprite = unit->GetSprite();
+        auto pos = sprite->getPosition();
+
+        auto center = m_view->getCenter();
+        auto viewSize = m_view->getSize();
+        auto viewSizeX = (viewSize.x / 2);
+        auto viewSizeY = (viewSize.y / 2);
+
+        switch (move)
+        {
+        case Move::Left:
+            if (sprite->getPosition().x < center.x - viewSizeX)
+                UpdateViewPosition(pos.x - viewSizeX, 0.0F);
+            break;
+        case Move::Right:
+            if (sprite->getPosition().x > (center.x + viewSizeX))
+                UpdateViewPosition(pos.x + viewSizeX, 0.0F);
+            break;
+        case Move::Up:
+            if (sprite->getPosition().y < center.y - viewSizeY)
+                UpdateViewPosition(0.0F, pos.y - viewSizeY);
+            break;
+        case Move::Down:
+            if (sprite->getPosition().y > center.y + viewSizeY)
+                UpdateViewPosition(0.0F, pos.y + viewSizeY);
+            break;
+
+        default:
+            break;
+        }
+    }
+}
+
 void Game::ExecuteMove(Unit *unit, sf::Clock &clock)
 {
     Utilities utilities;
@@ -2420,7 +2444,7 @@ void Game::ExecuteMove(Unit *unit, sf::Clock &clock)
     switch (move)
     {
     case Move::Left:
-        if (pos.x - speed > 0 + (tileSize / 2) && moveAllowed.left)
+        if (pos.x - speed > (tileSize / 2) && moveAllowed.left)
         {
             utilities.PlayAnimation(sprite, clock, animData.left.notMoving, animData.left.anim01);
             sprite->setPosition(pos.x - speed, pos.y);
@@ -2448,7 +2472,7 @@ void Game::ExecuteMove(Unit *unit, sf::Clock &clock)
 
         break;
     case Move::Up:
-        if (pos.y - speed > 0 + (tileSize / 2) && moveAllowed.up)
+        if (pos.y - speed > (tileSize / 2) && moveAllowed.up)
         {
             utilities.PlayAnimation(sprite, clock, animData.up.anim01, animData.up.anim02);
             sprite->setPosition(pos.x, pos.y - speed);
@@ -2481,5 +2505,6 @@ void Game::ExecuteMove(Unit *unit, sf::Clock &clock)
         break;
     }
 
+    UpdateAutomatedView(unit);
     unit->ResetMoveAllowed();
 }

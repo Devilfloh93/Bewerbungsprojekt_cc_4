@@ -23,7 +23,8 @@ public:
            const map<uint8_t, uint16_t> sellingItem,
            const map<uint8_t, uint16_t> buyingItem,
            const float maxMoveRange,
-           const Fraction fraction);
+           const Fraction fraction,
+           const Guid guid);
     ~Trader() = default;
 
     map<uint8_t, uint16_t> GetSellingItem() const;

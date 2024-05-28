@@ -17,14 +17,18 @@
  * @param id unique PlayerID
  */
 
-Player::Player(unique_ptr<sf::Sprite> sprite, const uint8_t animID, const string_view name, const uint8_t id)
-    : Unit(move(sprite), 100.0F, 1.0F, animID), m_name(name), m_ID(id)
+Player::Player(unique_ptr<sf::Sprite> sprite,
+               const uint8_t animID,
+               const string_view name,
+               const uint8_t id,
+               const Guid guid)
+    : Unit(move(sprite), 100.0F, 1.0F, animID, guid), m_name(name), m_ID(id)
 {
     Init();
 }
 
-Player::Player(unique_ptr<sf::Sprite> sprite, const uint8_t animID, const uint8_t id)
-    : Unit(move(sprite), 100.0F, 1.0F, animID), m_ID(id)
+Player::Player(unique_ptr<sf::Sprite> sprite, const uint8_t animID, const uint8_t id, const Guid guid)
+    : Unit(move(sprite), 100.0F, 1.0F, animID, guid), m_ID(id)
 {
     Init();
 }
@@ -525,9 +529,9 @@ void Player::Load(const uint8_t id, Game *game)
         m_sprite->setPosition(jsonData["playerPosX"], jsonData["playerPosY"]);
         view->setCenter(jsonData["viewPosX"], jsonData["viewPosY"]);
 
-        while (auto curZoom = game->GetZoom().curZoom != jsonData["zoom"])
+        while (game->GetZoom().curZoom != jsonData["zoom"])
         {
-            if (curZoom < jsonData["zoom"])
+            if (game->GetZoom().curZoom < jsonData["zoom"])
             {
                 view->zoom(0.5F);
                 game->SetZoom(1U);
@@ -546,8 +550,7 @@ void Player::Load(const uint8_t id, Game *game)
 
         file.close();
     }
-
-    game->UpdateView();
+    game->UpdateViewPosition();
 }
 
 void Player::Save(Game *game)

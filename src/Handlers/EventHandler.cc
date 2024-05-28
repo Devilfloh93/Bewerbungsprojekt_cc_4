@@ -30,7 +30,15 @@ void EventHandler::MouseBtnPressed(Game &game)
     if (state != MenuState::Playing)
         BtnPressed(game);
     else if (game.GetPlaying() && state == MenuState::Playing)
-        game.HandleViewPosition();
+    {
+        auto window = game.GetWindow();
+        // get the current mouse position in the window
+        sf::Vector2i pixelPos = sf::Mouse::getPosition(*window);
+        // convert it to world coordinates
+        sf::Vector2f worldPos = window->mapPixelToCoords(pixelPos);
+
+        game.UpdateViewPosition(worldPos.x, worldPos.y);
+    }
 }
 
 void EventHandler::Playing(Game &game, const sf::Keyboard::Key &key)
@@ -133,6 +141,7 @@ void EventHandler::KeyReleased(const Game &game)
             player->SetMove(Move::NotMoving);
     }
 }
+
 void EventHandler::MouseWheelScrolled(Game &game, float delta)
 {
     auto state = game.GetMenuState().first;
