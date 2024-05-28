@@ -19,8 +19,12 @@ struct SurvivalStats
 class Player final : public Unit
 {
 public:
-    Player(unique_ptr<sf::Sprite> sprite, const uint8_t animID, const string_view name, const uint8_t id);
-    Player(unique_ptr<sf::Sprite> sprite, const uint8_t animID, const uint8_t id);
+    Player(unique_ptr<sf::Sprite> sprite,
+           const uint8_t animID,
+           const string_view name,
+           const uint8_t id,
+           const Guid guid);
+    Player(unique_ptr<sf::Sprite> sprite, const uint8_t animID, const uint8_t id, const Guid guid);
     ~Player() = default;
 
     // INIT

@@ -2,6 +2,12 @@
 #include "Sprite.h"
 #include <SFML/Graphics.hpp>
 
+struct SurfaceSize
+{
+    uint8_t tileSize;
+    uint32_t maxTiles;
+};
+
 class Surface final : public Sprite
 {
 

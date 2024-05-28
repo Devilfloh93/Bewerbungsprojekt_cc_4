@@ -9,8 +9,8 @@
  * @param animID
  */
 
-Unit::Unit(unique_ptr<sf::Sprite> sprite, const float health, const float speed, const uint8_t animID)
-    : Sprite(move(sprite)), m_health(health), m_speed(speed), m_animID(animID)
+Unit::Unit(unique_ptr<sf::Sprite> sprite, const float health, const float speed, const uint8_t animID, const Guid guid)
+    : Sprite(move(sprite)), m_health(health), m_speed(speed), m_animID(animID), m_guid(guid)
 {
     m_move = Move::NotMoving;
     m_lastMove = m_move;
@@ -29,6 +29,11 @@ float Unit::GetSpeed() const
 uint8_t Unit::GetAnimID() const
 {
     return m_animID;
+}
+
+Guid Unit::GetGuid() const
+{
+    return m_guid;
 }
 
 // MOVE

@@ -18,16 +18,24 @@ enum class Move
     Right
 };
 
+enum class Guid
+{
+    Null = 0,
+    Player,
+    Creature
+};
+
 class Unit : public Sprite
 {
 public:
-    Unit(unique_ptr<sf::Sprite> sprite, const float health, const float speed, const uint8_t animID);
+    Unit(unique_ptr<sf::Sprite> sprite, const float health, const float speed, const uint8_t animID, const Guid guid);
     ~Unit() = default;
 
     void SetSpeed(const float speed);
     float GetSpeed() const;
 
     uint8_t GetAnimID() const;
+    Guid GetGuid() const;
 
     Move GetMove() const;
     Move GetLastMove() const;
@@ -45,4 +53,5 @@ protected:
     Move m_move;
     Move m_lastMove;
     MoveAllowed m_moveAllowed;
+    Guid m_guid;
 };

@@ -15,6 +15,7 @@
 #include "Thread.h"
 #include "Title.h"
 #include "Trader.h"
+#include "Unit.h"
 #include "Utilities.h"
 #include "World.h"
 #include <SFML/Graphics.hpp>
@@ -36,12 +37,6 @@ struct WindowSize
 {
     uint16_t width;
     uint16_t height;
-};
-
-struct SurfaceSize
-{
-    uint8_t tileSize;
-    uint32_t maxTiles;
 };
 
 struct Zoom
@@ -100,9 +95,10 @@ public:
 
     // VIEW
     sf::View *GetView();
-    void UpdateView();
-    void HandleViewPosition();
+    void UpdateViewPosition();
+    void UpdateViewPosition(const float moveX, const float moveY);
     void InitViews();
+    void UpdateAutomatedView(Unit *unit);
 
     // PLAYER
     void SetPlayer(Player *player);

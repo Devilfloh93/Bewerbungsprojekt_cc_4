@@ -27,7 +27,8 @@ public:
              const vector<string> dialogOffensive,
              const bool interactable,
              const float maxMoveRange,
-             const Fraction fraction);
+             const Fraction fraction,
+             const Guid guid);
     ~Creature() = default;
 
     bool GetInteractable() const;
