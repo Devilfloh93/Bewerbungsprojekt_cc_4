@@ -10,6 +10,13 @@ using namespace std;
 class Game;
 class Player;
 
+enum class Clicked
+{
+    None = 0,
+    Single,
+    Double
+};
+
 class EventHandler final
 {
 public:
@@ -19,14 +26,13 @@ public:
     bool GetBreak() const;
     void ResetBreak();
 
-    void MouseBtnPressed(Game &game);
+    void MousePressed(Game &game);
     void KeyPressed(Game &game, const sf::Keyboard::Key &key);
     void TxtEntered(Game &game, const sf::Uint32 character);
     void KeyReleased(const Game &game);
     void MouseWheelScrolled(Game &game, float delta);
-    void CheckTextClicked(Game &game, const vector<unique_ptr<SelectableText>> *selectableTexts);
+    Clicked CheckTextClicked(Game &game, const vector<unique_ptr<SelectableText>> *selectableTexts);
 
-    void BtnPressed(Game &game);
     void Playing(Game &game, const sf::Keyboard::Key &key);
 
     // QUIT

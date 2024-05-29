@@ -41,11 +41,18 @@ struct WindowSize
 
 struct Zoom
 {
-    uint8_t curZoom;
-    uint8_t maxZoom;
+    uint8_t cur;
+    uint8_t max;
+};
+
+struct ChangeHotkeyData
+{
+    sf::Keyboard::Key input;
+    bool allowed;
 };
 
 class Thread;
+class Utilities;
 
 class Game final
 {
@@ -149,12 +156,66 @@ public:
 
     // MESSAGE
     void RenderMessage();
-    void AddMessage(const string &message, const MessageType type);
+    void AddMessage(const uint16_t messageID, const MessageType type);
+
+    template <typename... Args>
+    void AddMessage(const uint16_t messageID, const MessageType type, Args... args)
+    {
+        Utilities utilities;
+        auto messageFormat = utilities.GetMessageFormat(*this, messageID);
+        auto message = vformat(messageFormat, make_format_args(args...));
+
+        auto newText = make_unique<sf::Text>();
+        auto clock = make_unique<sf::Clock>();
+
+        sf::Color textColor = {255, 165, 0};
+        float x = 0.0F;
+        float y = 0.0F;
+        uint8_t fontSize = 20U;
+
+        utilities.SetSFText(newText.get(), fontSize, m_fonts, 0U, message);
+
+        for (const auto &data : m_titles)
+        {
+            auto state = data->GetMenuState();
+            if (state == m_menuState.first)
+            {
+                auto text = data->GetText();
+                auto textPosition = text->getPosition();
+                auto textSize = text->getLocalBounds().getSize();
+                x = (textPosition.x + (textSize.x / 2)) - (newText.get()->getLocalBounds().getSize().x / 2);
+                y = (textPosition.y + textSize.y) + fontSize;
+                break;
+            }
+        }
+
+        newText->setPosition(x, y);
+
+        switch (type)
+        {
+        case MessageType::Information:
+            textColor = {255, 165, 0};
+            break;
+        case MessageType::Error:
+            textColor = {255, 69, 0};
+            break;
+        case MessageType::Success:
+            textColor = {0, 128, 0};
+            break;
+        default:
+            break;
+        }
+
+        newText->setFillColor(textColor);
+
+        m_messages.push_back(make_unique<Message>(move(newText), move(clock)));
+    }
+
     void InitMessageFormat();
     const vector<unique_ptr<MessageFormat>> *GetMessageFormat() const;
 
     // Render
-    void Render(sf::Clock &clock);
+    void Render();
     void RenderSurface();
     void RenderWorld();
     void RenderCreature();
@@ -185,21 +246,28 @@ public:
     void SaveGeneral();
     void LoadGeneral();
     void LoadHotkeys();
+    void SaveHotkeys();
+    void ResetHotkeys();
     void InitHotkeys();
+    void ChangeHotkey(const uint8_t selectedID);
+    void SetNewHotkey(const sf::Keyboard::Key &key);
+    void SetChangeHotkeyAllowed(const bool allowed);
+    void ResetNewHotkey(const uint8_t selectedID = 0);
+    ChangeHotkeyData GetChangeHotkeyData() const;
 
     // DIALOG
     void SetDialogSprite(unique_ptr<SelectableSprite> sprite);
     void SetDialogText(unique_ptr<SelectableText> text);
     void ClearDialog();
-    sf::Text *RenderSelectableTextDialog(const vector<unique_ptr<SelectableText>> *selectableTexts);
+    ReturnTextAndSelectedID RenderSelectableTextDialog(const vector<unique_ptr<SelectableText>> *selectableTexts);
     void RenderSelectableSpriteDialog();
     const vector<unique_ptr<SelectableText>> *GetDialogText() const;
     uint8_t GetDialogSelectedID(const SelectedTextCategorie selectedCategorie) const;
     void UpdateDialog(const SelectedTextCategorie selectedCategorie, const string &text);
     void UpdateDialog(const SelectedTextCategorie selectedCategorie);
 
-    void SetSelectedTextID(const uint8_t ID);
-    uint8_t GetSelectedTextID() const;
+    void SetSelectedTextID(const uint16_t ID);
+    uint16_t GetSelectedTextID() const;
 
     pair<MenuState, bool> GetMenuState() const;
     void SetMenuState(const MenuState menuState, const bool rePositioning);
@@ -214,8 +282,8 @@ public:
     string GetInputString() const;
 
     void MoveCreature();
-    void HandleCreatureMove(sf::Clock &clock);
-    void ExecuteMove(Unit *unit, sf::Clock &clock);
+    void HandleCreatureMove();
+    void ExecuteMove(Unit *unit);
 
 private:
     // RUNNING
@@ -249,7 +317,7 @@ private:
 
     vector<unique_ptr<SelectableSprite>> m_dialogSprites;
     vector<unique_ptr<SelectableText>> m_dialogTexts;
-    uint8_t m_selectedTextID;
+    uint16_t m_selectedTextID;
     // SETTINGS
     map<uint8_t, uint16_t> m_hotkeys;
     string m_language;
@@ -267,6 +335,7 @@ private:
     // RENDER
     float m_renderPuffer;
     sf::Text *m_hotkeyRender;
+    ChangeHotkeyData m_changeHotkey;
 
     pair<MenuState, bool> m_menuState;
     vector<pair<MenuState, bool>> m_lastMenuState;

@@ -34,7 +34,7 @@ public:
     uint8_t GetID() const;
 
     // MOVE
-    void HandleMove(sf::Clock &clock, Game *game);
+    void HandleMove(Game *game);
 
     // STATS
     float GetStatValue(const StatType type) const;

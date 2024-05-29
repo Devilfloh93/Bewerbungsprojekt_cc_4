@@ -12,9 +12,10 @@ sf::Text *Text::GetText() const
 SelectableText::SelectableText(unique_ptr<sf::Text> text,
                                const uint16_t selectedTextID,
                                const uint8_t selectedID,
-                               const SelectedTextCategorie selectedCategorie)
+                               const SelectedTextCategorie selectedCategorie,
+                               const bool doubleClicked)
     : Text(move(text)), m_selectedTextID(selectedTextID), m_selectedID(selectedID),
-      m_selectedCategorie(selectedCategorie)
+      m_selectedCategorie(selectedCategorie), m_doubleClicked(doubleClicked)
 {
 }
 
@@ -31,4 +32,14 @@ uint8_t SelectableText::GetSelectedID() const
 SelectedTextCategorie SelectableText::GetSelectedCategorie() const
 {
     return m_selectedCategorie;
+}
+
+bool SelectableText::GetDoubleClicked() const
+{
+    return m_doubleClicked;
+}
+
+void SelectableText::SetDoubleClicked(const bool doubleClicked)
+{
+    m_doubleClicked = doubleClicked;
 }

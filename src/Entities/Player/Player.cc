@@ -80,10 +80,9 @@ void Player::UseItem(Game &game)
 {
     Utilities utilities;
     auto selectedDialogID = game.GetDialogSelectedID(SelectedTextCategorie::Nothing);
-    auto messageFormat = utilities.GetMessageFormat(game, 15);
     if (selectedDialogID == 0)
     {
-        game.AddMessage(messageFormat, MessageType::Error);
+        game.AddMessage(15, MessageType::Error);
         return;
     }
     string name = "";
@@ -136,13 +135,11 @@ void Player::UseItem(Game &game)
 
         if (removed != ItemRemoved::Failed)
         {
-            messageFormat = utilities.GetMessageFormat(game, 18);
-            auto message = vformat(messageFormat, make_format_args(1, name));
-            game.AddMessage(message, MessageType::Success);
+            game.AddMessage(18, MessageType::Success, 1, name);
 
             if (removed == ItemRemoved::Updated)
             {
-                message = format("{}", m_items[selectedDialogID]);
+                auto message = format("{}", m_items[selectedDialogID]);
                 game.UpdateDialog(SelectedTextCategorie::Nothing, message);
             }
             else if (removed == ItemRemoved::Removed)
@@ -150,16 +147,12 @@ void Player::UseItem(Game &game)
         }
     }
     else
-    {
-        messageFormat = utilities.GetMessageFormat(game, 19);
-        auto message = vformat(messageFormat, make_format_args(name));
-        game.AddMessage(message, MessageType::Error);
-    }
+        game.AddMessage(19, MessageType::Error, name);
 }
 
-void Player::HandleMove(sf::Clock &clock, Game *game)
+void Player::HandleMove(Game *game)
 {
-    game->ExecuteMove(this, clock);
+    game->ExecuteMove(this);
     game->CollectItem();
 }
 
@@ -323,8 +316,6 @@ void Player::CheckRenderHotkey(Game *game)
 
 void Player::InitTraderItems(Game &game)
 {
-    game.ClearDialog();
-
     bool firstIcon = true;
     Utilities utilities;
     sf::Vector2f prevPos;
@@ -456,7 +447,6 @@ void Player::InitTraderItems(Game &game)
 
 void Player::InitInventoryItems(Game &game)
 {
-    game.ClearDialog();
     bool firstIcon = true;
     Utilities utilities;
     sf::Vector2f prevPos;
@@ -529,9 +519,9 @@ void Player::Load(const uint8_t id, Game *game)
         m_sprite->setPosition(jsonData["playerPosX"], jsonData["playerPosY"]);
         view->setCenter(jsonData["viewPosX"], jsonData["viewPosY"]);
 
-        while (game->GetZoom().curZoom != jsonData["zoom"])
+        while (game->GetZoom().cur != jsonData["zoom"])
         {
-            if (game->GetZoom().curZoom < jsonData["zoom"])
+            if (game->GetZoom().cur < jsonData["zoom"])
             {
                 view->zoom(0.5F);
                 game->SetZoom(1U);
@@ -570,7 +560,7 @@ void Player::Save(Game *game)
                          {"items", m_items},
                          {"viewPosX", game->GetView()->getCenter().x},
                          {"viewPosY", game->GetView()->getCenter().y},
-                         {"zoom", game->GetZoom().curZoom}};
+                         {"zoom", game->GetZoom().cur}};
 
         file << jsonData;
         file.close();
