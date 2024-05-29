@@ -17,8 +17,11 @@ Game::Game() : m_menuState(MenuState::Main, false)
     m_renderPuffer = 200.0F;
     m_playing = false;
     m_defaultAnimID = 0;
+    m_changeHotkey.input = sf::Keyboard::Key::Unknown;
+    m_changeHotkey.allowed = false;
+    m_selectedTextID = 0;
 
-    m_zoom = {.curZoom = 0U, .maxZoom = 3U};
+    m_zoom = {.cur = 0U, .max = 3U};
     m_statDecay = {.food = 0.2F, .water = 0.5F};
     m_gameSize = {.width = 8800U, .height = 4800U};
     m_surfaceSize = {.tileSize = 32U, .maxTiles = 0U};
@@ -122,27 +125,27 @@ sf::RenderWindow *Game::GetWindow()
 // ZOOM
 void Game::SetZoom(const uint8_t zoom)
 {
-    m_zoom.curZoom += zoom;
+    m_zoom.cur += zoom;
 }
 
 void Game::SetZoom(const uint8_t zoom, const float zoomLevel)
 {
     m_view->zoom(zoomLevel);
-    m_zoom.curZoom += zoom;
+    m_zoom.cur += zoom;
 }
 
 void Game::UpdateZoom(const float delta)
 {
-    auto curZoom = m_zoom.curZoom;
+    auto cur = m_zoom.cur;
 
     if (delta > 0U)
     {
-        if (curZoom < m_zoom.maxZoom)
+        if (cur < m_zoom.max)
             SetZoom(1U, 0.5F);
     }
     else
     {
-        if (curZoom > 0U)
+        if (cur > 0U)
             SetZoom(-1, 2.0F);
     }
 
@@ -304,8 +307,7 @@ bool Game::CreatePlayer()
     auto countFolders = CountSaveFolders();
     if (countFolders <= 0 || countFolders > 6)
     {
-        auto messageFormat = utilities.GetMessageFormat(*this, 13);
-        AddMessage(messageFormat, MessageType::Error);
+        AddMessage(13, MessageType::Error);
         return false;
     }
 
@@ -313,8 +315,7 @@ bool Game::CreatePlayer()
 
     if (input.size() == 0)
     {
-        auto messageFormat = utilities.GetMessageFormat(*this, 12);
-        AddMessage(messageFormat, MessageType::Information);
+        AddMessage(12, MessageType::Information);
         return false;
     }
 
@@ -401,11 +402,17 @@ void Game::SetItems(ItemGround *item)
 // INITS
 void Game::InitFolder()
 {
-    auto new_directory_path = filesystem::current_path();
-    new_directory_path /= "save";
+    auto save_directory_path = filesystem::current_path();
+    save_directory_path /= "save";
 
-    if (!filesystem::exists(new_directory_path))
-        filesystem::create_directory(new_directory_path);
+    if (!filesystem::exists(save_directory_path))
+        filesystem::create_directory(save_directory_path);
+
+    auto user_directory_path = filesystem::current_path();
+    user_directory_path /= "settings/user";
+
+    if (!filesystem::exists(user_directory_path))
+        filesystem::create_directory(user_directory_path);
 }
 
 void Game::InitSettings()
@@ -417,7 +424,7 @@ void Game::InitSettings()
 void Game::LoadGeneral()
 {
     auto path = filesystem::current_path();
-    path /= "settings/general.json";
+    path /= "settings/user/general.json";
 
     ifstream file(path);
 
@@ -455,8 +462,83 @@ void Game::LoadGeneral()
     }
 }
 
+ChangeHotkeyData Game::GetChangeHotkeyData() const
+{
+    return m_changeHotkey;
+}
+
+void Game::ResetNewHotkey(const uint8_t selectedID)
+{
+    for (const auto &data : m_hotkeyMenu)
+    {
+        if (selectedID != 0)
+        {
+        }
+
+        auto selectableText = data.get();
+        selectableText->SetDoubleClicked(false);
+    }
+    m_changeHotkey.allowed = false;
+    m_changeHotkey.input = sf::Keyboard::Key::Unknown;
+}
+
+void Game::SetNewHotkey(const sf::Keyboard::Key &key)
+{
+    m_changeHotkey.input = key;
+}
+
+void Game::SetChangeHotkeyAllowed(const bool allowed)
+{
+    m_changeHotkey.allowed = allowed;
+}
+
+void Game::ChangeHotkey(const uint8_t selectedID)
+{
+    if (selectedID == 0)
+        return;
+
+    Utilities utilities;
+    bool hotkeyChanged = false;
+
+    if (m_changeHotkey.allowed && m_changeHotkey.input == sf::Keyboard::Unknown)
+    {
+        AddMessage(20, MessageType::Information);
+    }
+    else if (m_changeHotkey.input != sf::Keyboard::Unknown)
+    {
+        bool duplicateFound = false;
+        for (auto it = m_hotkeys.begin(); it != m_hotkeys.end(); ++it)
+        {
+            if (it->second == m_changeHotkey.input)
+            {
+                duplicateFound = true;
+                AddMessage(21, MessageType::Error);
+                break;
+            }
+        }
+
+        if (!duplicateFound)
+        {
+            m_hotkeys[selectedID] = m_changeHotkey.input;
+            hotkeyChanged = true;
+        }
+        else
+            ResetNewHotkey();
+    }
+
+    if (hotkeyChanged)
+    {
+        SaveHotkeys();
+        ResetNewHotkey();
+
+        ClearDialog();
+        InitHotkeys();
+    }
+}
+
 void Game::InitHotkeys()
 {
+    m_hotkeyMenu.clear();
     Utilities utilities;
     ifstream fileLanguage("./data/language/hotkeys.json");
 
@@ -500,13 +582,51 @@ void Game::InitHotkeys()
     }
 }
 
-void Game::LoadHotkeys()
+void Game::ResetHotkeys()
 {
-    ifstream file("./settings/hotkeys.json");
+    auto user_directory_path = filesystem::current_path();
+    user_directory_path /= "settings/user";
+    filesystem::remove(user_directory_path / "hotkeys.json");
+
+    LoadHotkeys();
+    ClearDialog();
+    InitHotkeys();
+}
+
+void Game::SaveHotkeys()
+{
+    ofstream file("./settings/user/hotkeys.json");
 
     if (file.is_open())
     {
-        auto jsonData = json::parse(file);
+        bool firstElement = true;
+        file << '[';
+        for (const auto &data : m_hotkeys)
+        {
+            auto hotkeyID = data.first;
+            auto SFMLHotkey = data.second;
+
+            if (!firstElement)
+                file << ",";
+
+            json jsonData = {{"hotkeyID", hotkeyID}, {"SFMLHotkey", SFMLHotkey}};
+
+            file << jsonData;
+            firstElement = false;
+        }
+        file << ']';
+        file.close();
+    }
+}
+
+void Game::LoadHotkeys()
+{
+    m_hotkeys.clear();
+    ifstream userFile("./settings/user/hotkeys.json");
+
+    if (userFile.is_open())
+    {
+        auto jsonData = json::parse(userFile);
 
         for (const auto &data : jsonData)
         {
@@ -517,7 +637,27 @@ void Game::LoadHotkeys()
             m_hotkeys[hotkeyID] = sfmlHotkey;
         }
 
-        file.close();
+        userFile.close();
+    }
+    else
+    {
+        ifstream file("./settings/hotkeys.json");
+
+        if (file.is_open())
+        {
+            auto jsonData = json::parse(file);
+
+            for (const auto &data : jsonData)
+            {
+
+                uint8_t hotkeyID = data["hotkeyID"];
+                uint16_t sfmlHotkey = data["SFMLHotkey"];
+
+                m_hotkeys[hotkeyID] = sfmlHotkey;
+            }
+
+            file.close();
+        }
     }
 }
 
@@ -584,7 +724,7 @@ void Game::InitZoom()
     auto center = m_view->getCenter();
 
     m_view->zoom(0.5F);
-    m_zoom.curZoom = 1U;
+    m_zoom.cur = 1U;
 
     m_view->move({-(center.x / 2), -(center.y / 2)});
 }
@@ -1364,7 +1504,7 @@ void Game::InitRenderStats()
 }
 
 // Render
-void Game::Render(sf::Clock &clock)
+void Game::Render()
 {
     Collision collision;
 
@@ -1380,9 +1520,9 @@ void Game::Render(sf::Clock &clock)
 
     collision.CheckCollision(this);
 
-    m_player->HandleMove(clock, this);
+    m_player->HandleMove(this);
 
-    HandleCreatureMove(clock);
+    HandleCreatureMove();
 
     m_player->CheckRenderHotkey(this);
 
@@ -1517,7 +1657,9 @@ void Game::RenderMenu()
             switch (gameMenuState)
             {
             case MenuState::Hotkeys:
-                prevText = RenderSelectableTextDialog(&m_hotkeyMenu);
+                auto returnTextAndSelectedID = RenderSelectableTextDialog(&m_hotkeyMenu);
+                ChangeHotkey(returnTextAndSelectedID.id);
+                prevText = returnTextAndSelectedID.text;
                 usePrevText = true;
                 break;
             case MenuState::OpenLoad:
@@ -1526,7 +1668,8 @@ void Game::RenderMenu()
                 if (!m_dialogTexts.empty())
                 {
                     RenderSelectableSpriteDialog();
-                    prevText = RenderSelectableTextDialog(&m_dialogTexts);
+                    auto returnTextAndSelectedID = RenderSelectableTextDialog(&m_dialogTexts);
+                    prevText = returnTextAndSelectedID.text;
                     usePrevText = true;
                     dialogRenderExecuted = true;
                 }
@@ -1581,7 +1724,6 @@ void Game::RenderMenu()
 void Game::CreateLoadMenu()
 {
     Utilities utilities;
-    ClearDialog();
 
     auto count = CountSaveFolders();
 
@@ -1834,10 +1976,7 @@ void Game::ResizeWindow(const uint16_t width, const uint16_t height)
     {
         Utilities utilities;
 
-        auto messageFormat = utilities.GetMessageFormat(*this, 10);
-        auto message = vformat(messageFormat, make_format_args(width, height));
-
-        AddMessage(message, MessageType::Information);
+        AddMessage(10, MessageType::Information, width, height);
     }
 }
 
@@ -2011,7 +2150,6 @@ void Game::ChangeLanguage(const string language)
     delete m_hotkeyRender;
     m_hotkeyRender = nullptr;
 
-    m_hotkeyMenu.clear();
     m_messageFormat.clear();
 
     SaveGeneral();
@@ -2022,7 +2160,7 @@ void Game::ChangeLanguage(const string language)
 
 void Game::SaveGeneral()
 {
-    ofstream file("./settings/general.json");
+    ofstream file("./settings/user/general.json");
 
     if (file.is_open())
     {
@@ -2116,20 +2254,26 @@ void Game::RenderSelectableSpriteDialog()
     }
 }
 
-sf::Text *Game::RenderSelectableTextDialog(const vector<unique_ptr<SelectableText>> *selectableTexts)
+ReturnTextAndSelectedID Game::RenderSelectableTextDialog(const vector<unique_ptr<SelectableText>> *selectableTexts)
 {
-    sf::Text *prevTxt;
+    ReturnTextAndSelectedID returnValue;
+    returnValue.id = 0;
+
     for (float i = 0.0F; const auto &data : *selectableTexts)
     {
-        auto text = data.get()->GetText();
+        auto selectedText = data.get();
+        if (selectedText->GetDoubleClicked())
+            returnValue.id = selectedText->GetSelectedID();
+
+        auto text = selectedText->GetText();
 
         text->setColor(sf::Color(255, 255, 255));
 
-        auto textID = data.get()->GetSelectedTextID();
+        auto textID = selectedText->GetSelectedTextID();
 
         if (text->getPosition().y >= i)
         {
-            prevTxt = text;
+            returnValue.text = text;
             i = text->getPosition().y;
         }
 
@@ -2139,7 +2283,7 @@ sf::Text *Game::RenderSelectableTextDialog(const vector<unique_ptr<SelectableTex
         m_window->draw(*text);
     }
 
-    return prevTxt;
+    return returnValue;
 }
 
 const vector<unique_ptr<SelectableText>> *Game::GetDialogText() const
@@ -2161,6 +2305,8 @@ void Game::SetMenuState(const MenuState menuState, const bool rePositioning)
 
 void Game::SetMenuState()
 {
+    ClearDialog();
+    ResetNewHotkey();
     if (!m_lastMenuState.empty())
     {
         m_menuState.first = m_lastMenuState.back().first;
@@ -2191,12 +2337,12 @@ uint8_t Game::GetDialogSelectedID(const SelectedTextCategorie selectedCategorie)
     return 0;
 }
 
-void Game::SetSelectedTextID(const uint8_t ID)
+void Game::SetSelectedTextID(const uint16_t ID)
 {
     m_selectedTextID = ID;
 }
 
-uint8_t Game::GetSelectedTextID() const
+uint16_t Game::GetSelectedTextID() const
 {
     return m_selectedTextID;
 }
@@ -2261,9 +2407,10 @@ void Game::RenderMessage()
     }
 }
 
-void Game::AddMessage(const string &message, const MessageType type)
+void Game::AddMessage(const uint16_t messageID, const MessageType type)
 {
     Utilities utilities;
+    auto message = utilities.GetMessageFormat(*this, messageID);
 
     auto newText = make_unique<sf::Text>();
     auto clock = make_unique<sf::Clock>();
@@ -2280,8 +2427,9 @@ void Game::AddMessage(const string &message, const MessageType type)
         auto state = data->GetMenuState();
         if (state == m_menuState.first)
         {
-            auto textPosition = data->GetText()->getPosition();
-            auto textSize = data->GetText()->getLocalBounds().getSize();
+            auto text = data->GetText();
+            auto textPosition = text->getPosition();
+            auto textSize = text->getLocalBounds().getSize();
             x = (textPosition.x + (textSize.x / 2)) - (newText.get()->getLocalBounds().getSize().x / 2);
             y = (textPosition.y + textSize.y) + fontSize;
             break;
@@ -2371,7 +2519,7 @@ void Game::MoveCreature()
     }
 }
 
-void Game::HandleCreatureMove(sf::Clock &clock)
+void Game::HandleCreatureMove()
 {
     Utilities utilities;
     Collision collision;
@@ -2384,7 +2532,7 @@ void Game::HandleCreatureMove(sf::Clock &clock)
         {
             collision.CheckCollision(this, data);
 
-            ExecuteMove(data, clock);
+            ExecuteMove(data);
         }
     }
 }
@@ -2427,7 +2575,7 @@ void Game::UpdateAutomatedView(Unit *unit)
     }
 }
 
-void Game::ExecuteMove(Unit *unit, sf::Clock &clock)
+void Game::ExecuteMove(Unit *unit)
 {
     Utilities utilities;
     auto move = unit->GetMove();
@@ -2440,13 +2588,14 @@ void Game::ExecuteMove(Unit *unit, sf::Clock &clock)
 
     auto animData = utilities.GetAnim(m_anim, animID);
     auto tileSize = m_surfaceSize.tileSize;
+    auto halfTileSize = (tileSize / 2);
 
     switch (move)
     {
     case Move::Left:
-        if (pos.x - speed > (tileSize / 2) && moveAllowed.left)
+        if (pos.x - speed > halfTileSize && moveAllowed.left)
         {
-            utilities.PlayAnimation(sprite, clock, animData.left.notMoving, animData.left.anim01);
+            utilities.PlayAnimation(sprite, animData.left.notMoving, animData.left.anim01);
             sprite->setPosition(pos.x - speed, pos.y);
         }
         else
@@ -2455,7 +2604,7 @@ void Game::ExecuteMove(Unit *unit, sf::Clock &clock)
     case Move::Right:
         if (pos.x + speed < m_gameSize.width - tileSize && moveAllowed.right)
         {
-            utilities.PlayAnimation(sprite, clock, animData.right.notMoving, animData.right.anim01);
+            utilities.PlayAnimation(sprite, animData.right.notMoving, animData.right.anim01);
             sprite->setPosition(pos.x + speed, pos.y);
         }
         else
@@ -2464,7 +2613,7 @@ void Game::ExecuteMove(Unit *unit, sf::Clock &clock)
     case Move::Down:
         if (pos.y + speed < m_gameSize.height - tileSize && moveAllowed.down)
         {
-            utilities.PlayAnimation(sprite, clock, animData.down.anim01, animData.down.anim02);
+            utilities.PlayAnimation(sprite, animData.down.anim01, animData.down.anim02);
             sprite->setPosition(pos.x, pos.y + speed);
         }
         else
@@ -2472,9 +2621,9 @@ void Game::ExecuteMove(Unit *unit, sf::Clock &clock)
 
         break;
     case Move::Up:
-        if (pos.y - speed > (tileSize / 2) && moveAllowed.up)
+        if (pos.y - speed > halfTileSize && moveAllowed.up)
         {
-            utilities.PlayAnimation(sprite, clock, animData.up.anim01, animData.up.anim02);
+            utilities.PlayAnimation(sprite, animData.up.anim01, animData.up.anim02);
             sprite->setPosition(pos.x, pos.y - speed);
         }
         else

@@ -16,8 +16,6 @@ int main()
     // EventHandler Init
     EventHandler eventHandler;
 
-    sf::Clock clock;
-
     game.Init();
     auto window = game.GetWindow();
 
@@ -33,7 +31,7 @@ int main()
                 eventHandler.Quit(game);
                 break;
             case sf::Event::MouseButtonPressed:
-                eventHandler.MouseBtnPressed(game);
+                eventHandler.MousePressed(game);
                 break;
             case sf::Event::KeyPressed:
                 eventHandler.KeyPressed(game, event.key.code);
@@ -67,7 +65,7 @@ int main()
          *
          */
         if (game.GetPlaying() && game.GetMenuState().first == MenuState::Playing)
-            game.Render(clock);
+            game.Render();
         else
             game.RenderMenu();
 

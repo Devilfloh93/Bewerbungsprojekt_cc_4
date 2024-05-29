@@ -185,8 +185,9 @@ float Utilities::CalculateSpaceBetweenMenu(const Alignment alignment) const
     return 50.0F;
 }
 
-void Utilities::PlayAnimation(sf::Sprite *sprite, sf::Clock &clock, sf::IntRect &anim0, sf::IntRect &anim1)
+void Utilities::PlayAnimation(sf::Sprite *sprite, sf::IntRect &anim0, sf::IntRect &anim1)
 {
+    static sf::Clock clock;
     auto elapsed = clock.getElapsedTime();
     auto elapsedAsMs = elapsed.asMilliseconds();
 
@@ -423,15 +424,22 @@ bool Utilities::CheckMenuState(const vector<MenuState> &menuState, const MenuSta
     return false;
 }
 
-bool Utilities::CheckTextClicked(const sf::Vector2f &mousePos,
-                                 const sf::Vector2f &txtPos,
-                                 const sf::Vector2f &txtLSize) const
+Clicked Utilities::CheckTextClicked(const sf::Vector2f &mousePos,
+                                    const sf::Vector2f &txtPos,
+                                    const sf::Vector2f &txtLSize) const
 {
+    static sf::Clock clock;
+
     if (mousePos.x > txtPos.x && mousePos.x < txtPos.x + txtLSize.x && mousePos.y > txtPos.y &&
         mousePos.y < txtPos.y + txtLSize.y)
-        return true;
+    {
+        if (clock.restart().asMilliseconds() < 500)
+            return Clicked::Double;
 
-    return false;
+        return Clicked::Single;
+    }
+
+    return Clicked::None;
 }
 
 bool Utilities::CheckSpriteClicked(const sf::Vector2f &mousePos,

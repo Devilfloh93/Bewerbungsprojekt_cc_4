@@ -1,5 +1,6 @@
 #pragma once
 #include "Anim.h"
+#include "EventHandler.h"
 #include "Font.h"
 #include "Game.h"
 #include "Gui.h"
@@ -57,7 +58,7 @@ public:
     uint16_t CalculateAlignmentWindowWidth(const uint16_t width, const Alignment alignment) const;
     float CalculateSpaceBetweenMenu(const Alignment alignment) const;
 
-    void PlayAnimation(sf::Sprite *sprite, sf::Clock &clock, sf::IntRect &anim0, sf::IntRect &anim1);
+    void PlayAnimation(sf::Sprite *sprite, sf::IntRect &anim0, sf::IntRect &anim1);
 
     void SetSFText(sf::Text *text,
                    const uint8_t size,
@@ -112,7 +113,9 @@ public:
 
     bool CheckMenuState(const vector<MenuState> &menuState, const MenuState currentState) const;
 
-    bool CheckTextClicked(const sf::Vector2f &mousePos, const sf::Vector2f &txtPos, const sf::Vector2f &txtLSize) const;
+    Clicked CheckTextClicked(const sf::Vector2f &mousePos,
+                             const sf::Vector2f &txtPos,
+                             const sf::Vector2f &txtLSize) const;
     bool CheckSpriteClicked(const sf::Vector2f &mousePos,
                             const sf::Vector2f &btnPos,
                             const sf::Vector2f &btnLSize,

@@ -62,18 +62,16 @@ void Trader::Buy(Game &game)
     Utilities utilities;
     auto selectedDialogID = game.GetDialogSelectedID(SelectedTextCategorie::Buy);
 
-    auto messageFormat = utilities.GetMessageFormat(game, 1);
     auto input = game.GetInputString();
     if (input.size() == 0)
     {
-        game.AddMessage(messageFormat, MessageType::Error);
+        game.AddMessage(1, MessageType::Error);
         return;
     }
 
-    messageFormat = utilities.GetMessageFormat(game, 16);
     if (selectedDialogID == 0)
     {
-        game.AddMessage(messageFormat, MessageType::Error);
+        game.AddMessage(16, MessageType::Error);
         return;
     }
 
@@ -88,25 +86,19 @@ void Trader::Buy(Game &game)
 
         auto removed = utilities.RemoveItem(m_buyingItem, selectedDialogID, inputNum);
 
-        messageFormat = utilities.GetMessageFormat(game, 3);
-        auto message = vformat(messageFormat, make_format_args(inputNum, itemName));
-
-        game.AddMessage(message, MessageType::Success);
+        game.AddMessage(3, MessageType::Success, inputNum, itemName);
 
         if (removed == ItemRemoved::Updated)
         {
-            messageFormat = utilities.GetMessageFormat(game, 2);
-            message = vformat(messageFormat, make_format_args(m_buyingItem[selectedDialogID]));
+            auto messageFormat = utilities.GetMessageFormat(game, 2);
+            auto message = vformat(messageFormat, make_format_args(m_buyingItem[selectedDialogID]));
             game.UpdateDialog(SelectedTextCategorie::Buy, message);
         }
         else if (removed == ItemRemoved::Removed)
             game.UpdateDialog(SelectedTextCategorie::Buy);
     }
     else
-    {
-        messageFormat = utilities.GetMessageFormat(game, 4);
-        game.AddMessage(messageFormat, MessageType::Error);
-    }
+        game.AddMessage(4, MessageType::Error);
 }
 
 void Trader::Sell(Game &game)
@@ -116,18 +108,16 @@ void Trader::Sell(Game &game)
     auto selectedDialogID = game.GetDialogSelectedID(SelectedTextCategorie::Sell);
 
     auto input = game.GetInputString();
-    auto messageFormat = utilities.GetMessageFormat(game, 5);
 
     if (input.size() == 0)
     {
-        game.AddMessage(messageFormat, MessageType::Error);
+        game.AddMessage(5, MessageType::Error);
         return;
     }
 
-    messageFormat = utilities.GetMessageFormat(game, 17);
     if (selectedDialogID == 0)
     {
-        game.AddMessage(messageFormat, MessageType::Error);
+        game.AddMessage(17, MessageType::Error);
         return;
     }
 
@@ -145,30 +135,22 @@ void Trader::Sell(Game &game)
             auto itemName = utilities.GetItemName(game, selectedDialogID);
             removed = utilities.RemoveItem(m_sellingItem, selectedDialogID, inputNum);
 
-            messageFormat = utilities.GetMessageFormat(game, 9);
-            auto message = vformat(messageFormat, make_format_args(inputNum, itemName));
-
-            game.AddMessage(message, MessageType::Success);
+            game.AddMessage(9, MessageType::Success, inputNum, itemName);
 
             if (removed == ItemRemoved::Updated)
             {
                 auto inventoryValue = player->GetItemCount(selectedDialogID);
-                messageFormat = utilities.GetMessageFormat(game, 8);
-                message = vformat(messageFormat, make_format_args(m_sellingItem[selectedDialogID], inventoryValue));
+                auto messageFormat = utilities.GetMessageFormat(game, 8);
+                auto message =
+                    vformat(messageFormat, make_format_args(m_sellingItem[selectedDialogID], inventoryValue));
                 game.UpdateDialog(SelectedTextCategorie::Sell, message);
             }
             else if (removed == ItemRemoved::Removed)
                 game.UpdateDialog(SelectedTextCategorie::Sell);
         }
         else
-        {
-            messageFormat = utilities.GetMessageFormat(game, 6);
-            game.AddMessage(messageFormat, MessageType::Error);
-        }
+            game.AddMessage(6, MessageType::Error);
     }
     else
-    {
-        messageFormat = utilities.GetMessageFormat(game, 7);
-        game.AddMessage(messageFormat, MessageType::Error);
-    }
+        game.AddMessage(7, MessageType::Error);
 }

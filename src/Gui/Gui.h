@@ -27,7 +27,8 @@ enum class BtnFunc
     OpenHotkeys,
     Buy,
     Sell,
-    Use
+    Use,
+    ResetHotkeys
 };
 
 enum class MenuState

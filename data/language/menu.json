@@ -284,5 +284,16 @@
             "title": "Benutzen",
             "description": ""
         }
+    },
+    {
+        "id": 27,
+        "enEN": {
+            "title": "Reset Hotkeys",
+            "description": ""
+        },
+        "deDE": {
+            "title": "Tastaturbelegung zurücksetzen",
+            "description": ""
+        }
     }
 ]

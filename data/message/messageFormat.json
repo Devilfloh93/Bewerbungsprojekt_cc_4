@@ -169,5 +169,23 @@
         "deDE": {
             "format": "Du kannst {} nicht benutzen."
         }
+    },
+    {
+        "id": 20,
+        "enEN": {
+            "format": "Enter a new Hotkey. Only Characters are allowed!"
+        },
+        "deDE": {
+            "format": "Gib einen neuen Tastaturbefehl ein. Nur Buchstaben sind erlaubt!"
+        }
+    },
+    {
+        "id": 21,
+        "enEN": {
+            "format": "This Key is already used!"
+        },
+        "deDE": {
+            "format": "Dieser Tastaturkürzel wird bereits verwendet!"
+        }
     }
 ]
