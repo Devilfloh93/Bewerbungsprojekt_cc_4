@@ -1073,7 +1073,7 @@ void Game::InitCreature()
             const sf::Texture *texture;
             AnimTextureCombined animData;
             uint8_t templateId = data["creatureTemplateID"];
-            Fraction fraction = Fraction::Neutral;
+            Faction faction = Faction::Neutral;
             uint8_t traderID = 0;
             vector<string> dialogIntro;
             vector<string> dialogOutro;
@@ -1085,8 +1085,8 @@ void Game::InitCreature()
             if (data.contains("traderID"))
                 traderID = data["traderID"];
 
-            if (data.contains("fraction"))
-                fraction = data["fraction"];
+            if (data.contains("faction"))
+                faction = data["faction"];
 
             for (const auto &data1 : jsonDataCreatureTemplate)
             {
@@ -1172,7 +1172,7 @@ void Game::InitCreature()
                                              sellingItem,
                                              buyingItem,
                                              maxMoveRange,
-                                             fraction,
+                                             faction,
                                              Guid::Creature);
 
                     m_creature.push_back(trader);
@@ -1189,7 +1189,7 @@ void Game::InitCreature()
                                                  dialogOffensive,
                                                  interactable,
                                                  maxMoveRange,
-                                                 fraction,
+                                                 faction,
                                                  Guid::Creature);
 
                     m_creature.push_back(creature);
@@ -2405,19 +2405,19 @@ void Game::UpdateAutomatedView(Unit *unit)
         switch (move)
         {
         case Move::Left:
-            if (sprite->getPosition().x < center.x - viewSizeX)
+            if (pos.x < center.x - viewSizeX)
                 UpdateViewPosition(pos.x - viewSizeX, 0.0F);
             break;
         case Move::Right:
-            if (sprite->getPosition().x > (center.x + viewSizeX))
+            if (pos.x > (center.x + viewSizeX))
                 UpdateViewPosition(pos.x + viewSizeX, 0.0F);
             break;
         case Move::Up:
-            if (sprite->getPosition().y < center.y - viewSizeY)
+            if (pos.y < center.y - viewSizeY)
                 UpdateViewPosition(0.0F, pos.y - viewSizeY);
             break;
         case Move::Down:
-            if (sprite->getPosition().y > center.y + viewSizeY)
+            if (pos.y > center.y + viewSizeY)
                 UpdateViewPosition(0.0F, pos.y + viewSizeY);
             break;
 
