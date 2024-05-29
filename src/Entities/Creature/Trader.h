@@ -23,7 +23,7 @@ public:
            const map<uint8_t, uint16_t> sellingItem,
            const map<uint8_t, uint16_t> buyingItem,
            const float maxMoveRange,
-           const Fraction fraction,
+           const Faction faction,
            const Guid guid);
     ~Trader() = default;
 

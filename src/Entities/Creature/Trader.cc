@@ -29,7 +29,7 @@ Trader::Trader(unique_ptr<sf::Sprite> sprite,
                const map<uint8_t, uint16_t> sellingItem,
                const map<uint8_t, uint16_t> buyingItem,
                const float maxMoveRange,
-               const Fraction fraction,
+               const Faction faction,
                const Guid guid)
     : Creature(move(sprite),
                health,
@@ -41,7 +41,7 @@ Trader::Trader(unique_ptr<sf::Sprite> sprite,
                dialogOffensive,
                interactable,
                maxMoveRange,
-               fraction,
+               faction,
                guid),
       m_sellingItem(sellingItem), m_buyingItem(buyingItem)
 {

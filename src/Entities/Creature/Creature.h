@@ -6,7 +6,7 @@
 
 using namespace std;
 
-enum class Fraction
+enum class Faction
 {
     Neutral = 0,
     Friend,
@@ -27,7 +27,7 @@ public:
              const vector<string> dialogOffensive,
              const bool interactable,
              const float maxMoveRange,
-             const Fraction fraction,
+             const Faction faction,
              const Guid guid);
     ~Creature() = default;
 
@@ -37,7 +37,7 @@ public:
     sf::Vector2f GetSpawnPos() const;
     float GetMaxMoveRange() const;
 
-    Fraction GetFraction() const;
+    Faction GetFaction() const;
 
     vector<string> GetDialogIntro() const;
     vector<string> GetDialogOutro() const;
@@ -51,5 +51,5 @@ private:
     vector<string> m_dialogIntro;
     vector<string> m_dialogOutro;
     vector<string> m_dialogOffensive;
-    Fraction m_fraction;
+    Faction m_faction;
 };
