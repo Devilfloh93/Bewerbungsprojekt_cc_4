@@ -239,7 +239,7 @@ public:
     void RenderMenu();
 
     // SETTINGS
-    map<uint8_t, uint16_t> GetHotkeys() const;
+    map<uint8_t, pair<uint16_t, bool>> GetHotkeys() const;
     const vector<unique_ptr<SelectableText>> *GetHotkeyMenu() const;
     void ChangeLanguage(const string language);
     void InitSettings();
@@ -319,7 +319,7 @@ private:
     vector<unique_ptr<SelectableText>> m_dialogTexts;
     uint16_t m_selectedTextID;
     // SETTINGS
-    map<uint8_t, uint16_t> m_hotkeys;
+    map<uint8_t, pair<uint16_t, bool>> m_hotkeys;
     string m_language;
     // VIEW
     sf::View *m_view;

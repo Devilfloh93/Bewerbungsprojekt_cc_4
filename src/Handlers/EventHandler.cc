@@ -310,8 +310,10 @@ Clicked EventHandler::CheckTextClicked(Game &game, const vector<unique_ptr<Selec
 
     for (const auto &data : *selectableTexts)
     {
-        auto text = data.get()->GetText();
-        auto newSelectedTextID = data.get()->GetSelectedTextID();
+        auto selectableText = data.get();
+
+        auto text = selectableText->GetText();
+        auto newSelectedTextID = selectableText->GetSelectedTextID();
 
         auto txtPos = text->getPosition();
         auto txtLSize = text->getLocalBounds().getSize();
@@ -321,13 +323,13 @@ Clicked EventHandler::CheckTextClicked(Game &game, const vector<unique_ptr<Selec
         if (clicked == Clicked::Single)
         {
             game.SetSelectedTextID(newSelectedTextID);
-            data.get()->SetDoubleClicked(false);
+            selectableText->SetDoubleClicked(false);
             break;
         }
         else if (clicked == Clicked::Double)
         {
             game.SetSelectedTextID(newSelectedTextID);
-            data.get()->SetDoubleClicked(true);
+            selectableText->SetDoubleClicked(true);
             break;
         }
     }

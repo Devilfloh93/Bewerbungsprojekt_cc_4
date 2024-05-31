@@ -187,5 +187,14 @@
         "deDE": {
             "format": "Dieser Tastaturkürzel wird bereits verwendet!"
         }
+    },
+    {
+        "id": 22,
+        "enEN": {
+            "format": "This Key is not changeable!"
+        },
+        "deDE": {
+            "format": "Dieser Tastaturkürzel kann nicht geändert werden!"
+        }
     }
 ]

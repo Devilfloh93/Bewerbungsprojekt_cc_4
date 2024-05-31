@@ -10,6 +10,7 @@ struct ReturnTextAndSelectedID
     uint8_t id;
 };
 
+
 class Text
 {
 public:
@@ -28,8 +29,7 @@ public:
     SelectableText(unique_ptr<sf::Text> text,
                    const uint16_t selectedTextID,
                    const uint8_t selectedID,
-                   const SelectedTextCategorie selectedCategorie,
-                   const bool doubleClicked = false);
+                   const SelectedTextCategorie selectedCategorie);
     ~SelectableText() = default;
 
     uint16_t GetSelectedTextID() const;
