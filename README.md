@@ -27,7 +27,7 @@
 
 ## Installationshinweise
 
-* Laden Sie die GoodGame.v0.5.1.rar Datei runter und entpacken diese. <https://github.com/Devilfloh93/Bewerbungsprojekt_cc_4/releases/tag/GoodGame0.5.1>
+* Laden Sie die GoodGame.v0.5.1.rar Datei runter und entpacken diese. <https://github.com/Devilfloh93/Bewerbungsprojekt_cc_4/releases/tag/GoodGame0.6>
 * Gehen Sie in den entpackten Ordner und starten Sie die GoodGame.exe
 * Dateien und Ordner, die vom Programm erstellt werden, sind in demselben Ordner, für schnelle und problemlose Löschung, abgelegt
 * Alle erstellten Dateien und Texturen sind einsehbar
