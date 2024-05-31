@@ -162,6 +162,12 @@ public:
     void AddMessage(const uint16_t messageID, const MessageType type, Args... args)
     {
         Utilities utilities;
+
+        auto canAddMessage = utilities.CheckMessageExists(this, messageID);
+
+        if (!canAddMessage)
+            return;
+
         auto messageFormat = utilities.GetMessageFormat(*this, messageID);
         auto message = vformat(messageFormat, make_format_args(args...));
 
@@ -208,8 +214,9 @@ public:
 
         newText->setFillColor(textColor);
 
-        m_messages.push_back(make_unique<Message>(move(newText), move(clock)));
+        m_messages.push_back(make_unique<Message>(move(newText), move(clock), messageID));
     }
+    const vector<unique_ptr<Message>> *GetMessages() const;
 
     void InitMessageFormat();
     const vector<unique_ptr<MessageFormat>> *GetMessageFormat() const;

@@ -110,6 +110,7 @@ public:
     string GetLanguageText(const json &jsonData, const uint8_t languageID, string_view language) const;
     string_view GetItemName(const Game &game, const uint8_t itemID) const;
     string GetMessageFormat(const Game &game, const uint16_t messageFormatID);
+    bool CheckMessageExists(const Game *game, const uint16_t messageID);
 
     bool CheckMenuState(const vector<MenuState> &menuState, const MenuState currentState) const;
 

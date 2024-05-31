@@ -494,6 +494,13 @@ void Game::ChangeHotkey(const uint8_t selectedID)
     if (selectedID == 0)
         return;
 
+    if (m_hotkeys[selectedID].second == false)
+    {
+        AddMessage(22, MessageType::Error);
+        ResetNewHotkey();
+        return;
+    }
+
     Utilities utilities;
     bool hotkeyChanged = false;
 
@@ -506,21 +513,10 @@ void Game::ChangeHotkey(const uint8_t selectedID)
         bool changeAllowed = true;
         for (const auto &[key, value] : m_hotkeys)
         {
-            if (selectedID == key)
+            if (value.first == m_changeHotkey.input)
             {
-                if (value.second == false)
-                {
-                    changeAllowed = false;
-                    AddMessage(22, MessageType::Error);
-                    break;
-                }
-
-                if (value.first == m_changeHotkey.input)
-                {
-                    changeAllowed = false;
-                    AddMessage(21, MessageType::Error);
-                    break;
-                }
+                changeAllowed = false;
+                AddMessage(21, MessageType::Error);
                 break;
             }
         }
@@ -707,6 +703,8 @@ void Game::InitPlayer()
         InitWorld();
         InitCreature();
         ResizeStats();
+        ClearDialog();
+        ResetNewHotkey();
 
         m_playing = true;
         SetMenuState(MenuState::Playing, false);
@@ -2315,8 +2313,11 @@ void Game::SetMenuState(const MenuState menuState, const bool rePositioning)
 
 void Game::SetMenuState()
 {
-    ClearDialog();
-    ResetNewHotkey();
+    if (m_menuState.first != MenuState::Saving)
+    {
+        ClearDialog();
+        ResetNewHotkey();
+    }
     if (!m_lastMenuState.empty())
     {
         m_menuState.first = m_lastMenuState.back().first;
@@ -2402,9 +2403,9 @@ void Game::RenderMessage()
         auto clock = (*itr).get()->GetClock();
         bool remove = false;
         auto elapsed = clock->getElapsedTime();
-        auto elapsedAsSec = elapsed.asSeconds();
+        auto elapsedAsMiliSec = elapsed.asMilliseconds();
 
-        if (elapsedAsSec < 1)
+        if (elapsedAsMiliSec < 1000)
         {
             auto text = (*itr).get()->GetText();
             m_window->draw(*text);
@@ -2422,6 +2423,11 @@ void Game::RenderMessage()
 void Game::AddMessage(const uint16_t messageID, const MessageType type)
 {
     Utilities utilities;
+    auto canAddMessage = utilities.CheckMessageExists(this, messageID);
+
+    if (!canAddMessage)
+        return;
+
     auto message = utilities.GetMessageFormat(*this, messageID);
 
     auto newText = make_unique<sf::Text>();
@@ -2467,7 +2473,12 @@ void Game::AddMessage(const uint16_t messageID, const MessageType type)
 
     newText->setFillColor(textColor);
 
-    m_messages.push_back(make_unique<Message>(move(newText), move(clock)));
+    m_messages.push_back(make_unique<Message>(move(newText), move(clock), messageID));
+}
+
+const vector<unique_ptr<Message>> *Game::GetMessages() const
+{
+    return &m_messages;
 }
 
 void Game::InitMessageFormat()

@@ -32,5 +32,5 @@ private:
     vector<thread> m_threads;
     condition_variable m_conditionVar;
     mutex m_mutex;
-    bool m_stop = false;
+    bool m_stop;
 };
