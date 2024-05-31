@@ -6,6 +6,7 @@
 #include <iterator>
 #include <map>
 #include <random>
+#include <utility>
 
 
 using json = nlohmann::json;
@@ -471,10 +472,6 @@ void Game::ResetNewHotkey(const uint8_t selectedID)
 {
     for (const auto &data : m_hotkeyMenu)
     {
-        if (selectedID != 0)
-        {
-        }
-
         auto selectableText = data.get();
         selectableText->SetDoubleClicked(false);
     }
@@ -506,20 +503,31 @@ void Game::ChangeHotkey(const uint8_t selectedID)
     }
     else if (m_changeHotkey.input != sf::Keyboard::Unknown)
     {
-        bool duplicateFound = false;
-        for (auto it = m_hotkeys.begin(); it != m_hotkeys.end(); ++it)
+        bool changeAllowed = true;
+        for (const auto &[key, value] : m_hotkeys)
         {
-            if (it->second == m_changeHotkey.input)
+            if (selectedID == key)
             {
-                duplicateFound = true;
-                AddMessage(21, MessageType::Error);
+                if (value.second == false)
+                {
+                    changeAllowed = false;
+                    AddMessage(22, MessageType::Error);
+                    break;
+                }
+
+                if (value.first == m_changeHotkey.input)
+                {
+                    changeAllowed = false;
+                    AddMessage(21, MessageType::Error);
+                    break;
+                }
                 break;
             }
         }
 
-        if (!duplicateFound)
+        if (changeAllowed)
         {
-            m_hotkeys[selectedID] = m_changeHotkey.input;
+            m_hotkeys[selectedID].first = m_changeHotkey.input;
             hotkeyChanged = true;
         }
         else
@@ -551,7 +559,7 @@ void Game::InitHotkeys()
         for (uint8_t i = 1; const auto &[key, value] : m_hotkeys)
         {
             auto hotkeyName = utilities.GetLanguageText(jsonDataLanguage, key, m_language);
-            auto hotkeyString = utilities.GetAnsiString(value);
+            auto hotkeyString = utilities.GetAnsiString(value.first);
             auto spaceBetween = utilities.CalculateSpaceBetweenMenu(Alignment::Middle);
 
             auto string = format("{} : {}", hotkeyName, hotkeyString);
@@ -574,7 +582,7 @@ void Game::InitHotkeys()
 
         utilities.SetSFText(m_hotkeyRender, 10U, m_fonts, 0U);
 
-        auto hotkeyString = utilities.GetAnsiString(interact);
+        auto hotkeyString = utilities.GetAnsiString(interact.first);
 
         m_hotkeyRender->setString(hotkeyString);
 
@@ -604,12 +612,13 @@ void Game::SaveHotkeys()
         for (const auto &data : m_hotkeys)
         {
             auto hotkeyID = data.first;
-            auto SFMLHotkey = data.second;
+            auto SFMLHotkey = data.second.first;
+            auto changeable = data.second.second;
 
             if (!firstElement)
                 file << ",";
 
-            json jsonData = {{"hotkeyID", hotkeyID}, {"SFMLHotkey", SFMLHotkey}};
+            json jsonData = {{"id", hotkeyID}, {"SFMLHotkey", SFMLHotkey}, {"changeable", changeable}};
 
             file << jsonData;
             firstElement = false;
@@ -631,10 +640,11 @@ void Game::LoadHotkeys()
         for (const auto &data : jsonData)
         {
 
-            uint8_t hotkeyID = data["hotkeyID"];
+            uint8_t hotkeyID = data["id"];
             uint16_t sfmlHotkey = data["SFMLHotkey"];
+            bool changeable = data["changeable"];
 
-            m_hotkeys[hotkeyID] = sfmlHotkey;
+            m_hotkeys[hotkeyID] = make_pair(sfmlHotkey, changeable);
         }
 
         userFile.close();
@@ -649,11 +659,11 @@ void Game::LoadHotkeys()
 
             for (const auto &data : jsonData)
             {
-
-                uint8_t hotkeyID = data["hotkeyID"];
+                uint8_t hotkeyID = data["id"];
                 uint16_t sfmlHotkey = data["SFMLHotkey"];
+                bool changeable = data["changeable"];
 
-                m_hotkeys[hotkeyID] = sfmlHotkey;
+                m_hotkeys[hotkeyID] = make_pair(sfmlHotkey, changeable);
             }
 
             file.close();
@@ -2109,7 +2119,7 @@ Thread *Game::GetThread()
 
 
 // SETTINGS
-map<uint8_t, uint16_t> Game::GetHotkeys() const
+map<uint8_t, pair<uint16_t, bool>> Game::GetHotkeys() const
 {
     return m_hotkeys;
 }
@@ -2317,6 +2327,8 @@ void Game::SetMenuState()
 
 void Game::ResetMenuState()
 {
+    ClearDialog();
+    ResetNewHotkey();
     m_lastMenuState.clear();
     m_menuState.first = MenuState::Main;
     m_menuState.second = false;

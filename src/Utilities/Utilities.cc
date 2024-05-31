@@ -367,7 +367,7 @@ Hotkey Utilities::GetHotkey(const Game &game, const sf::Keyboard::Key &key) cons
     for (const auto &data : hotkeys)
     {
         auto hotkey = static_cast<Hotkey>(data.first);
-        auto keyID = data.second;
+        auto keyID = data.second.first;
 
         if (key == keyID)
         {
