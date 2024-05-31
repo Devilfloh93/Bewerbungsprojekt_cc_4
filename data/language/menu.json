@@ -295,5 +295,16 @@
             "title": "Tastaturbelegung zurücksetzen",
             "description": ""
         }
+    },
+    {
+        "id": 28,
+        "enEN": {
+            "title": "Saving...",
+            "description": ""
+        },
+        "deDE": {
+            "title": "Speichern...",
+            "description": ""
+        }
     }
 ]

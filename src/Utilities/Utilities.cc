@@ -414,6 +414,23 @@ string Utilities::GetMessageFormat(const Game &game, const uint16_t messageForma
     return "";
 }
 
+bool Utilities::CheckMessageExists(const Game *game, const uint16_t messageID)
+{
+    auto messages = game->GetMessages();
+
+    for (auto const &data : *messages)
+    {
+        auto message = data.get();
+        auto id = message->GetMessageID();
+        auto clock = message->GetClock();
+
+        if (id == messageID && clock->getElapsedTime().asMilliseconds() < 900)
+            return false;
+    }
+
+    return true;
+}
+
 bool Utilities::CheckMenuState(const vector<MenuState> &menuState, const MenuState currentState) const
 {
     for (const auto &data : menuState)

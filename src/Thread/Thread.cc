@@ -1,7 +1,7 @@
 #include "Thread.h"
 
 
-Thread::Thread(Game *game)
+Thread::Thread(Game *game) : m_stop(false)
 {
     m_threads.push_back(thread(&Thread::UpdateStats, this, game));
     m_threads.push_back(thread(&Thread::SaveGame, this, game));
@@ -49,7 +49,11 @@ void Thread::SaveGame(Game *game)
     while (game->GetWindow()->isOpen() && game->GetPlaying())
     {
         while (WaitFor(chrono::minutes(1)))
+        {
+            game->SetMenuState(MenuState::Saving, false);
             game->Saving(false);
+            game->SetMenuState();
+        }
     }
 }
 

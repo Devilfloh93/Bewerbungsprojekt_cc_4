@@ -45,7 +45,8 @@ enum class MenuState
     Language,
     Trader,
     Resolution,
-    Hotkeys
+    Hotkeys,
+    Saving
 };
 
 enum class Hotkey
