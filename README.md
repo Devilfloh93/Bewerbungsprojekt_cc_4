@@ -4,7 +4,7 @@
 
 * Dieses Projekt dient zu Übungszwecken und als Beigabe für Bewerbungen auf einen Praktikumsplatz zum Fachinformatiker für Anwendungsentwicklung, für das 9-monatige Pflichtpraktikum der IHK.
 * Dieses Projekt ist in einer frühen Phase der Entwicklung und noch nicht abgeschlossen.
-* Ich arbeite derzeit an einem C# .NET 7 Projekt
+* Nach einiger Zeit, die ich bereits mit C++ verbracht habe, arbeite ich derzeit vermehrt an einem C# 11 und .NET Framework 7 Projekt, sobald es weitere Informationen gibt, werde ich hier ein Link einfügen.
 
 ## Projektübersicht
 
