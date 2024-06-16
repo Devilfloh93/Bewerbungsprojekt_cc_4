@@ -1,10 +1,13 @@
 # Bewerbungsprojekt_cc_4
 
+## C# Projekt
+* Nach einiger Zeit, die ich bereits mit C++ verbracht habe, arbeite ich derzeit vermehrt an einem C# Projekt mit .NET 8, WPF und einer temporäraren SQlite-Verbindung.
+* Hier gehts zum aktuellen Projekt das sich mit der Erstellung einer Human-Resource-Software befasst <https://github.com/Devilfloh93/HRS_CS>
+
 ## Vorwort
 
 * Dieses Projekt dient zu Übungszwecken und als Beigabe für Bewerbungen auf einen Praktikumsplatz zum Fachinformatiker für Anwendungsentwicklung, für das 9-monatige Pflichtpraktikum der IHK.
 * Dieses Projekt ist in einer frühen Phase der Entwicklung und noch nicht abgeschlossen.
-* Nach einiger Zeit, die ich bereits mit C++ verbracht habe, arbeite ich derzeit vermehrt an einem C# 11 und .NET Framework 7 Projekt, sobald es weitere Informationen gibt, werde ich hier ein Link einfügen.
 
 ## Projektübersicht
 
